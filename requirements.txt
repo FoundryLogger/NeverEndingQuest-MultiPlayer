@@ -24,6 +24,9 @@ tqdm>=4.65.0
 # HTTP requests for web interactions
 requests>=2.31.0
 
+# Environment variables management
+python-dotenv>=1.0.0
+
 # Python standard library extensions (usually included)
 # pathlib - included in Python 3.4+
 # datetime - standard library

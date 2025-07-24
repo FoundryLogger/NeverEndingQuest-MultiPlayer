@@ -1,0 +1,167 @@
+{
+  "worldName": "Fantasy Adventure World",
+  "registryVersion": "1.0.0",
+  "lastUpdated": "2025-07-24T19:33:34.978355",
+  "modules": {
+    "Keep_of_Doom": {
+      "moduleName": "Keep_of_Doom",
+      "addedDate": "2025-07-24T19:33:34.422637",
+      "themes": [
+        "The party arrives in Harrow's Hollow, a small, anxious village gripped by fear. Elder Mirna Harrow asks the characters to investigate recent disappearances, including that of Scout Elen. Tensions run ",
+        "Tracking clues and rumors, the party must brave the haunted forest and reach the Keep of Doom. Along the way, they navigate treacherous terrain, spectral ambushes, and lingering wards. The forest is a",
+        "The party must reach and enter the foreboding Keep of Doom. This quest completes when the party successfully enters the keep through any means.",
+        "Within the keep's depths lies the source of the curse: the vengeful spirit of Lord Thaddeus Greymont, corrupted by dark magic. The party must confront him, either by combat, exorcism, or fulfilling hi",
+        "Return to Harrow's Hollow after dealing with the shadow relic. This quest completes when the party returns to the village after defeating or destroying the shadow relic in the keep."
+      ],
+      "plotObjective": "Investigate the mysterious disappearances in Harrow's Hollow and discover the fate of Scout Elen.",
+      "levelRange": {
+        "min": 3,
+        "max": 5
+      },
+      "areaCount": 5,
+      "travelNarration": {
+        "travelNarration": "The party travels to a new region where fresh adventures await.",
+        "dmGuidance": "Present this as a transition to the new module.",
+        "generatedDate": "2025-07-24T19:33:34.137825"
+      }
+    },
+    "The_Thornwood_Watch": {
+      "moduleName": "The_Thornwood_Watch",
+      "addedDate": "2025-07-24T19:33:34.978355",
+      "themes": [
+        "The party arrives at Rangers' Outpost to find it in crisis. Three caravans have been massacred in five days with unnatural precision. Ranger Elen, the outpost's commander, recruits the party. Her prim",
+        "Following leads from Rusk, the party ventures into the Thornwood Wilds to find the main bandit camp, located in an old, crumbling watchtower. They must overcome unnaturally aggressive wildlife and ban",
+        "The trail leads north to a blighted part of the forest where the trees are twisted and the air hums with dark energy. The party must navigate this dangerous grove to find the source of the sorcerer's ",
+        "Deep within the ruins, the party finds Malarok the Corruptor. He is performing a dark ritual to absorb the power of a large, pulsating Voidstone Shard set upon an altar. He is a formidable spellcaster",
+        "When the party returns to Rangers' Outpost to report their success, they discover Commander Elen has vanished! Ranger Marcus explains that Elen received an urgent message about Scout Elen's disappeara"
+      ],
+      "plotObjective": "Investigate the escalating bandit attacks on the Rangers' Outpost and stop the sorcerer who is corrupting the northern wilderness.",
+      "levelRange": {
+        "min": 1,
+        "max": 2
+      },
+      "areaCount": 3,
+      "travelNarration": {
+        "travelNarration": "The party travels to a new region where fresh adventures await.",
+        "dmGuidance": "Present this as a transition to the new module.",
+        "generatedDate": "2025-07-24T19:33:34.727689"
+      }
+    }
+  },
+  "areas": {
+    "G001": {
+      "areaName": "Gloamwood",
+      "areaDescription": "A dense, brooding forest where sunlight rarely pierces the canopy. Ethereal mists swirl between ancient oaks, and spirits of the restless dead prowl the trails. Travelers risk losing both their way and their lives among the twisted paths and shadowed groves.",
+      "areaType": "forest",
+      "dangerLevel": "medium",
+      "recommendedLevel": 3,
+      "climate": "temperate",
+      "terrain": "dense forest, misty trails, marshy clearings",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 9,
+      "module": "Keep_of_Doom",
+      "addedDate": "2025-07-24T19:33:34.422637"
+    },
+    "HH001": {
+      "areaName": "Harrow's Hollow",
+      "areaDescription": "Harrow's Hollow is a medium settlement where civilization meets the frontier. Politics and intrigue mix with everyday commerce.",
+      "areaType": "town",
+      "dangerLevel": "low",
+      "recommendedLevel": 3,
+      "climate": "temperate",
+      "terrain": "urban streets and buildings",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 6,
+      "module": "Keep_of_Doom",
+      "addedDate": "2025-07-24T19:33:34.422637"
+    },
+    "SK001": {
+      "areaName": "Shadowfall Keep",
+      "areaDescription": "A crumbling fortress perched atop a rocky hill, its towers broken and battlements thick with creeping ivy. Within, restless spirits and deadly traps await all who enter, and the cursed knight's presence warps reality itself. The very stones seem to absorb light, casting the keep in perpetual shadow regardless of the time of day.",
+      "areaType": "ruins",
+      "dangerLevel": "high",
+      "recommendedLevel": 4,
+      "climate": "temperate",
+      "terrain": "rocky hill, stone fortress, crumbling architecture",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 8,
+      "module": "Keep_of_Doom",
+      "addedDate": "2025-07-24T19:33:34.422637"
+    },
+    "TBM001": {
+      "areaName": "The Blighted Marches",
+      "areaDescription": "A desolate moor stretching beyond the keep, scarred by ancient battles and lingering curses. Strange lights drift over the bogs at night, and only the desperate or foolhardy dare to cross these lands. The soil itself seems poisoned, growing only twisted vegetation, while miasmic mists obscure vision and disorient travelers. Time and space bend unpredictably here, where the shadow relic's influence has seeped into the very landscape over centuries.",
+      "areaType": "wilderness",
+      "dangerLevel": "extreme",
+      "recommendedLevel": 5,
+      "climate": "cold and foggy",
+      "terrain": "moors, bogs, rocky outcroppings, and blasted plains",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 6,
+      "module": "Keep_of_Doom",
+      "addedDate": "2025-07-24T19:33:34.422637"
+    },
+    "TCD001": {
+      "areaName": "The Cursed Dungeons",
+      "areaDescription": "Beneath the keep, these ancient catacombs twist into darkness, suffused with the shadow relic's malevolent power. Echoes of suffering and the undead linger in every shadowed cell and hidden chamber. The very stones pulse with corrupted energy, and the air is thick with the taste of fear and ancient despair. Time and space seem to warp within these depths, with passages that shouldn't connect somehow leading into one another.",
+      "areaType": "dungeon",
+      "dangerLevel": "high",
+      "recommendedLevel": 4,
+      "climate": "cold and damp",
+      "terrain": "underground stone passages, cells, and chambers",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 7,
+      "module": "Keep_of_Doom",
+      "addedDate": "2025-07-24T19:33:34.422637"
+    },
+    "NCW001": {
+      "areaName": "Northern Corrupted Woods",
+      "areaDescription": "The Northern Corrupted Woods exist as the epicenter of Malarok's dark influence, where ancient trees have been twisted into grotesque forms by the sorcerer's Voidstone magic. Black-needled pines writhe skyward like grasping fingers, their trunks weeping dark sap that pulses with corrupt energy. The air hums with Malarok's power, making metal grow cold and thoughts sluggish. At the heart of this blighted grove lie the crumbling ruins where the sorcerer conducts his dark rituals, protected by magical wards and corrupted guardians.",
+      "areaType": "wilderness",
+      "dangerLevel": "high",
+      "recommendedLevel": 2,
+      "climate": "temperate - corrupted",
+      "terrain": "blighted forest",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 5,
+      "module": "The_Thornwood_Watch",
+      "addedDate": "2025-07-24T19:33:34.978355"
+    },
+    "RO001": {
+      "areaName": "Rangers' Outpost",
+      "areaDescription": "Crisis transforms this frontier outpost from peaceful haven to fortress under siege. Weathered timber walkways now bear the scars of hasty fortification, while the clearing echoes with urgent voices and the clash of hastily prepared weapons. The spicy tang of pine sap mingles with smoke from signal fires and the metallic scent of fear. Rangers move with grim purpose between reinforced positions, their usual confidence replaced by the weight of impending catastrophe threatening to overwhelm their small garrison.",
+      "areaType": "wilderness",
+      "dangerLevel": "low",
+      "recommendedLevel": 1,
+      "climate": "temperate",
+      "terrain": "forest clearing",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 6,
+      "module": "The_Thornwood_Watch",
+      "addedDate": "2025-07-24T19:33:34.978355"
+    },
+    "TW001": {
+      "areaName": "Thornwood Wilds",
+      "areaDescription": "The Thornwood Wilds writhe with predatory intelligence, their canopy of clawed branches seeming to shift and close behind intruders. Ancient trees lean inward like conspirators, their moss-choked bark weeping strange saps while root-latticed shadows conceal signs of recent violence. The air tastes of copper and fear, thick with the scent of spilled blood and the acrid smoke of bandit camps. Every snapping twig and rustling leaf might herald ambush, while drag marks in the earth tell grim stories of those who ventured here before you.",
+      "areaType": "wilderness",
+      "dangerLevel": "medium",
+      "recommendedLevel": 1,
+      "climate": "temperate",
+      "terrain": "forest",
+      "areaConnectivity": [],
+      "areaConnectivityId": [],
+      "locationCount": 6,
+      "module": "The_Thornwood_Watch",
+      "addedDate": "2025-07-24T19:33:34.978355"
+    }
+  },
+  "themes": {},
+  "isolatedModules": true
+}

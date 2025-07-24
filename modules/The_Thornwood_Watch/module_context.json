@@ -1,0 +1,195 @@
+{
+  "module_name": "The Thornwood Watch",
+  "module_id": "The_Thornwood_Watch",
+  "areas": {
+    "RO001": {
+      "name": "Rangers\u2019 Outpost",
+      "type": "wilderness",
+      "locations": [],
+      "npcs": [
+        "Ranger Elen",
+        "Quartermaster Brann",
+        "Trader Sila",
+        "Captured Bandit Leader Rusk"
+      ],
+      "plot_points": [
+        "PP001",
+        "PP002",
+        "PP003",
+        "PP004"
+      ]
+    },
+    "TW001": {
+      "name": "Thornwood Wilds",
+      "type": "wilderness",
+      "locations": [],
+      "npcs": [
+        "Wounded Scout Neris",
+        "Merchant Lira",
+        "Spirit-Touched Hermit Maelo"
+      ],
+      "plot_points": [
+        "PP001",
+        "PP002",
+        "PP003",
+        "PP004"
+      ]
+    },
+    "NCW001": {
+      "name": "Northern Corrupted Woods",
+      "type": "wilderness",
+      "locations": [],
+      "npcs": [
+        "The Withered Hart"
+      ],
+      "plot_points": [
+        "PP001",
+        "PP002",
+        "PP003",
+        "PP004"
+      ]
+    }
+  },
+  "npcs": {
+    "ranger_elen": {
+      "name": "Ranger Elen",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "RO001",
+          "location": "RO01"
+        }
+      ]
+    },
+    "quartermaster_brann": {
+      "name": "Quartermaster Brann",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "RO001",
+          "location": "RO02"
+        }
+      ]
+    },
+    "trader_sila": {
+      "name": "Trader Sila",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "RO001",
+          "location": "RO03"
+        }
+      ]
+    },
+    "captured_bandit_leader_rusk": {
+      "name": "Captured Bandit Leader Rusk",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "RO001",
+          "location": "RO01"
+        }
+      ]
+    },
+    "merchant_lira": {
+      "name": "Merchant Lira",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "TW001",
+          "location": "TW06"
+        }
+      ]
+    },
+    "wounded_scout_neris": {
+      "name": "Wounded Scout Neris",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "TW001",
+          "location": "TW06"
+        }
+      ]
+    },
+    "spirit-touched_hermit_maelo": {
+      "name": "Spirit-Touched Hermit Maelo",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "TW001",
+          "location": "TW04"
+        }
+      ]
+    },
+    "corrupted_woodland_creatures": {
+      "name": "Corrupted Woodland Creatures",
+      "role": "",
+      "faction": "",
+      "appears_in": []
+    },
+    "the_withered_hart": {
+      "name": "The Withered Hart",
+      "role": "",
+      "faction": "",
+      "appears_in": [
+        {
+          "area": "NCW001",
+          "location": "NC03"
+        }
+      ]
+    }
+  },
+  "locations": {},
+  "plot_scopes": {
+    "PP001": "RO001",
+    "PP002": "TW001",
+    "PP003": "NCW001",
+    "PP004": "NCW001",
+    "PP005": "RO001",
+    "SQ001": "RO001",
+    "SQ002": "RO001",
+    "SQ003": "TW001",
+    "SQ004": "TW001",
+    "SQ005": "NCW001"
+  },
+  "references": {
+    "npc:Ranger Elen": [
+      "module:plotStages"
+    ],
+    "npc:Quartermaster Brann": [
+      "module:plotStages"
+    ],
+    "npc:Trader Sila": [
+      "module:plotStages"
+    ],
+    "npc:Captured Bandit Leader Rusk": [
+      "module:plotStages"
+    ],
+    "npc:Merchant Lira": [
+      "module:plotStages"
+    ],
+    "npc:Wounded Scout Neris": [
+      "module:plotStages"
+    ],
+    "npc:Spirit-Touched Hermit Maelo": [
+      "module:plotStages"
+    ],
+    "npc:Corrupted Woodland Creatures": [
+      "module:plotStages"
+    ],
+    "npc:The Withered Hart": [
+      "module:plotStages"
+    ]
+  },
+  "validation_issues": [
+    "NPC 'Corrupted Woodland Creatures' is referenced in ['module:plotStages'] but not placed in any location"
+  ],
+  "generated_at": "2025-06-22T22:27:41.391154"
+}

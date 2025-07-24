@@ -131,12 +131,17 @@ set_script_name(__name__)
 # Import model configurations from config.py
 from config import (
     OPENAI_API_KEY,
+    OPENAI_ORG_ID,
     DM_MAIN_MODEL,
     DM_SUMMARIZATION_MODEL,
     DM_VALIDATION_MODEL
 )
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+# Initialize OpenAI client with organization support
+client_kwargs = {"api_key": OPENAI_API_KEY}
+if OPENAI_ORG_ID:
+    client_kwargs["organization"] = OPENAI_ORG_ID
+client = OpenAI(**client_kwargs)
 
 # Initialize location graph for path validation
 location_graph = LocationGraph()

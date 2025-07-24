@@ -1,0 +1,22 @@
+{
+  "campaignName": "Fantasy Adventure Campaign",
+  "currentModule": null,
+  "hubModule": null,
+  "completedModules": [],
+  "availableModules": [
+    "The_Thornwood_Watch",
+    "Keep_of_Doom"
+  ],
+  "hubs": {},
+  "relationships": {},
+  "artifacts": {},
+  "worldState": {
+    "keepOwnership": false,
+    "majorDecisions": [],
+    "crossModuleRelationships": {},
+    "unlockedAreas": [],
+    "hubEstablished": false
+  },
+  "lastUpdated": "2025-07-24T19:33:34.982352",
+  "version": "1.0.0"
+}

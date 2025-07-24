@@ -466,8 +466,8 @@ def update_character_data(conversation_history, party_tracker_data):
         for member in party_tracker_data["partyMembers"]:
             # Normalize name for file access
             from updates.update_character_info import normalize_character_name
-            normalized_member = normalize_character_name(member)
-            name = member.lower()
+            normalized_member = normalize_character_name(member["name"])
+            name = member["name"].lower()
             member_file = path_manager.get_character_path(normalized_member)
             try:
                 with open(member_file, "r", encoding="utf-8") as file:
