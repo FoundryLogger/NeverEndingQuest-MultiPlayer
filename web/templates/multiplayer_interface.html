@@ -796,6 +796,8 @@
             background-color: #555;
             border-color: #666;
         }
+
+        
     </style>
 </head>
 <body>
@@ -921,22 +923,26 @@
                     </div>
                 </div>
             </div>
+
+            
         </div>
     </div>
+
+    
 
     <script>
         // Socket.IO connection
         const socket = io();
         
-        // Game state
-        let gameState = {
-            connected: false,
-            playerName: '',
-            gameActive: false,
-            currentTurnPlayer: null,
-            connectedPlayers: [],
-            messages: []
-        };
+                 // Game state
+         let gameState = {
+             connected: false,
+             playerName: '',
+             gameActive: false,
+             currentTurnPlayer: null,
+             connectedPlayers: [],
+             messages: []
+         };
         
         // DOM elements
         const joinGameForm = document.getElementById('join-game-form');
@@ -1035,6 +1041,29 @@
             hideCharacterCreationInterface();
             addMessage('system', data.message, 'DM');
         });
+        
+                 // Combat event handlers (for future use if needed)
+         socket.on('combat_started', (data) => {
+             console.log('Combat started:', data);
+             addMessage('system', '⚔️ Combat has begun!', 'DM');
+         });
+         
+         socket.on('combat_state_update', (data) => {
+             console.log('Combat state update:', data);
+         });
+         
+         socket.on('combat_ended', (data) => {
+             console.log('Combat ended:', data);
+             addMessage('system', '🎯 Combat has ended!', 'DM');
+         });
+         
+         socket.on('combat_turn_update', (data) => {
+             console.log('Combat turn update:', data);
+         });
+         
+         socket.on('combat_action_result', (data) => {
+             console.log('Combat action result:', data);
+         });
         
         function showCharacterCreationInterface(data) {
             // Crea l'interfaccia di creazione personaggio
@@ -1241,6 +1270,8 @@
                 sendChatMessage();
             }
         });
+        
+        
         
         function sendAction() {
             const action = actionInput.value.trim();
@@ -1576,10 +1607,21 @@
             return str.replace(/\b\w/g, l => l.toUpperCase());
         }
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('NeverEndingQuest Multiplayer Interface loaded');
-        });
+                 // Combat functions (simplified for narrative combat)
+         function showCombatPanel() {
+             // Combat is handled narratively, no special panel needed
+             console.log('Combat is handled through normal chat interface');
+         }
+         
+         function hideCombatPanel() {
+             // Combat is handled narratively, no special panel needed
+             console.log('Combat is handled through normal chat interface');
+         }
+        
+                 // Initialize
+         document.addEventListener('DOMContentLoaded', () => {
+             console.log('NeverEndingQuest Multiplayer Interface loaded');
+         });
     </script>
 </body>
 </html> 

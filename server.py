@@ -66,6 +66,9 @@ from updates.update_character_info import normalize_character_name
 from utils.enhanced_logger import debug, info, warning, error, set_script_name
 from main import save_conversation_history
 
+# Import CombatService for multiplayer combat
+from core.managers.combat_service import CombatService
+
 # Import from main.py for conversation history management
 from main import save_conversation_history
 
@@ -98,6 +101,10 @@ client = OpenAI(**client_kwargs)
 
 # Global game state (shared across all players)
 GAME_STATE = {
+    # Combat state for multiplayer
+    "active_combat": None,  # CombatService instance
+    "is_in_combat": False,  # Boolean flag for combat state
+    "combat_players": [],   # List of players in combat
     "party_tracker": None,
     "conversation_history": [],
     "location_data": None,
@@ -389,6 +396,11 @@ def get_current_state_for_client():
         # Converti SID in nomi di giocatori
         connected_player_names = [PLAYERS_SID_MAP.get(sid, f'Player_{sid[:8]}') for sid in GAME_STATE["connected_players"]]
         
+        # Get combat state if active
+        combat_state = None
+        if GAME_STATE["is_in_combat"] and GAME_STATE["active_combat"]:
+            combat_state = GAME_STATE["active_combat"].get_current_combat_state()
+        
         return {
             "messages": formatted_messages,
             "party_members": GAME_STATE["party_tracker"].get("partyMembers", []),
@@ -400,7 +412,9 @@ def get_current_state_for_client():
             "connected_players": connected_player_names,
             "current_turn_player": GAME_STATE["current_turn_player"],
             "game_active": GAME_STATE["game_active"],
-            "character_sheets": GAME_STATE["character_sheets"]  # Nuovo: dati dei personaggi
+            "character_sheets": GAME_STATE["character_sheets"],  # Nuovo: dati dei personaggi
+            "combat_state": combat_state,  # Combat state information
+            "is_in_combat": GAME_STATE["is_in_combat"]  # Combat mode flag
         }
         
     except Exception as e:
@@ -660,7 +674,13 @@ def handle_player_action_logic(player_name, action_text):
     """
     global GAME_STATE
     
-    # 1. VALIDAZIONE DEL TURNO
+    # 1. CHECK IF IN COMBAT MODE
+    if GAME_STATE["is_in_combat"]:
+        # Redirect to combat action handler
+        handle_combat_action_logic(player_name, action_text)
+        return
+    
+    # 2. VALIDAZIONE DEL TURNO
     if GAME_STATE["current_turn_player"] and GAME_STATE["current_turn_player"] != player_name:
         try:
             emit('error', {'message': f"Non è il tuo turno. Tocca a {GAME_STATE['current_turn_player']}."})
@@ -754,8 +774,21 @@ def handle_player_action_logic(player_name, action_text):
             
             # GESTIONE DEI SOTTOSISTEMI SPECIALI
             if isinstance(result, dict):
-                # Caso 1: Il combattimento è terminato
-                if result.get("status") == "needs_post_combat_narration":
+                # Caso 1: Inizio di un nuovo combattimento
+                if result.get("status") == "start_combat":
+                    encounter_id = result.get("encounter_id")
+                    if encounter_id and not GAME_STATE["is_in_combat"]:
+                        debug(f"COMBAT: Starting combat session for encounter {encounter_id}", category="combat_events")
+                        if start_combat_session(encounter_id):
+                            # Combat session started successfully, break out of action processing
+                            break
+                        else:
+                            error(f"COMBAT: Failed to start combat session for encounter {encounter_id}", category="combat_events")
+                            broadcast_full_game_state(message_type="error", message_content="Failed to start combat session.")
+                            break
+                
+                # Caso 2: Il combattimento è terminato
+                elif result.get("status") == "needs_post_combat_narration":
                     print("SERVER: Combattimento terminato. Richiedo narrazione post-combattimento.")
                     # La cronologia è già stata aggiornata dall'handler, quindi basta richiamare l'AI
                     post_combat_history = safe_json_load("modules/conversation_history/conversation_history.json")
@@ -779,7 +812,7 @@ def handle_player_action_logic(player_name, action_text):
                     
                     break # Esce dal ciclo delle azioni
                     
-                # Caso 2: Bisogna entrare in modalità Level-Up
+                # Caso 3: Bisogna entrare in modalità Level-Up
                 elif result.get("status") == "enter_levelup_mode":
                     print("SERVER: Inizio sessione di Level-Up.")
                     # Per ora, logghiamo solo l'inizio della sessione
@@ -879,6 +912,43 @@ def handle_chat_message(data):
         'message': message,
         'timestamp': datetime.now().isoformat()
     })
+
+# ============================================================================
+# COMBAT EVENT HANDLERS
+# ============================================================================
+
+@socketio.on('combat_action')
+def on_combat_action(data):
+    """Handle combat actions from players"""
+    sid = request.sid
+    player_name = data.get('player_name')
+    action_text = data.get('text', '')
+    
+    if not action_text.strip():
+        emit('error', {'message': 'Please provide a combat action to perform.'})
+        return
+    
+    # Check if combat is active
+    if not GAME_STATE["is_in_combat"] or not GAME_STATE["active_combat"]:
+        emit('error', {'message': 'No active combat session.'})
+        return
+    
+    # Check if player is connected
+    if sid not in GAME_STATE["connected_players"]:
+        emit('error', {'message': 'You are not connected to the game.'})
+        return
+    
+    # Process combat action in background thread
+    socketio.start_background_task(target=handle_combat_action_logic, player_name=player_name, action_text=action_text)
+
+@socketio.on('request_combat_state')
+def handle_combat_state_request():
+    """Handle requests for current combat state"""
+    if GAME_STATE["is_in_combat"] and GAME_STATE["active_combat"]:
+        combat_state = GAME_STATE["active_combat"].get_current_combat_state()
+        emit('combat_state_update', combat_state)
+    else:
+        emit('combat_state_update', {"is_active": False})
 
 def create_character_from_creation_data(player_name, creation_data):
     """Create a complete character from creation data"""
@@ -1073,6 +1143,155 @@ def get_starting_equipment(character_class, background):
         })
     
     return equipment
+
+# ============================================================================
+# COMBAT MANAGEMENT FUNCTIONS
+# ============================================================================
+
+def handle_combat_action_logic(player_name, action_text):
+    """
+    Handle combat action logic using CombatService.
+    This function processes player actions during combat.
+    """
+    global GAME_STATE
+    
+    if not GAME_STATE["is_in_combat"] or not GAME_STATE["active_combat"]:
+        debug("COMBAT: No active combat session", category="combat_events")
+        return
+    
+    try:
+        # Process the player's combat action
+        result = GAME_STATE["active_combat"].process_player_turn(player_name, action_text)
+        
+        if "error" in result:
+            # Broadcast error to all players
+            broadcast_full_game_state(message_type="error", message_content=result["error"])
+            return
+        
+        # Broadcast combat state update to all players
+        socketio.emit('combat_state_update', result)
+        
+        # Check if combat has ended
+        if not result.get("is_active", True):
+            GAME_STATE["is_in_combat"] = False
+            GAME_STATE["active_combat"] = None
+            GAME_STATE["combat_players"] = []
+            
+            # Broadcast combat end
+            socketio.emit('combat_ended', {
+                'message': 'Combat has ended.',
+                'final_state': result
+            })
+            
+            # Return to normal game state
+            broadcast_full_game_state(message_type="dm", message_content="Combat has ended. What would you like to do next?")
+            return
+        
+        # If it's not a player's turn, process AI turns
+        current_turn = result.get("current_turn")
+        if current_turn and not is_player_turn(current_turn):
+            # Process AI turns in background
+            socketio.start_background_task(target=process_ai_combat_turns)
+        
+    except Exception as e:
+        error(f"COMBAT: Error processing combat action", exception=e, category="combat_events")
+        broadcast_full_game_state(message_type="error", message_content="Error processing combat action. Please try again.")
+
+def process_ai_combat_turns():
+    """
+    Process AI turns in combat.
+    This function runs in a background thread to handle AI actions.
+    """
+    global GAME_STATE
+    
+    if not GAME_STATE["is_in_combat"] or not GAME_STATE["active_combat"]:
+        return
+    
+    try:
+        # Process AI turns
+        result = GAME_STATE["active_combat"].process_ai_turns()
+        
+        if "error" in result:
+            broadcast_full_game_state(message_type="error", message_content=result["error"])
+            return
+        
+        # Broadcast updated combat state
+        socketio.emit('combat_state_update', result)
+        
+        # Check if combat has ended
+        if not result.get("is_active", True):
+            GAME_STATE["is_in_combat"] = False
+            GAME_STATE["active_combat"] = None
+            GAME_STATE["combat_players"] = []
+            
+            # Broadcast combat end
+            socketio.emit('combat_ended', {
+                'message': 'Combat has ended.',
+                'final_state': result
+            })
+            
+            # Return to normal game state
+            broadcast_full_game_state(message_type="dm", message_content="Combat has ended. What would you like to do next?")
+        
+    except Exception as e:
+        error(f"COMBAT: Error processing AI turns", exception=e, category="combat_events")
+        broadcast_full_game_state(message_type="error", message_content="Error processing AI turns.")
+
+def start_combat_session(encounter_id):
+    """
+    Start a new combat session using CombatService.
+    This function is called when an encounter is triggered.
+    """
+    global GAME_STATE
+    
+    try:
+        # Get current location data
+        current_location_id = GAME_STATE["party_tracker"]["worldConditions"]["currentLocationId"]
+        location_data = location_manager.get_location_info(
+            GAME_STATE["party_tracker"]["worldConditions"]["currentLocation"],
+            GAME_STATE["party_tracker"]["worldConditions"]["currentArea"],
+            current_location_id
+        )
+        
+        if not location_data:
+            error(f"COMBAT: Failed to get location data for encounter {encounter_id}", category="combat_events")
+            return False
+        
+        # Create CombatService instance
+        combat_service = CombatService(encounter_id, GAME_STATE["party_tracker"], location_data)
+        
+        if not combat_service.is_active:
+            error(f"COMBAT: Failed to initialize combat service for encounter {encounter_id}", category="combat_events")
+            return False
+        
+        # Set combat state
+        GAME_STATE["active_combat"] = combat_service
+        GAME_STATE["is_in_combat"] = True
+        GAME_STATE["combat_players"] = list(GAME_STATE["connected_players"].values())
+        
+        # Get initial combat state
+        initial_state = combat_service.get_current_combat_state()
+        
+        # Broadcast combat start to all players
+        socketio.emit('combat_started', {
+            'message': 'Combat has begun!',
+            'combat_state': initial_state
+        })
+        
+        debug(f"COMBAT: Started combat session for encounter {encounter_id}", category="combat_events")
+        return True
+        
+    except Exception as e:
+        error(f"COMBAT: Error starting combat session", exception=e, category="combat_events")
+        return False
+
+def is_player_turn(character_name):
+    """
+    Check if the current turn belongs to a player character.
+    """
+    # Check if the character name matches any connected player
+    connected_players = list(GAME_STATE["connected_players"].values())
+    return character_name in connected_players
 
 def start_server():
     """Start the multiplayer server"""
