@@ -670,6 +670,115 @@
         .character-panel.active {
             display: block;
         }
+        
+        /* Spell System Styles */
+        .spell-slots-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        
+        .spell-slots-section h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .spell-slots-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .spell-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #444;
+            border: 2px solid #666;
+            border-radius: 6px;
+            min-width: 60px;
+            transition: all 0.3s;
+        }
+        
+        .spell-slot.available {
+            border-color: #4CAF50;
+            background-color: #2d4a2d;
+        }
+        
+        .spell-slot.depleted {
+            border-color: #666;
+            background-color: #333;
+            opacity: 0.6;
+        }
+        
+        .slot-level {
+            font-size: 12px;
+            color: #ccc;
+            font-weight: bold;
+        }
+        
+        .slot-count {
+            font-size: 14px;
+            color: #FFA500;
+            font-weight: bold;
+        }
+        
+        .spell-level {
+            margin-bottom: 15px;
+        }
+        
+        .spell-level h4 {
+            color: #4CAF50;
+            margin-bottom: 8px;
+            font-size: 14px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 4px;
+        }
+        
+        .spell-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .spell-item:hover {
+            background-color: #3a3a3a;
+        }
+        
+        .spell-name {
+            color: #e0e0e0;
+            font-weight: 500;
+        }
+        
+        .cast-spell-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .cast-spell-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .cast-spell-btn:active {
+            background-color: #3d8b40;
+        }
 
         /* Overlay for Character Creation */
         .overlay {
@@ -1578,6 +1687,29 @@
             let html = '<div class="character-sheet">';
             html += `<div class="character-header"><div class="character-name">${data.name}</div></div>`;
             
+            // Mostra gli slot incantesimo disponibili
+            if (data.spellcasting && data.spellcasting.spellSlots) {
+                html += '<div class="spell-slots-section">';
+                html += '<h3>Spell Slots</h3>';
+                html += '<div class="spell-slots-container">';
+                
+                for (let level = 1; level <= 9; level++) {
+                    const levelKey = `level${level}`;
+                    const slotData = data.spellcasting.spellSlots[levelKey];
+                    if (slotData && slotData.max > 0) {
+                        const current = slotData.current || 0;
+                        const max = slotData.max;
+                        const slotClass = current > 0 ? 'available' : 'depleted';
+                        html += `<div class="spell-slot ${slotClass}">`;
+                        html += `<span class="slot-level">L${level}</span>`;
+                        html += `<span class="slot-count">${current}/${max}</span>`;
+                        html += '</div>';
+                    }
+                }
+                html += '</div></div>';
+            }
+            
+            // Mostra la lista degli incantesimi con pulsanti "Cast"
             if (data.spellcasting && data.spellcasting.spells) {
                 html += '<div class="spellcasting-section">';
                 const spellLevels = ['cantrips', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 'level7', 'level8', 'level9'];
@@ -1588,7 +1720,10 @@
                     if (spells && spells.length > 0) {
                         html += `<div class="spell-level"><h4>${spellLevelNames[index]}</h4>`;
                         spells.forEach(spell => {
-                            html += `<div class="spell-item">${spell}</div>`;
+                            html += `<div class="spell-item">`;
+                            html += `<span class="spell-name">${spell}</span>`;
+                            html += `<button class="cast-spell-btn" data-spell-name="${spell}" onclick="castSpell('${spell}')">Cast</button>`;
+                            html += '</div>';
                         });
                         html += '</div>';
                     }
@@ -1600,6 +1735,22 @@
             
             html += '</div>';
             characterSpellsPanel.innerHTML = html;
+        }
+        
+        function castSpell(spellName) {
+            // Pre-compila la casella di testo per aiutare il giocatore
+            const actionInput = document.getElementById('action-input');
+            actionInput.value = `Cast ${spellName} on `;
+            actionInput.focus();
+            
+            // Evidenzia brevemente il pulsante per feedback visivo
+            const castBtn = document.querySelector(`[data-spell-name="${spellName}"]`);
+            if (castBtn) {
+                castBtn.style.backgroundColor = '#4CAF50';
+                setTimeout(() => {
+                    castBtn.style.backgroundColor = '';
+                }, 500);
+            }
         }
         
         function capitalizeWords(str) {

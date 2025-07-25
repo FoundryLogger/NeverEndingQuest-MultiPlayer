@@ -711,10 +711,36 @@ def handle_player_action_logic(player_name, action_text):
     dm_note = f"Dungeon Master Note: Current date and time: {GAME_STATE['party_tracker']['worldConditions']['time']}. "
     dm_note += f"Current location: {GAME_STATE['party_tracker']['worldConditions']['currentLocation']} in {GAME_STATE['party_tracker']['worldConditions']['currentArea']}. "
     
-    # Aggiungi informazioni sui membri del party
+    # Aggiungi informazioni sui membri del party con slot incantesimo
     party_members = GAME_STATE["party_tracker"].get("partyMembers", [])
     if party_members:
-        member_names = [member.get("name", "Unknown") for member in party_members]
+        member_names = []
+        for member in party_members:
+            member_name = member.get("name", "Unknown")
+            member_names.append(member_name)
+            
+            # Carica i dati del personaggio per ottenere gli slot incantesimo
+            try:
+                member_data_path = f"modules/{GAME_STATE['party_tracker'].get('module', '').replace(' ', '_')}/characters/{member_name}.json"
+                member_data = safe_json_load(member_data_path)
+                if member_data:
+                    spellcasting = member_data.get("spellcasting", {})
+                    if spellcasting and "spellSlots" in spellcasting:
+                        spell_slots = spellcasting["spellSlots"]
+                        slot_parts = []
+                        for level in range(1, 10):  # Spell levels 1-9
+                            level_key = f"level{level}"
+                            if level_key in spell_slots:
+                                slot_data = spell_slots[level_key]
+                                current = slot_data.get("current", 0)
+                                maximum = slot_data.get("max", 0)
+                                if maximum > 0:  # Only show levels with available slots
+                                    slot_parts.append(f"L{level}:{current}/{maximum}")
+                        if slot_parts:
+                            member_names[-1] += f" (Spell Slots: {' '.join(slot_parts)})"
+            except Exception as e:
+                debug(f"Error loading spell slots for {member_name}: {e}", category="spell_system")
+        
         dm_note += f"Party members: {', '.join(member_names)}. "
     
     dm_note += f"Player ({player_name}): {action_text}"
@@ -972,6 +998,9 @@ def create_character_from_creation_data(player_name, creation_data):
         con_mod = (abilities['constitution'] - 10) // 2
         max_hp = base_hp + con_mod
         
+        # Calcola le abilità di incantesimo se la classe le ha
+        spellcasting_data = get_spellcasting_data(character_class, abilities)
+        
         character_data = {
             "character_role": "player",
             "character_type": "player",
@@ -1007,8 +1036,6 @@ def create_character_from_creation_data(player_name, creation_data):
             "conditionImmunities": [],
             "experience_points": 0,
             "classFeatures": get_class_features(character_class),
-            "spellSlots": {},
-            "spells": [],
             "inventory": get_starting_equipment(character_class, background),
             "personality": {
                 "traits": "I stand up for what I believe in.",
@@ -1018,11 +1045,218 @@ def create_character_from_creation_data(player_name, creation_data):
             }
         }
         
+        # Aggiungi le abilità di incantesimo se la classe le ha
+        if spellcasting_data:
+            character_data["spellcasting"] = spellcasting_data
+        
         return character_data
         
     except Exception as e:
         error(f"ERRORE durante la creazione del personaggio per '{player_name}': {e}", category="character_creation")
         return None
+
+def get_spellcasting_data(character_class, abilities):
+    """Get spellcasting data for spellcasting classes"""
+    spellcasting_classes = {
+        'Wizard': {
+            'ability': 'intelligence',
+            'spellSaveDC': 8 + 2 + (abilities['intelligence'] - 10) // 2,  # 8 + prof + mod
+            'spellAttackBonus': 2 + (abilities['intelligence'] - 10) // 2,  # prof + mod
+            'spells': {
+                'cantrips': ['Fire Bolt', 'Light', 'Mage Hand', 'Prestidigitation'],
+                'level1': ['Magic Missile', 'Shield', 'Sleep'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 2, 'max': 2},
+                'level2': {'current': 0, 'max': 0},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        },
+        'Cleric': {
+            'ability': 'wisdom',
+            'spellSaveDC': 8 + 2 + (abilities['wisdom'] - 10) // 2,
+            'spellAttackBonus': 2 + (abilities['wisdom'] - 10) // 2,
+            'spells': {
+                'cantrips': ['Guidance', 'Light', 'Sacred Flame', 'Thaumaturgy'],
+                'level1': ['Cure Wounds', 'Detect Magic', 'Guiding Bolt', 'Healing Word'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 2, 'max': 2},
+                'level2': {'current': 0, 'max': 0},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        },
+        'Sorcerer': {
+            'ability': 'charisma',
+            'spellSaveDC': 8 + 2 + (abilities['charisma'] - 10) // 2,
+            'spellAttackBonus': 2 + (abilities['charisma'] - 10) // 2,
+            'spells': {
+                'cantrips': ['Fire Bolt', 'Light', 'Mage Hand', 'Prestidigitation'],
+                'level1': ['Burning Hands', 'Magic Missile', 'Shield'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 2, 'max': 2},
+                'level2': {'current': 0, 'max': 0},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        },
+        'Bard': {
+            'ability': 'charisma',
+            'spellSaveDC': 8 + 2 + (abilities['charisma'] - 10) // 2,
+            'spellAttackBonus': 2 + (abilities['charisma'] - 10) // 2,
+            'spells': {
+                'cantrips': ['Blade Ward', 'Dancing Lights', 'Light', 'Vicious Mockery'],
+                'level1': ['Cure Wounds', 'Detect Magic', 'Healing Word', 'Thunderwave'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 2, 'max': 2},
+                'level2': {'current': 0, 'max': 0},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        },
+        'Warlock': {
+            'ability': 'charisma',
+            'spellSaveDC': 8 + 2 + (abilities['charisma'] - 10) // 2,
+            'spellAttackBonus': 2 + (abilities['charisma'] - 10) // 2,
+            'spells': {
+                'cantrips': ['Eldritch Blast', 'Friends', 'Mage Hand', 'Prestidigitation'],
+                'level1': ['Armor of Agathys', 'Hellish Rebuke', 'Hex'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 1, 'max': 1},  # Warlock ha solo 1 slot al livello 1
+                'level2': {'current': 0, 'max': 0},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        },
+        'Paladin': {
+            'ability': 'charisma',
+            'spellSaveDC': 8 + 2 + (abilities['charisma'] - 10) // 2,
+            'spellAttackBonus': 2 + (abilities['charisma'] - 10) // 2,
+            'spells': {
+                'cantrips': [],
+                'level1': ['Bless', 'Cure Wounds', 'Detect Magic', 'Divine Favor'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 0, 'max': 0},  # Paladin non ha slot al livello 1
+                'level2': {'current': 2, 'max': 2},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        },
+        'Ranger': {
+            'ability': 'wisdom',
+            'spellSaveDC': 8 + 2 + (abilities['wisdom'] - 10) // 2,
+            'spellAttackBonus': 2 + (abilities['wisdom'] - 10) // 2,
+            'spells': {
+                'cantrips': [],
+                'level1': ['Cure Wounds', 'Detect Magic', 'Goodberry', 'Hunter\'s Mark'],
+                'level2': [],
+                'level3': [],
+                'level4': [],
+                'level5': [],
+                'level6': [],
+                'level7': [],
+                'level8': [],
+                'level9': []
+            },
+            'spellSlots': {
+                'level1': {'current': 0, 'max': 0},  # Ranger non ha slot al livello 1
+                'level2': {'current': 2, 'max': 2},
+                'level3': {'current': 0, 'max': 0},
+                'level4': {'current': 0, 'max': 0},
+                'level5': {'current': 0, 'max': 0},
+                'level6': {'current': 0, 'max': 0},
+                'level7': {'current': 0, 'max': 0},
+                'level8': {'current': 0, 'max': 0},
+                'level9': {'current': 0, 'max': 0}
+            }
+        }
+    }
+    
+    return spellcasting_classes.get(character_class, None)
 
 def get_class_saving_throws(character_class):
     """Get saving throws for a class"""
