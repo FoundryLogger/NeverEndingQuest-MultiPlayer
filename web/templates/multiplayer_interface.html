@@ -83,11 +83,12 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            border: 1px solid #444;
+            border: 2px solid #444;
             margin: 10px;
             background-color: #2c2c2c;
-            border-radius: 5px;
+            border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         .panel-header {
@@ -98,6 +99,35 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+        
+        .panel-header .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .toggle-button {
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .toggle-button:hover {
+            background-color: #45a049;
+        }
+        
+        .toggle-button.secondary {
+            background-color: #2196F3;
+        }
+        
+        .toggle-button.secondary:hover {
+            background-color: #1976D2;
         }
         
         .panel-content {
@@ -116,18 +146,30 @@
             color: #4CAF50;
             font-weight: bold;
             margin-bottom: 10px;
+            padding: 8px;
+            background-color: rgba(76, 175, 80, 0.1);
+            border-left: 3px solid #4CAF50;
+            border-radius: 4px;
         }
         
         .player-action {
             color: #FFA500;
             font-style: italic;
             margin-bottom: 10px;
+            padding: 8px;
+            background-color: rgba(255, 165, 0, 0.1);
+            border-left: 3px solid #FFA500;
+            border-radius: 4px;
         }
         
         .system-message {
             color: #888;
             font-size: 0.9em;
             margin-bottom: 10px;
+            padding: 6px;
+            background-color: rgba(136, 136, 136, 0.1);
+            border-left: 3px solid #888;
+            border-radius: 4px;
         }
         
         .input-area {
@@ -153,12 +195,19 @@
         
         .action-input {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             background-color: #444;
-            border: 1px solid #666;
+            border: 2px solid #666;
             color: #e0e0e0;
-            border-radius: 4px;
+            border-radius: 6px;
             font-family: 'Crimson Text', serif;
+            transition: border-color 0.3s ease;
+        }
+        
+        .action-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
         }
         
         .send-button {
@@ -166,18 +215,24 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .send-button:hover {
             background-color: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         .send-button:disabled {
             background-color: #666;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
         
         .players-panel {
@@ -387,6 +442,360 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Character Sheet Styling */
+        .character-sheet {
+            padding: 8px;
+            margin: 0;
+            background-color: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            font-family: 'Crimson Text', Georgia, serif;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.01) 10px,
+                    rgba(255, 255, 255, 0.01) 20px
+                );
+        }
+        
+        .character-header {
+            margin: 0;
+            padding: 0 0 3px 0;
+            border-bottom: 2px solid #666;
+        }
+        
+        .character-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            color: #ccc;
+            font-size: 16px;
+            line-height: 1.2;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .character-details > .detail-left > div,
+        .character-details > .detail-right > div {
+            margin-bottom: 2px;
+            min-height: 1.3em;
+        }
+        
+        .character-details > .detail-left > div:last-child,
+        .character-details > .detail-right > div:last-child {
+            margin-bottom: 0;
+        }
+        
+        .detail-left {
+            flex: 1;
+        }
+        
+        .detail-right {
+            text-align: right;
+        }
+        
+        .orange {
+            color: #FFA500;
+            font-weight: bold;
+        }
+        
+        .character-name {
+            font-size: 32px;
+            font-weight: 600;
+            color: #FFA500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Cinzel', Georgia, serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            line-height: 1;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0;
+            outline: 0;
+            vertical-align: baseline;
+            background: transparent;
+        }
+        
+        /* Ability Scores */
+        .abilities-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 2px;
+            margin-top: 3px;
+            margin-bottom: 3px;
+        }
+        
+        .ability-score {
+            background-color: #2c2c2c;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 2px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ability-score:hover {
+            border-color: #FFA500;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 165, 0, 0.2);
+        }
+        
+        .ability-name {
+            font-size: 18px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+            line-height: 1;
+        }
+        
+        .ability-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFA500;
+            margin: 2px 0;
+            line-height: 1;
+        }
+        
+        .ability-modifier {
+            font-size: 14px;
+            color: #ccc;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Combat Stats */
+        .combat-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin: 8px 0;
+        }
+        
+        .combat-stat {
+            background-color: #2c2c2c;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 4px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .combat-stat:hover {
+            border-color: #FFA500;
+            transform: translateY(-1px);
+        }
+        
+        .combat-stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+        
+        .combat-stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFA500;
+        }
+        
+        .hp-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #444;
+            border-radius: 2px;
+            margin-top: 2px;
+            overflow: hidden;
+        }
+        
+        .hp-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s;
+        }
+        
+        .hp-fill.low {
+            background-color: #f44336;
+        }
+        
+        .hp-fill.medium {
+            background-color: #FFA500;
+        }
+
+        /* Character Tabs */
+        .character-tabs {
+            display: flex;
+            background-color: #333;
+            border-bottom: 1px solid #444;
+        }
+        
+        .character-tab {
+            padding: 10px 20px;
+            background-color: #444;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .character-tab.active {
+            background-color: #666;
+            color: #fff;
+        }
+        
+        .character-tab:hover {
+            background-color: #555;
+        }
+        
+        .character-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .character-panel {
+            display: none;
+        }
+        
+        .character-panel.active {
+            display: block;
+        }
+
+        /* Overlay for Character Creation */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .character-creation-modal {
+            background-color: #2c2c2c;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            color: #e0e0e0;
+        }
+
+        .character-creation-modal h2 {
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .character-creation-modal p {
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .creation-step {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        .creation-step h3 {
+            color: #FFA500;
+            margin-bottom: 15px;
+        }
+
+        .race-options, .class-options, .background-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .race-option, .class-option, .background-option {
+            padding: 10px 20px;
+            background-color: #444;
+            color: #e0e0e0;
+            border: 1px solid #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .race-option:hover, .class-option:hover, .background-option:hover {
+            background-color: #555;
+            border-color: #666;
+        }
+
+        .creation-progress {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+
+        .progress-step {
+            padding: 8px 15px;
+            background-color: #444;
+            border-radius: 6px;
+            color: #888;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .progress-step.active {
+            background-color: #666;
+            color: #fff;
+        }
+
+        .progress-step.completed {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        .ability-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .ability-option {
+            padding: 10px 20px;
+            background-color: #444;
+            color: #e0e0e0;
+            border: 1px solid #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .ability-option:hover {
+            background-color: #555;
+            border-color: #666;
+        }
     </style>
 </head>
 <body>
@@ -416,7 +825,10 @@
             <div class="panel">
                 <div class="panel-header">
                     <span>Game Output</span>
-                    <span id="game-status">Waiting for players...</span>
+                    <div class="header-buttons">
+                        <button class="toggle-button secondary" id="toggle-character-btn" onclick="toggleCharacterPanel()">Show Character Sheet</button>
+                        <span id="game-status">Waiting for players...</span>
+                    </div>
                 </div>
                 <div class="panel-content">
                     <div id="game-output" class="game-output">
@@ -481,6 +893,34 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Character Panel -->
+            <div class="panel character-panel" id="character-panel" style="display: none;">
+                <div class="panel-header">
+                    <span>Character Sheet</span>
+                    <div class="header-buttons">
+                        <button class="toggle-button" onclick="toggleCharacterPanel()">Hide Character Sheet</button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="character-tabs">
+                        <button class="character-tab active" onclick="switchCharacterTab('stats')">Character</button>
+                        <button class="character-tab" onclick="switchCharacterTab('inventory')">Inventory</button>
+                        <button class="character-tab" onclick="switchCharacterTab('spells')">Spells & Magic</button>
+                    </div>
+                    <div class="character-content">
+                        <div id="character-stats-panel" class="character-panel active">
+                            <div class="loading">Loading character stats...</div>
+                        </div>
+                        <div id="character-inventory-panel" class="character-panel">
+                            <div class="loading">Loading inventory...</div>
+                        </div>
+                        <div id="character-spells-panel" class="character-panel">
+                            <div class="loading">Loading spells and magic...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -519,6 +959,11 @@
         const chatMessages = document.getElementById('chat-messages');
         const chatInput = document.getElementById('chat-input');
         const chatSend = document.getElementById('chat-send');
+        
+        // Character panel elements
+        const characterStatsPanel = document.getElementById('character-stats-panel');
+        const characterInventoryPanel = document.getElementById('character-inventory-panel');
+        const characterSpellsPanel = document.getElementById('character-spells-panel');
         
         // Connection handling
         socket.on('connect', () => {
@@ -573,6 +1018,187 @@
         socket.on('connected', (data) => {
             console.log('Server connected:', data.message);
         });
+        
+        // Character creation handling
+        socket.on('character_creation_required', (data) => {
+            console.log('Character creation required:', data);
+            showCharacterCreationInterface(data);
+        });
+        
+        socket.on('character_creation_step', (data) => {
+            console.log('Character creation step:', data);
+            updateCharacterCreationStep(data);
+        });
+        
+        socket.on('character_creation_complete', (data) => {
+            console.log('Character creation complete:', data);
+            hideCharacterCreationInterface();
+            addMessage('system', data.message, 'DM');
+        });
+        
+        function showCharacterCreationInterface(data) {
+            // Crea l'interfaccia di creazione personaggio
+            const creationHTML = `
+                <div id="character-creation-overlay" class="overlay">
+                    <div class="character-creation-modal">
+                        <h2>Create Your D&D Character</h2>
+                        <p>Welcome ${data.player_name}! Let's create your character step by step.</p>
+                        
+                        <div id="creation-step-content">
+                            <div class="creation-step" id="step-race">
+                                <h3>Choose Your Race</h3>
+                                <p>Select your character's race:</p>
+                                <div class="race-options">
+                                    <button class="race-option" data-race="Human">Human</button>
+                                    <button class="race-option" data-race="Elf">Elf</button>
+                                    <button class="race-option" data-race="Dwarf">Dwarf</button>
+                                    <button class="race-option" data-race="Halfling">Halfling</button>
+                                    <button class="race-option" data-race="Dragonborn">Dragonborn</button>
+                                    <button class="race-option" data-race="Gnome">Gnome</button>
+                                    <button class="race-option" data-race="Half-Elf">Half-Elf</button>
+                                    <button class="race-option" data-race="Half-Orc">Half-Orc</button>
+                                    <button class="race-option" data-race="Tiefling">Tiefling</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="creation-progress">
+                            <div class="progress-step active" data-step="race">Race</div>
+                            <div class="progress-step" data-step="class">Class</div>
+                            <div class="progress-step" data-step="background">Background</div>
+                            <div class="progress-step" data-step="abilities">Abilities</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', creationHTML);
+            
+            // Aggiungi event listeners per le opzioni
+            document.querySelectorAll('.race-option').forEach(button => {
+                button.addEventListener('click', () => {
+                    const race = button.dataset.race;
+                    socket.emit('character_creation_step', {
+                        step: 'race_selected',
+                        data: { race: race }
+                    });
+                });
+            });
+        }
+        
+        function updateCharacterCreationStep(data) {
+            const stepContent = document.getElementById('creation-step-content');
+            
+            if (data.step === 'class_selection') {
+                stepContent.innerHTML = `
+                    <div class="creation-step" id="step-class">
+                        <h3>Choose Your Class</h3>
+                        <p>${data.message}</p>
+                        <div class="class-options">
+                            ${data.options.map(className => 
+                                `<button class="class-option" data-class="${className}">${className}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                document.querySelectorAll('.class-option').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const characterClass = button.dataset.class;
+                        socket.emit('character_creation_step', {
+                            step: 'class_selected',
+                            data: { class: characterClass }
+                        });
+                    });
+                });
+                
+                updateProgress('class');
+                
+            } else if (data.step === 'background_selection') {
+                stepContent.innerHTML = `
+                    <div class="creation-step" id="step-background">
+                        <h3>Choose Your Background</h3>
+                        <p>${data.message}</p>
+                        <div class="background-options">
+                            ${data.options.map(bg => 
+                                `<button class="background-option" data-background="${bg}">${bg}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                document.querySelectorAll('.background-option').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const background = button.dataset.background;
+                        socket.emit('character_creation_step', {
+                            step: 'background_selected',
+                            data: { background: background }
+                        });
+                    });
+                });
+                
+                updateProgress('background');
+                
+            } else if (data.step === 'ability_scores') {
+                stepContent.innerHTML = `
+                    <div class="creation-step" id="step-abilities">
+                        <h3>Determine Ability Scores</h3>
+                        <p>${data.message}</p>
+                        <div class="ability-options">
+                            <button class="ability-option" data-method="standard">Standard Array (15, 14, 13, 12, 10, 8)</button>
+                            <button class="ability-option" data-method="roll">Roll for Stats (4d6 drop lowest)</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.querySelectorAll('.ability-option').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const method = button.dataset.method;
+                        if (method === 'standard') {
+                            const abilities = {
+                                strength: 15, dexterity: 14, constitution: 13,
+                                intelligence: 12, wisdom: 10, charisma: 8
+                            };
+                            socket.emit('character_creation_step', {
+                                step: 'ability_scores_complete',
+                                data: { abilities: abilities }
+                            });
+                        } else {
+                            // Per ora usa standard array anche per roll
+                            const abilities = {
+                                strength: 15, dexterity: 14, constitution: 13,
+                                intelligence: 12, wisdom: 10, charisma: 8
+                            };
+                            socket.emit('character_creation_step', {
+                                step: 'ability_scores_complete',
+                                data: { abilities: abilities }
+                            });
+                        }
+                    });
+                });
+                
+                updateProgress('abilities');
+            }
+        }
+        
+        function updateProgress(currentStep) {
+            document.querySelectorAll('.progress-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+                if (step.dataset.step === currentStep) {
+                    step.classList.add('active');
+                } else if (['race', 'class', 'background'].includes(step.dataset.step) && 
+                          ['class', 'background', 'abilities'].includes(currentStep)) {
+                    step.classList.add('completed');
+                }
+            });
+        }
+        
+        function hideCharacterCreationInterface() {
+            const overlay = document.getElementById('character-creation-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
         
         // Join game handling
         joinGameButton.addEventListener('click', () => {
@@ -690,6 +1316,11 @@
                     addMessage(msg.type, msg.content, msg.player);
                 });
             }
+            
+            // Load character data if available
+            if (state.character_sheets && gameState.playerName && state.character_sheets[gameState.playerName]) {
+                loadCharacterData('stats');
+            }
         }
         
         function updatePlayersList(players) {
@@ -769,6 +1400,180 @@
             successDiv.textContent = message;
             gameOutput.appendChild(successDiv);
             gameOutput.scrollTop = gameOutput.scrollHeight;
+        }
+        
+        // Character management functions
+        function toggleCharacterPanel() {
+            const characterPanel = document.getElementById('character-panel');
+            const toggleBtn = document.getElementById('toggle-character-btn');
+            
+            if (characterPanel.style.display === 'none') {
+                characterPanel.style.display = 'flex';
+                toggleBtn.textContent = 'Hide Character Sheet';
+                toggleBtn.classList.remove('secondary');
+                // Load character data when showing the panel
+                loadCharacterData('stats');
+            } else {
+                characterPanel.style.display = 'none';
+                toggleBtn.textContent = 'Show Character Sheet';
+                toggleBtn.classList.add('secondary');
+            }
+        }
+        
+        function switchCharacterTab(tabName) {
+            // Remove active class from all tabs and panels
+            document.querySelectorAll('.character-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.character-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Add active class to selected tab and panel
+            document.querySelector(`.character-tab[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById(`character-${tabName}-panel`).classList.add('active');
+            
+            // Load data for the selected tab
+            loadCharacterData(tabName);
+        }
+        
+        function loadCharacterData(dataType) {
+            if (!gameState.playerName) return;
+            
+            socket.emit('request_player_data', { dataType: dataType });
+        }
+        
+        // Handle character data response
+        socket.on('player_data_response', (data) => {
+            console.log('Character data received:', data);
+            switch (data.dataType) {
+                case 'stats':
+                    displayCharacterStats(data.data);
+                    break;
+                case 'inventory':
+                    displayCharacterInventory(data.data);
+                    break;
+                case 'spells':
+                    displayCharacterSpells(data.data);
+                    break;
+            }
+        });
+        
+        function displayCharacterStats(data) {
+            if (!data) {
+                characterStatsPanel.innerHTML = '<div class="loading">No character data available</div>';
+                return;
+            }
+            
+            function getModifier(score) { 
+                const mod = Math.floor((score - 10) / 2); 
+                return mod >= 0 ? `+${mod}` : `${mod}`; 
+            }
+            
+            const hpPercent = (data.hitPoints / data.maxHitPoints) * 100;
+            let hpClass = '';
+            if (hpPercent <= 25) hpClass = 'low'; 
+            else if (hpPercent <= 50) hpClass = 'medium';
+            
+            let html = '<div class="character-sheet">';
+            html += `<div class="character-header"><div class="character-name">${data.name}</div><div class="character-details"><div class="detail-left"><div><span class="orange">Level ${data.level}</span> ${data.race} ${data.class}</div><div><span class="orange">Profession:</span> ${data.background || 'Adventurer'} • <span class="orange">Alignment:</span> ${capitalizeWords(data.alignment) || 'Neutral'}</div></div><div class="detail-right"><div><span class="orange">XP:</span> ${data.experience_points} / ${data.exp_required_for_next_level}</div><div><span class="orange">Status:</span> ${capitalizeWords(data.status) || 'Alive'} • <span class="orange">Prof:</span> +${data.proficiencyBonus || 2}</div></div></div></div>`;
+            
+            if (data.abilities) {
+                html += '<div class="abilities-row">';
+                ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'].forEach(ability => {
+                    const score = data.abilities[ability] || 10;
+                    html += `<div class="ability-score"><div class="ability-name">${ability.substr(0, 3).toUpperCase()}</div><div class="ability-value">${score}</div><div class="ability-modifier">${getModifier(score)}</div></div>`;
+                });
+                html += '</div>';
+            }
+            
+            html += `<div class="combat-stats">
+                        <div class="combat-stat">
+                            <div class="combat-stat-label">HP</div>
+                            <div class="combat-stat-value">${data.hitPoints}/${data.maxHitPoints}</div>
+                            <div class="hp-bar"><div class="hp-fill ${hpClass}" style="width: ${hpPercent}%"></div></div>
+                        </div>
+                        <div class="combat-stat">
+                            <div class="combat-stat-label">AC</div>
+                            <div class="combat-stat-value">${data.armorClass}</div>
+                        </div>
+                        <div class="combat-stat">
+                            <div class="combat-stat-label">INIT</div>
+                            <div class="combat-stat-value">${data.initiative >= 0 ? '+' : ''}${data.initiative}</div>
+                        </div>
+                        <div class="combat-stat currency">
+                            <div class="combat-stat-label">GP</div>
+                            <div class="combat-stat-value">${data.currency?.gold || 0}</div>
+                        </div>
+                        <div class="combat-stat currency">
+                            <div class="combat-stat-label">SP</div>
+                            <div class="combat-stat-value">${data.currency?.silver || 0}</div>
+                        </div>
+                        <div class="combat-stat currency">
+                            <div class="combat-stat-label">CP</div>
+                            <div class="combat-stat-value">${data.currency?.copper || 0}</div>
+                        </div>
+                    </div>`;
+            
+            html += '</div>'; // close character-sheet
+            characterStatsPanel.innerHTML = html;
+        }
+        
+        function displayCharacterInventory(data) {
+            if (!data) {
+                characterInventoryPanel.innerHTML = '<div class="loading">No character data available</div>';
+                return;
+            }
+            
+            let html = '<div class="character-sheet">';
+            html += `<div class="character-header"><div class="character-name">${data.name}</div></div>`;
+            
+            if (data.inventory && data.inventory.length > 0) {
+                html += '<div class="inventory-section">';
+                data.inventory.forEach(item => {
+                    html += `<div class="inventory-item"><span class="item-name">${item.name}</span><span class="item-qty">×${item.quantity}</span></div>`;
+                });
+                html += '</div>';
+            } else {
+                html += '<div class="inventory-section"><div class="inventory-item">No items in inventory</div></div>';
+            }
+            
+            html += '</div>';
+            characterInventoryPanel.innerHTML = html;
+        }
+        
+        function displayCharacterSpells(data) {
+            if (!data) {
+                characterSpellsPanel.innerHTML = '<div class="loading">No character data available</div>';
+                return;
+            }
+            
+            let html = '<div class="character-sheet">';
+            html += `<div class="character-header"><div class="character-name">${data.name}</div></div>`;
+            
+            if (data.spellcasting && data.spellcasting.spells) {
+                html += '<div class="spellcasting-section">';
+                const spellLevels = ['cantrips', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6', 'level7', 'level8', 'level9'];
+                const spellLevelNames = ['Cantrips', '1st Level', '2nd Level', '3rd Level', '4th Level', '5th Level', '6th Level', '7th Level', '8th Level', '9th Level'];
+                
+                spellLevels.forEach((level, index) => {
+                    const spells = data.spellcasting.spells[level];
+                    if (spells && spells.length > 0) {
+                        html += `<div class="spell-level"><h4>${spellLevelNames[index]}</h4>`;
+                        spells.forEach(spell => {
+                            html += `<div class="spell-item">${spell}</div>`;
+                        });
+                        html += '</div>';
+                    }
+                });
+                html += '</div>';
+            } else {
+                html += '<div class="spellcasting-section"><div class="spell-item">No spellcasting abilities</div></div>';
+            }
+            
+            html += '</div>';
+            characterSpellsPanel.innerHTML = html;
+        }
+        
+        function capitalizeWords(str) {
+            if (!str) return str;
+            return str.replace(/\b\w/g, l => l.toUpperCase());
         }
         
         // Initialize

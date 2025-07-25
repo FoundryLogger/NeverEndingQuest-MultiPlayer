@@ -107,7 +107,10 @@ GAME_STATE = {
     "game_active": False,
     "current_turn_player": None,
     "turn_order": [],
-    "last_action_time": None
+    "last_action_time": None,
+    "player_sids": {},  # Nuovo: mappa sid -> player_name
+    "character_sheets": {},  # Nuovo: mappa player_name -> dati del personaggio
+    "character_creation": {} # Nuovo: mappa player_name -> stato di creazione personaggio
 }
 
 # Dizionario per associare SID ai nomi dei giocatori
@@ -319,7 +322,8 @@ def broadcast_full_game_state(message_type=None, message_content=None, message_p
             "time": GAME_STATE["party_tracker"]["worldConditions"].get("time", ""),
             "connected_players": connected_player_names, # Usa i nomi dei giocatori, non i SID
             "current_turn_player": GAME_STATE["current_turn_player"],
-            "game_active": GAME_STATE["game_active"]
+            "game_active": GAME_STATE["game_active"],
+            "character_sheets": GAME_STATE["character_sheets"]  # Nuovo: dati dei personaggi
         }
         
         socketio.emit('game_state_update', state_data)
@@ -395,7 +399,8 @@ def get_current_state_for_client():
             "day": GAME_STATE["party_tracker"]["worldConditions"].get("day", ""),
             "connected_players": connected_player_names,
             "current_turn_player": GAME_STATE["current_turn_player"],
-            "game_active": GAME_STATE["game_active"]
+            "game_active": GAME_STATE["game_active"],
+            "character_sheets": GAME_STATE["character_sheets"]  # Nuovo: dati dei personaggi
         }
         
     except Exception as e:
@@ -484,6 +489,7 @@ def handle_join_game(data):
     
     # Associa SID al nome del giocatore
     PLAYERS_SID_MAP[sid] = player_name
+    GAME_STATE["player_sids"][sid] = player_name
     
     # Add to turn order if not already present
     if player_name not in GAME_STATE["turn_order"]:
@@ -497,12 +503,56 @@ def handle_join_game(data):
     if not GAME_STATE["game_active"]:
         GAME_STATE["game_active"] = True
     
-    emit('player_joined', {
-        'player_name': player_name,
-        'message': f'{player_name} has joined the game!'
-    })
+    # CARICA I DATI DEL PERSONAGGIO!
+    try:
+        if GAME_STATE["party_tracker"]:
+            module_name = GAME_STATE["party_tracker"].get("module", "").replace(" ", "_")
+            path_manager = ModulePathManager(module_name)
+            char_file = path_manager.get_character_path(normalize_character_name(player_name))
+            
+            # DEBUG: Aggiungiamo informazioni dettagliate
+            debug(f"DEBUG: Cercando personaggio '{player_name}' in file: {char_file}", category="character_loading")
+            debug(f"DEBUG: Working directory: {os.getcwd()}", category="character_loading")
+            debug(f"DEBUG: File esiste: {os.path.exists(char_file)}", category="character_loading")
+            debug(f"DEBUG: Percorso assoluto: {os.path.abspath(char_file)}", category="character_loading")
+            
+            char_data = safe_json_load(char_file)
+            debug(f"DEBUG: Risultato safe_json_load: {char_data is not None}", category="character_loading")
+            
+            if char_data:
+                GAME_STATE["character_sheets"][player_name] = char_data
+                info(f"SUCCESS: Dati del personaggio per '{player_name}' caricati.", category="character_loading")
+                # Personaggio esistente trovato
+                emit('player_joined', {
+                    'player_name': player_name,
+                    'message': f'{player_name} has joined the game!',
+                    'character_exists': True
+                })
+            else:
+                warning(f"ATTENZIONE: File del personaggio per '{player_name}' non trovato.", category="character_loading")
+                # Personaggio non trovato - avvia processo di creazione
+                emit('character_creation_required', {
+                    'player_name': player_name,
+                    'message': f'Welcome {player_name}! Let\'s create your D&D character.',
+                    'character_exists': False
+                })
+                # Inizializza lo stato di creazione personaggio
+                GAME_STATE["character_creation"][player_name] = {
+                    "step": "welcome",
+                    "data": {}
+                }
+                return  # Non continuare con il broadcast finché il personaggio non è creato
+        else:
+            warning(f"ATTENZIONE: party_tracker non disponibile per caricare il personaggio di '{player_name}'", category="character_loading")
+            emit('error', {'message': 'Game configuration error. Please contact the DM.'})
+            return
+    except Exception as e:
+        error(f"ERRORE durante il caricamento del personaggio per '{player_name}': {e}", category="character_loading")
+        emit('error', {'message': 'Error loading character data. Please try again.'})
+        return
     
-    broadcast_full_game_state() # Use the new broadcast function
+    # Solo se il personaggio esiste, procedi con il broadcast
+    broadcast_full_game_state()
     debug(f"SUCCESS: Player {player_name} joined the game", category="game_management")
 
 @socketio.on('player_action')
@@ -528,6 +578,80 @@ def on_player_action_event(data):
     
     # Esegui la logica di gioco in un thread separato per non bloccare il server
     socketio.start_background_task(target=handle_player_action_logic, player_name=player_name, action_text=action_text)
+
+@socketio.on('character_creation_step')
+def handle_character_creation_step(data):
+    """Handle character creation steps"""
+    sid = request.sid
+    player_name = PLAYERS_SID_MAP.get(sid)
+    step = data.get('step')
+    step_data = data.get('data', {})
+    
+    if not player_name or player_name not in GAME_STATE["character_creation"]:
+        emit('error', {'message': 'Character creation not started for this player.'})
+        return
+    
+    creation_state = GAME_STATE["character_creation"][player_name]
+    creation_state["step"] = step
+    creation_state["data"].update(step_data)
+    
+    # Gestisci i diversi step della creazione
+    if step == "race_selected":
+        # Razza selezionata, procedi con la classe
+        emit('character_creation_step', {
+            'step': 'class_selection',
+            'message': f'Great choice! Now choose your class:',
+            'options': [
+                'Fighter', 'Wizard', 'Rogue', 'Cleric', 'Ranger', 
+                'Barbarian', 'Bard', 'Paladin', 'Warlock', 'Sorcerer'
+            ]
+        })
+    
+    elif step == "class_selected":
+        # Classe selezionata, procedi con il background
+        emit('character_creation_step', {
+            'step': 'background_selection',
+            'message': f'Excellent! Now choose your background:',
+            'options': [
+                'Acolyte', 'Criminal', 'Folk Hero', 'Noble', 'Sage',
+                'Soldier', 'Charlatan', 'Entertainer', 'Guild Artisan', 'Hermit'
+            ]
+        })
+    
+    elif step == "background_selected":
+        # Background selezionato, procedi con le statistiche
+        emit('character_creation_step', {
+            'step': 'ability_scores',
+            'message': f'Perfect! Now let\'s determine your ability scores. You can use standard array or roll for stats.',
+            'options': ['Standard Array', 'Roll for Stats']
+        })
+    
+    elif step == "ability_scores_complete":
+        # Statistiche complete, finalizza il personaggio
+        character_data = create_character_from_creation_data(player_name, creation_state["data"])
+        if character_data:
+            # Salva il personaggio
+            module_name = GAME_STATE["party_tracker"].get("module", "").replace(" ", "_")
+            path_manager = ModulePathManager(module_name)
+            char_file = path_manager.get_character_path(normalize_character_name(player_name))
+            safe_json_dump(character_data, char_file)
+            
+            # Aggiungi al game state
+            GAME_STATE["character_sheets"][player_name] = character_data
+            
+            # Rimuovi dallo stato di creazione
+            del GAME_STATE["character_creation"][player_name]
+            
+            emit('character_creation_complete', {
+                'message': f'Congratulations {player_name}! Your character has been created successfully.',
+                'character_data': character_data
+            })
+            
+            # Ora puoi procedere con il broadcast
+            broadcast_full_game_state()
+            debug(f"SUCCESS: Character creation completed for {player_name}", category="character_creation")
+        else:
+            emit('error', {'message': 'Error creating character. Please try again.'})
 
 def handle_player_action_logic(player_name, action_text):
     """
@@ -719,6 +843,26 @@ def handle_game_state_request():
     current_state = get_current_state_for_client()
     emit('game_state_response', current_state)
 
+@socketio.on('request_player_data')
+def handle_player_data_request(data):
+    """Handle player data request from client"""
+    sid = request.sid
+    player_name = PLAYERS_SID_MAP.get(sid)
+    data_type = data.get('dataType', 'stats')
+    
+    if not player_name:
+        emit('error', {'message': 'Player not found.'})
+        return
+    
+    if player_name in GAME_STATE["character_sheets"]:
+        character_data = GAME_STATE["character_sheets"][player_name]
+        emit('player_data_response', {
+            'dataType': data_type,
+            'data': character_data
+        })
+    else:
+        emit('error', {'message': f'Character data not found for {player_name}.'})
+
 @socketio.on('chat_message')
 def handle_chat_message(data):
     """Handle chat messages between players"""
@@ -736,9 +880,199 @@ def handle_chat_message(data):
         'timestamp': datetime.now().isoformat()
     })
 
-# ============================================================================
-# SERVER INITIALIZATION AND STARTUP
-# ============================================================================
+def create_character_from_creation_data(player_name, creation_data):
+    """Create a complete character from creation data"""
+    try:
+        race = creation_data.get('race', 'Human')
+        character_class = creation_data.get('class', 'Fighter')
+        background = creation_data.get('background', 'Folk Hero')
+        abilities = creation_data.get('abilities', {
+            'strength': 10, 'dexterity': 10, 'constitution': 10,
+            'intelligence': 10, 'wisdom': 10, 'charisma': 10
+        })
+        
+        # Calcola HP base basato sulla classe
+        class_hp = {
+            'Fighter': 10, 'Paladin': 10, 'Ranger': 10, 'Barbarian': 12,
+            'Bard': 8, 'Cleric': 8, 'Druid': 8, 'Monk': 8, 'Rogue': 8, 'Warlock': 8,
+            'Sorcerer': 6, 'Wizard': 6
+        }
+        
+        base_hp = class_hp.get(character_class, 8)
+        con_mod = (abilities['constitution'] - 10) // 2
+        max_hp = base_hp + con_mod
+        
+        character_data = {
+            "character_role": "player",
+            "character_type": "player",
+            "name": player_name,
+            "type": "player",
+            "size": "Medium",
+            "level": 1,
+            "race": race,
+            "class": character_class,
+            "alignment": "neutral good",
+            "background": background,
+            "status": "alive",
+            "condition": "none",
+            "condition_affected": [],
+            "hitPoints": max_hp,
+            "maxHitPoints": max_hp,
+            "armorClass": 10 + (abilities['dexterity'] - 10) // 2,
+            "initiative": (abilities['dexterity'] - 10) // 2,
+            "speed": 30,
+            "abilities": abilities,
+            "savingThrows": get_class_saving_throws(character_class),
+            "skills": get_class_skills(character_class, background),
+            "proficiencyBonus": 2,
+            "senses": {
+                "darkvision": 0,
+                "passivePerception": 10 + (abilities['wisdom'] - 10) // 2
+            },
+            "languages": ["Common"],
+            "proficiencies": get_class_proficiencies(character_class),
+            "damageVulnerabilities": [],
+            "damageResistances": [],
+            "damageImmunities": [],
+            "conditionImmunities": [],
+            "experience_points": 0,
+            "classFeatures": get_class_features(character_class),
+            "spellSlots": {},
+            "spells": [],
+            "inventory": get_starting_equipment(character_class, background),
+            "personality": {
+                "traits": "I stand up for what I believe in.",
+                "ideals": "I fight for those who cannot fight for themselves.",
+                "bonds": "I protect those who cannot protect themselves.",
+                "flaws": "I have a weakness for the vices of the city."
+            }
+        }
+        
+        return character_data
+        
+    except Exception as e:
+        error(f"ERRORE durante la creazione del personaggio per '{player_name}': {e}", category="character_creation")
+        return None
+
+def get_class_saving_throws(character_class):
+    """Get saving throws for a class"""
+    saving_throws = {
+        'Fighter': ['strength', 'constitution'],
+        'Wizard': ['intelligence', 'wisdom'],
+        'Rogue': ['dexterity', 'intelligence'],
+        'Cleric': ['wisdom', 'charisma'],
+        'Ranger': ['strength', 'dexterity'],
+        'Barbarian': ['strength', 'constitution'],
+        'Bard': ['dexterity', 'charisma'],
+        'Paladin': ['wisdom', 'charisma'],
+        'Warlock': ['wisdom', 'charisma'],
+        'Sorcerer': ['constitution', 'charisma']
+    }
+    return saving_throws.get(character_class, ['strength', 'dexterity'])
+
+def get_class_skills(character_class, background):
+    """Get skills for a class and background"""
+    # Skills semplificati per ora
+    return {
+        'athletics': 2,
+        'perception': 2
+    }
+
+def get_class_proficiencies(character_class):
+    """Get proficiencies for a class"""
+    proficiencies = {
+        'Fighter': {
+            'armor': ['Light', 'Medium', 'Heavy', 'Shields'],
+            'weapons': ['Simple', 'Martial'],
+            'tools': []
+        },
+        'Wizard': {
+            'armor': [],
+            'weapons': ['Daggers', 'Quarterstaffs'],
+            'tools': []
+        },
+        'Rogue': {
+            'armor': ['Light'],
+            'weapons': ['Simple', 'Hand Crossbows', 'Longswords', 'Rapiers', 'Shortswords'],
+            'tools': ['Thieves\' Tools']
+        }
+    }
+    return proficiencies.get(character_class, {
+        'armor': ['Light'],
+        'weapons': ['Simple'],
+        'tools': []
+    })
+
+def get_class_features(character_class):
+    """Get class features for a class"""
+    features = {
+        'Fighter': [{
+            "name": "Second Wind",
+            "description": "Once per short rest, regain 1d10 + fighter level HP as a bonus action",
+            "source": "Fighter feature"
+        }],
+        'Wizard': [{
+            "name": "Spellcasting",
+            "description": "You can cast wizard spells",
+            "source": "Wizard feature"
+        }],
+        'Rogue': [{
+            "name": "Sneak Attack",
+            "description": "Deal extra 1d6 damage when you have advantage or an ally is within 5 feet of target",
+            "source": "Rogue feature"
+        }]
+    }
+    return features.get(character_class, [])
+
+def get_starting_equipment(character_class, background):
+    """Get starting equipment for a class and background"""
+    equipment = {
+        'weapons': [],
+        'armor': [],
+        'items': [
+            {
+                "name": "Backpack",
+                "type": "container",
+                "description": "Contains adventuring gear"
+            },
+            {
+                "name": "Bedroll",
+                "type": "item",
+                "description": "For sleeping outdoors"
+            },
+            {
+                "name": "Rations (5 days)",
+                "type": "consumable",
+                "description": "Food and water for survival"
+            }
+        ],
+        'money': {
+            'copper': 0,
+            'silver': 0,
+            'electrum': 0,
+            'gold': 10,
+            'platinum': 0
+        }
+    }
+    
+    # Aggiungi equipaggiamento specifico per classe
+    if character_class == 'Fighter':
+        equipment['weapons'].append({
+            "name": "Longsword",
+            "type": "weapon",
+            "damage": "1d8",
+            "damageType": "slashing",
+            "properties": ["versatile"],
+            "versatileDamage": "1d10"
+        })
+        equipment['armor'].append({
+            "name": "Chain Mail",
+            "type": "armor",
+            "armorClass": 16,
+            "armorType": "Heavy"
+        })
+    
+    return equipment
 
 def start_server():
     """Start the multiplayer server"""
