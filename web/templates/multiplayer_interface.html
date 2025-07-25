@@ -780,6 +780,142 @@
             background-color: #3d8b40;
         }
 
+        /* --- QUEST SYSTEM STYLES --- */
+        .quest-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #444;
+        }
+
+        .quest-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4CAF50;
+            display: flex;
+            align-items: center;
+        }
+
+        .quest-title::before {
+            content: '○'; /* Open circle for active quests */
+            margin-right: 10px;
+            font-size: 1.1em;
+            color: #FFA500;
+        }
+
+        .quest-item.completed .quest-title {
+            color: #888;
+            text-decoration: line-through;
+        }
+
+        .quest-item.completed .quest-title::before {
+            content: '✓'; /* Checkmark for completed quests */
+            color: #4CAF50;
+        }
+
+        .quest-description {
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-top: 5px;
+            padding-left: 25px; /* Indent description under the title */
+            color: #ccc;
+        }
+
+        .side-quest-item {
+            margin-top: 15px;
+            padding: 10px;
+            margin-left: 25px;
+            border-left: 3px solid #444;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .quest-section {
+            margin-bottom: 30px;
+        }
+
+        .quest-section h3 {
+            color: #FFA500;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        
+        .quest-activate-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .quest-activate-btn:hover {
+            background: #357abd;
+        }
+        
+        .quest-close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .quest-close-btn:hover {
+            background: #c0392b;
+        }
+        
+        .quest-reject-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+        
+        .quest-reject-btn:hover {
+            background: #d35400;
+        }
+        
+        .quest-remove-btn {
+            background: #8e44ad;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .quest-remove-btn:hover {
+            background: #7d3c98;
+        }
+        
+        .quest-cleanup-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .quest-cleanup-btn:hover {
+            background: #229954;
+        }
+
         /* Overlay for Character Creation */
         .overlay {
             position: fixed;
@@ -906,6 +1042,22 @@
             border-color: #666;
         }
 
+        .reload-button {
+            padding: 8px 12px;
+            background-color: #666;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+
+        .reload-button:hover {
+            background-color: #777;
+        }
         
     </style>
 </head>
@@ -1017,7 +1169,9 @@
                     <div class="character-tabs">
                         <button class="character-tab active" onclick="switchCharacterTab('stats')">Character</button>
                         <button class="character-tab" onclick="switchCharacterTab('inventory')">Inventory</button>
+                        <button class="character-tab" onclick="switchCharacterTab('quests')">Quests</button>
                         <button class="character-tab" onclick="switchCharacterTab('spells')">Spells & Magic</button>
+                        <button class="reload-button" onclick="reloadCharacterData()" title="Reload character data">🔄</button>
                     </div>
                     <div class="character-content">
                         <div id="character-stats-panel" class="character-panel active">
@@ -1025,6 +1179,9 @@
                         </div>
                         <div id="character-inventory-panel" class="character-panel">
                             <div class="loading">Loading inventory...</div>
+                        </div>
+                        <div id="character-quests-panel" class="character-panel">
+                            <div class="loading">Loading quests...</div>
                         </div>
                         <div id="character-spells-panel" class="character-panel">
                             <div class="loading">Loading spells and magic...</div>
@@ -1078,6 +1235,7 @@
         // Character panel elements
         const characterStatsPanel = document.getElementById('character-stats-panel');
         const characterInventoryPanel = document.getElementById('character-inventory-panel');
+        const characterQuestsPanel = document.getElementById('character-quests-panel');
         const characterSpellsPanel = document.getElementById('character-spells-panel');
         
         // Connection handling
@@ -1128,6 +1286,32 @@
         
         socket.on('error', (data) => {
             addErrorMessage(data.message);
+        });
+        
+        socket.on('success', (data) => {
+            console.log('Success:', data.message);
+            addMessage('system', data.message, 'System');
+        });
+        
+        socket.on('info', (data) => {
+            console.log('Info:', data.message);
+            addMessage('system', data.message, 'System');
+        });
+        
+        // Chat history management events
+        socket.on('chat_cleared', (data) => {
+            console.log('Chat history cleared:', data);
+            addMessage('system', '🗑️ Chat history has been cleared', 'System');
+        });
+        
+        socket.on('combat_cleared', (data) => {
+            console.log('Combat history cleared:', data);
+            addMessage('system', '⚔️ Combat history has been cleared', 'System');
+        });
+        
+        socket.on('all_history_cleared', (data) => {
+            console.log('All history cleared:', data);
+            addMessage('system', '🧹 All history has been cleared', 'System');
         });
         
         socket.on('connected', (data) => {
@@ -1576,7 +1760,12 @@
         function loadCharacterData(dataType) {
             if (!gameState.playerName) return;
             
-            socket.emit('request_player_data', { dataType: dataType });
+            if (dataType === 'quests') {
+                // Request plot data for quests
+                socket.emit('request_plot_data');
+            } else {
+                socket.emit('request_player_data', { dataType: dataType });
+            }
         }
         
         // Handle character data response
@@ -1589,15 +1778,62 @@
                 case 'inventory':
                     displayCharacterInventory(data.data);
                     break;
+                case 'quests':
+                    displayCharacterQuests(data.data);
+                    break;
                 case 'spells':
                     displayCharacterSpells(data.data);
                     break;
             }
         });
+
+        // Handle plot data response for quests
+        socket.on('plot_data_response', (data) => {
+            console.log('Plot data received:', data);
+            if (data.dataType === 'quests' || !data.dataType) {
+                displayCharacterQuests(data.data);
+            }
+        });
+        
+        // Handle character data reload response
+        socket.on('character_data_reloaded', (data) => {
+            console.log('Character data reloaded:', data);
+            // Reload the current tab data
+            const activeTab = document.querySelector('.character-tab.active');
+            if (activeTab) {
+                const tabName = activeTab.getAttribute('onclick').match(/switchCharacterTab\('([^']+)'\)/)[1];
+                loadCharacterData(tabName);
+            }
+        });
+        
+        // Handle character data errors
+        socket.on('error', (data) => {
+            console.log('Error received:', data);
+            const activePanel = document.querySelector('.character-panel.active');
+            if (activePanel) {
+                activePanel.innerHTML = `<div class="loading">Error: ${data.message}. <button onclick="reloadCharacterData()" class="reload-button">🔄 Retry</button></div>`;
+            }
+        });
+        
+        function reloadCharacterData() {
+            if (!gameState.playerName) {
+                console.log('No player name available for reload');
+                return;
+            }
+            
+            console.log('Reloading character data for:', gameState.playerName);
+            socket.emit('reload_character_data', {});
+            
+            // Show loading state
+            const activePanel = document.querySelector('.character-panel.active');
+            if (activePanel) {
+                activePanel.innerHTML = '<div class="loading">Reloading character data...</div>';
+            }
+        }
         
         function displayCharacterStats(data) {
             if (!data) {
-                characterStatsPanel.innerHTML = '<div class="loading">No character data available</div>';
+                characterStatsPanel.innerHTML = '<div class="loading">No character data available. <button onclick="reloadCharacterData()" class="reload-button">🔄 Reload</button></div>';
                 return;
             }
             
@@ -1651,13 +1887,13 @@
                         </div>
                     </div>`;
             
-            html += '</div>'; // close character-sheet
+            html += '</div>';
             characterStatsPanel.innerHTML = html;
         }
         
         function displayCharacterInventory(data) {
             if (!data) {
-                characterInventoryPanel.innerHTML = '<div class="loading">No character data available</div>';
+                characterInventoryPanel.innerHTML = '<div class="loading">No character data available. <button onclick="reloadCharacterData()" class="reload-button">🔄 Reload</button></div>';
                 return;
             }
             
@@ -1678,9 +1914,303 @@
             characterInventoryPanel.innerHTML = html;
         }
         
+        function displayCharacterQuests(data) {
+            console.log('Displaying quest data:', data);
+            
+            if (!data) {
+                characterQuestsPanel.innerHTML = '<div class="loading">No quest data available. <button onclick="loadCharacterData(\'quests\')" class="reload-button">🔄 Reload</button></div>';
+                return;
+            }
+            
+            let html = '<div class="character-sheet">';
+            html += `<div class="character-header"><div class="character-name">Quest Journal</div></div>`;
+            
+            // Show all quests including not started ones for debugging
+            const allQuests = data.plotPoints || [];
+            console.log('All quests:', allQuests);
+            
+            // Filter out quests that haven't started yet for display
+            const availableQuests = allQuests.filter(q => q.status !== 'not started' && q.status !== 'removed');
+            console.log('Available quests:', availableQuests);
+            
+            // Separate into active, completed, cancelled, and rejected quests
+            const activeQuests = availableQuests.filter(q => q.status !== 'completed' && q.status !== 'cancelled' && q.status !== 'rejected');
+            const completedQuests = availableQuests.filter(q => q.status === 'completed');
+            const cancelledQuests = availableQuests.filter(q => q.status === 'cancelled');
+            const rejectedQuests = availableQuests.filter(q => q.status === 'rejected');
+            
+            // Helper function to build quest HTML
+            function renderQuestsToHTML(quests) {
+                if (quests.length === 0) {
+                    return '<div class="quest-item"><div class="quest-description">No quests available</div></div>';
+                }
+                
+                let html = '';
+                quests.forEach(point => {
+                    const itemClass = point.status === 'completed' ? 'quest-item completed' : 'quest-item';
+                    html += `<div class="${itemClass}">`;
+                    html += `<h3 class="quest-title">${point.title}</h3>`;
+                    html += `<p class="quest-description">${point.description}</p>`;
+                    
+                    // Add close/cancel button for active quests
+                    if (point.status === 'in progress' || point.status === 'available') {
+                        html += `<button onclick="closeQuest('${point.id}', 'main')" class="quest-close-btn">Close Quest</button>`;
+                    }
+                    
+                    // Add remove button for cancelled quests
+                    if (point.status === 'cancelled') {
+                        html += `<button onclick="removeQuest('${point.id}', 'main')" class="quest-remove-btn">Remove Quest</button>`;
+                    }
+                    
+                    // Handle side quests
+                    if (point.sideQuests && point.sideQuests.length > 0) {
+                        const discoveredSideQuests = point.sideQuests.filter(sq => sq.status !== 'not started' && sq.status !== 'removed');
+                        discoveredSideQuests.forEach(sq => {
+                            const sqClass = sq.status === 'completed' ? 'quest-item side-quest-item completed' : 'quest-item side-quest-item';
+                            html += `<div class="${sqClass}">`;
+                            html += `<h4 class="quest-title">${sq.title}</h4>`;
+                            html += `<p class="quest-description">${sq.description}</p>`;
+                            if (sq.status === 'available') {
+                                html += `<button onclick="closeQuest('${sq.id}', 'side')" class="quest-close-btn">Close Quest</button>`;
+                            }
+                            if (sq.status === 'cancelled') {
+                                html += `<button onclick="removeQuest('${sq.id}', 'side')" class="quest-remove-btn">Remove Quest</button>`;
+                            }
+                            html += '</div>';
+                        });
+                    }
+                    html += '</div>';
+                });
+                return html;
+            }
+            
+            // Active Quests Section
+            html += '<div class="quest-section">';
+            html += '<h3>Current Objectives</h3>';
+            html += renderQuestsToHTML(activeQuests);
+            html += '</div>';
+            
+            // Completed Quests Section
+            html += '<div class="quest-section">';
+            html += '<h3>Completed Quests</h3>';
+            html += renderQuestsToHTML(completedQuests);
+            html += '</div>';
+            
+            // Cancelled Quests Section
+            if (cancelledQuests.length > 0) {
+                html += '<div class="quest-section">';
+                html += '<h3>Cancelled Quests</h3>';
+                html += renderQuestsToHTML(cancelledQuests);
+                html += '</div>';
+            }
+            
+            // Rejected Quests Section
+            if (rejectedQuests.length > 0) {
+                html += '<div class="quest-section">';
+                html += '<h3>Rejected Quests</h3>';
+                html += renderQuestsToHTML(rejectedQuests);
+                html += '</div>';
+            }
+            
+            // Debug section - show all quests except removed ones
+            const visibleQuests = allQuests.filter(point => point.status !== 'removed');
+            if (visibleQuests.length > 0) {
+                html += '<div class="quest-section">';
+                html += '<h3>All Quests (Debug)</h3>';
+                visibleQuests.forEach(point => {
+                    html += `<div class="quest-item">`;
+                    html += `<h3 class="quest-title">${point.title} (${point.status})</h3>`;
+                    html += `<p class="quest-description">${point.description}</p>`;
+                    if (point.status === 'not started') {
+                        html += `<button onclick="activateQuest('${point.id}', 'main')" class="quest-activate-btn">Activate Quest</button>`;
+                        html += `<button onclick="rejectQuest('${point.id}', 'main')" class="quest-reject-btn">Reject Quest</button>`;
+                    }
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+            
+            // Cleanup section
+            if (rejectedQuests.length > 0) {
+                html += '<div class="quest-section">';
+                html += '<h3>Quest Management</h3>';
+                html += '<button onclick="cleanupRejectedQuests()" class="quest-cleanup-btn">Cleanup All Rejected Quests</button>';
+                html += '</div>';
+            }
+            
+            // Chat History Management section
+            html += '<div class="quest-section">';
+            html += '<h3>Chat History Management</h3>';
+            html += '<button onclick="showClearChatHistoryWarning()" class="quest-cleanup-btn" style="background: #e74c3c; margin-right: 10px;">Clear Chat History</button>';
+            html += '<button onclick="showClearCombatHistoryWarning()" class="quest-cleanup-btn" style="background: #8e44ad; margin-right: 10px;">Clear Combat History</button>';
+            html += '<button onclick="showClearAllHistoryWarning()" class="quest-cleanup-btn" style="background: #c0392b;">Clear All History</button>';
+            html += '</div>';
+            
+            html += '</div>';
+            characterQuestsPanel.innerHTML = html;
+        }
+        
+        function activateQuest(questId, questType) {
+            console.log('Activating quest:', questId, questType);
+            socket.emit('activate_quest', {
+                quest_id: questId,
+                quest_type: questType
+            });
+        }
+        
+        function rejectQuest(questId, questType) {
+            console.log('Rejecting quest:', questId, questType);
+            socket.emit('reject_quest', {
+                quest_id: questId,
+                quest_type: questType
+            });
+        }
+        
+        function closeQuest(questId, questType) {
+            console.log('Closing quest:', questId, questType);
+            socket.emit('close_quest', {
+                quest_id: questId,
+                quest_type: questType
+            });
+        }
+        
+        function removeQuest(questId, questType) {
+            console.log('Removing quest:', questId, questType);
+            socket.emit('remove_quest', {
+                quest_id: questId,
+                quest_type: questType
+            });
+        }
+        
+        function cleanupRejectedQuests() {
+            console.log('🧹 CLEANUP: Cleaning up rejected quests');
+            console.log('🧹 CLEANUP: Emitting cleanup_rejected_quests event');
+            socket.emit('cleanup_rejected_quests');
+            console.log('🧹 CLEANUP: Event emitted successfully');
+        }
+        
+        // Variabili globali per il modal di conferma
+        let currentClearType = null;
+        let currentClearCode = '';
+
+        function showClearChatHistoryWarning() {
+            currentClearType = 'chat';
+            currentClearCode = generateConfirmationCode();
+            
+            document.getElementById('clear-history-title').textContent = '⚠️ Clear Chat History Warning';
+            document.getElementById('clear-history-message').textContent = 'This will permanently delete all chat conversation history. This action cannot be undone.';
+            document.getElementById('clear-history-list').innerHTML = `
+                <li>🗑️ All chat messages and conversations</li>
+                <li>💬 Player and NPC dialogue history</li>
+                <li>📝 Story progression and narrative elements</li>
+                <li>🔄 Chat state will be reset to empty</li>
+            `;
+            document.getElementById('clear-confirmation-code').textContent = currentClearCode;
+            document.getElementById('clear-code-input').value = '';
+            document.getElementById('confirm-clear-button').disabled = true;
+            
+            document.getElementById('clear-history-modal').style.display = 'flex';
+        }
+        
+        function showClearCombatHistoryWarning() {
+            currentClearType = 'combat';
+            currentClearCode = generateConfirmationCode();
+            
+            document.getElementById('clear-history-title').textContent = '⚔️ Clear Combat History Warning';
+            document.getElementById('clear-history-message').textContent = 'This will permanently delete all combat-related history and logs. This action cannot be undone.';
+            document.getElementById('clear-history-list').innerHTML = `
+                <li>⚔️ All combat conversation history</li>
+                <li>🛡️ Combat validation logs and records</li>
+                <li>🎯 Battle progression and tactical decisions</li>
+                <li>🔄 Combat state will be reset to empty</li>
+            `;
+            document.getElementById('clear-confirmation-code').textContent = currentClearCode;
+            document.getElementById('clear-code-input').value = '';
+            document.getElementById('confirm-clear-button').disabled = true;
+            
+            document.getElementById('clear-history-modal').style.display = 'flex';
+        }
+        
+        function showClearAllHistoryWarning() {
+            currentClearType = 'all';
+            currentClearCode = generateConfirmationCode();
+            
+            document.getElementById('clear-history-title').textContent = '🧹 Clear All History Warning';
+            document.getElementById('clear-history-message').textContent = 'This will permanently delete ALL conversation history, combat logs, and debug files. This action cannot be undone.';
+            document.getElementById('clear-history-list').innerHTML = `
+                <li>🗑️ All chat conversation history</li>
+                <li>⚔️ All combat conversation history</li>
+                <li>🛡️ Combat validation logs</li>
+                <li>📝 Second and third model history</li>
+                <li>🔍 Debug files and summary dumps</li>
+                <li>💬 Dialogue summaries</li>
+                <li>🔄 Complete reset of all conversation state</li>
+            `;
+            document.getElementById('clear-confirmation-code').textContent = currentClearCode;
+            document.getElementById('clear-code-input').value = '';
+            document.getElementById('confirm-clear-button').disabled = true;
+            
+            document.getElementById('clear-history-modal').style.display = 'flex';
+        }
+
+        function closeClearHistoryModal() {
+            document.getElementById('clear-history-modal').style.display = 'none';
+            currentClearType = null;
+            currentClearCode = '';
+        }
+
+        function validateClearCode() {
+            const input = document.getElementById('clear-code-input').value;
+            const confirmButton = document.getElementById('confirm-clear-button');
+            confirmButton.disabled = (input !== currentClearCode);
+        }
+
+        function confirmClearHistory() {
+            const input = document.getElementById('clear-code-input').value;
+            if (input !== currentClearCode) {
+                alert('Confirmation code is incorrect.');
+                return;
+            }
+
+            // Esegui la pulizia in base al tipo
+            switch (currentClearType) {
+                case 'chat':
+                    console.log('🗑️ CHAT CLEAR: Confirmed - Clearing chat history');
+                    socket.emit('clear_chat_history');
+                    break;
+                case 'combat':
+                    console.log('⚔️ COMBAT CLEAR: Confirmed - Clearing combat history');
+                    socket.emit('clear_combat_history');
+                    break;
+                case 'all':
+                    console.log('🧹 FULL CLEAR: Confirmed - Clearing all history');
+                    socket.emit('clear_all_history');
+                    break;
+                default:
+                    console.error('Unknown clear type:', currentClearType);
+                    return;
+            }
+
+            // Chiudi il modal
+            closeClearHistoryModal();
+            
+            // Mostra messaggio di conferma
+            addMessage('system', `✅ ${currentClearType === 'chat' ? 'Chat' : currentClearType === 'combat' ? 'Combat' : 'All'} history clear initiated`, 'System');
+        }
+
+        function generateConfirmationCode() {
+            // Genera un codice di 6 caratteri alfanumerici
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
         function displayCharacterSpells(data) {
             if (!data) {
-                characterSpellsPanel.innerHTML = '<div class="loading">No character data available</div>';
+                characterSpellsPanel.innerHTML = '<div class="loading">No character data available. <button onclick="reloadCharacterData()" class="reload-button">🔄 Reload</button></div>';
                 return;
             }
             
@@ -1774,5 +2304,170 @@
              console.log('NeverEndingQuest Multiplayer Interface loaded');
          });
     </script>
+
+    <!-- CLEAR HISTORY CONFIRMATION MODAL -->
+    <div id="clear-history-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="clear-history-title">⚠️ Clear History Warning</h3>
+                <span class="modal-close" onclick="closeClearHistoryModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="clear-history-warning" class="warning-box">
+                    <p id="clear-history-message"></p>
+                </div>
+                <div class="warning-details">
+                    <h4>📋 What will be cleared:</h4>
+                    <ul id="clear-history-list"></ul>
+                </div>
+                <div class="confirmation-box">
+                    <p style="color: #ccc; margin-bottom: 10px;">To confirm, please type the following code:</p>
+                    <p id="clear-confirmation-code" style="font-size: 20px; font-weight: bold; color: #4CAF50; letter-spacing: 3px; margin: 10px 0; user-select: none; background: #1a1a1a; padding: 5px; border-radius: 3px; text-align: center;"></p>
+                    <input type="text" id="clear-code-input" class="modal-input" placeholder="Enter code here" oninput="validateClearCode()">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button secondary" onclick="closeClearHistoryModal()">Cancel</button>
+                <button class="modal-button danger" id="confirm-clear-button" onclick="confirmClearHistory()" disabled>Confirm Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #2c2c2c;
+            border: 2px solid #444;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background-color: #333;
+            padding: 15px 20px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #e74c3c;
+        }
+
+        .modal-close {
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .warning-box {
+            background-color: #3d1a1a;
+            border: 1px solid #e74c3c;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .warning-details {
+            margin-bottom: 20px;
+        }
+
+        .warning-details h4 {
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+
+        .warning-details ul {
+            color: #ccc;
+            margin-left: 20px;
+        }
+
+        .warning-details li {
+            margin-bottom: 5px;
+        }
+
+        .confirmation-box {
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 3px;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #444;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .modal-button.secondary {
+            background-color: #666;
+            color: #fff;
+        }
+
+        .modal-button.danger {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .modal-button:disabled {
+            background-color: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .modal-button:hover:not(:disabled) {
+            opacity: 0.8;
+        }
+    </style>
 </body>
 </html> 

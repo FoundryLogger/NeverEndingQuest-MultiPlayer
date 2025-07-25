@@ -93,6 +93,11 @@ app = Flask(__name__, template_folder='web/templates', static_folder='web/static
 app.config['SECRET_KEY'] = 'neverendingquest-multiplayer-secret-key-2024'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
+# Debug function for all socket events
+def debug_socket_event(event_name, data=None):
+    """Debug function to log all socket events"""
+    print(f"🔍 DEBUG: Socket event '{event_name}' received with data: {data}")
+
 # Initialize OpenAI client with organization support
 client_kwargs = {"api_key": OPENAI_API_KEY}
 if OPENAI_ORG_ID:
@@ -445,6 +450,7 @@ def get_game_state():
 def handle_connect():
     """Handle client connection"""
     sid = request.sid
+    print(f"🔌 DEBUG: Client connected with SID: {sid}")
     emit('connected', {
         'message': 'Connected to NeverEndingQuest Multiplayer Server',
         'sid': sid
@@ -572,6 +578,7 @@ def handle_join_game(data):
 @socketio.on('player_action')
 def on_player_action_event(data):
     """Questa funzione riceve l'evento dal client e lo passa al gestore della logica."""
+    debug_socket_event('player_action', data)
     sid = request.sid
     player_name = data.get('player_name', f'Player_{sid[:8]}')
     action_text = data.get('text', '')
@@ -913,14 +920,162 @@ def handle_player_data_request(data):
         emit('error', {'message': 'Player not found.'})
         return
     
+    # Se i dati del personaggio non sono caricati, prova a ricaricarli
+    if player_name not in GAME_STATE["character_sheets"]:
+        success = reload_character_data(player_name)
+        if not success:
+            emit('error', {'message': f'Character data not found for {player_name}.'})
+            return
+    
     if player_name in GAME_STATE["character_sheets"]:
         character_data = GAME_STATE["character_sheets"][player_name]
+        
+        # Filtra i dati in base al tipo richiesto
+        filtered_data = {}
+        
+        if data_type == 'stats':
+            # Dati per la tab Stats
+            filtered_data = {
+                'name': character_data.get('name'),
+                'level': character_data.get('level', 1),
+                'race': character_data.get('race'),
+                'class': character_data.get('class'),
+                'background': character_data.get('background'),
+                'alignment': character_data.get('alignment'),
+                'status': character_data.get('status'),
+                'hitPoints': character_data.get('hitPoints', 0),
+                'maxHitPoints': character_data.get('maxHitPoints', 0),
+                'armorClass': character_data.get('armorClass', 10),
+                'initiative': character_data.get('initiative', 0),
+                'abilities': character_data.get('abilities', {}),
+                'savingThrows': character_data.get('savingThrows', {}),
+                'skills': character_data.get('skills', {}),
+                'proficiencyBonus': character_data.get('proficiencyBonus', 2),
+                'experience_points': character_data.get('experience_points', 0),
+                'exp_required_for_next_level': character_data.get('exp_required_for_next_level', 300),
+                'currency': character_data.get('currency', {'gold': 0, 'silver': 0, 'copper': 0})
+            }
+        elif data_type == 'inventory':
+            # Dati per la tab Inventory
+            filtered_data = {
+                'name': character_data.get('name'),
+                'inventory': character_data.get('inventory', []),
+                'currency': character_data.get('currency', {'gold': 0, 'silver': 0, 'copper': 0})
+            }
+        elif data_type == 'spells':
+            # Dati per la tab Spells
+            filtered_data = {
+                'name': character_data.get('name'),
+                'spellcasting': character_data.get('spellcasting', {})
+            }
+        else:
+            # Per qualsiasi altro tipo, restituisci tutti i dati
+            filtered_data = character_data
+        
         emit('player_data_response', {
             'dataType': data_type,
-            'data': character_data
+            'data': filtered_data
         })
     else:
         emit('error', {'message': f'Character data not found for {player_name}.'})
+
+def reload_character_data(player_name):
+    """Reload character data from file"""
+    try:
+        if GAME_STATE["party_tracker"]:
+            module_name = GAME_STATE["party_tracker"].get("module", "").replace(" ", "_")
+            path_manager = ModulePathManager(module_name)
+            char_file = path_manager.get_character_path(normalize_character_name(player_name))
+            
+            debug(f"DEBUG: Ricaricando personaggio '{player_name}' da file: {char_file}", category="character_reload")
+            
+            char_data = safe_json_load(char_file)
+            if char_data:
+                GAME_STATE["character_sheets"][player_name] = char_data
+                info(f"SUCCESS: Dati del personaggio per '{player_name}' ricaricati.", category="character_reload")
+                return True
+            else:
+                warning(f"ATTENZIONE: File del personaggio per '{player_name}' non trovato durante il ricaricamento.", category="character_reload")
+                return False
+        else:
+            warning(f"ATTENZIONE: party_tracker non disponibile per ricaricare il personaggio di '{player_name}'", category="character_reload")
+            return False
+    except Exception as e:
+        error(f"ERRORE durante il ricaricamento del personaggio per '{player_name}': {e}", category="character_reload")
+        return False
+
+@socketio.on('reload_character_data')
+def handle_reload_character_data(data):
+    """Handle character data reload request from client"""
+    sid = request.sid
+    player_name = PLAYERS_SID_MAP.get(sid)
+    
+    if not player_name:
+        emit('error', {'message': 'Player not found.'})
+        return
+    
+    success = reload_character_data(player_name)
+    if success:
+        emit('character_data_reloaded', {
+            'message': f'Character data for {player_name} has been reloaded successfully.'
+        })
+    else:
+        emit('error', {'message': f'Failed to reload character data for {player_name}.'})
+
+@socketio.on('request_plot_data')
+def handle_plot_data_request():
+    """Handle plot data request from client"""
+    try:
+        print("DEBUG: Received plot data request from client")
+        
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+        print(f"DEBUG: Current module: {current_module}")
+        
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+        print(f"DEBUG: Looking for plot file: {plot_file_path}")
+        
+        if os.path.exists(plot_file_path):
+            print(f"DEBUG: Found plot file, loading data...")
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+            
+            print(f"DEBUG: Loaded plot data with {len(plot_data.get('plotPoints', []))} plot points")
+            
+            # Activate first quest if no quests are active
+            plot_data = activate_first_quest_if_needed(plot_data, current_module)
+            
+            print(f"DEBUG: Sending plot data response to client")
+            emit('plot_data_response', {
+                'dataType': 'quests',
+                'data': plot_data
+            })
+        else:
+            print(f"DEBUG: Plot file not found, trying backup...")
+            # Fallback to backup file
+            backup_plot_path = f"modules/{current_module}/module_plot_BU.json"
+            if os.path.exists(backup_plot_path):
+                print(f"DEBUG: Found backup plot file, loading data...")
+                with open(backup_plot_path, 'r', encoding='utf-8') as f:
+                    plot_data = json.load(f)
+                
+                # Activate first quest if no quests are active
+                plot_data = activate_first_quest_if_needed(plot_data, current_module)
+                
+                print(f"DEBUG: Sending backup plot data response to client")
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+            else:
+                print(f"ERROR: No plot data found for module {current_module}")
+                emit('error', {'message': 'Plot data not found.'})
+                
+    except Exception as e:
+        print(f"ERROR: Error loading plot data: {e}")
+        emit('error', {'message': f'Error loading plot data: {str(e)}'})
 
 @socketio.on('chat_message')
 def handle_chat_message(data):
@@ -975,6 +1130,232 @@ def handle_combat_state_request():
         emit('combat_state_update', combat_state)
     else:
         emit('combat_state_update', {"is_active": False})
+
+@socketio.on('activate_quest')
+def handle_activate_quest(data):
+    """Handle manual quest activation request"""
+    try:
+        quest_id = data.get('quest_id')
+        quest_type = data.get('quest_type', 'main')  # 'main' or 'side'
+        
+        print(f"DEBUG: Received quest activation request - ID: {quest_id}, Type: {quest_type}")
+        
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+        
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+        
+        if os.path.exists(plot_file_path):
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+            
+            # Find and activate the quest
+            quest_activated = False
+            for plot_point in plot_data['plotPoints']:
+                if quest_type == 'main' and plot_point.get('id') == quest_id:
+                    if plot_point.get('status') == 'not started':
+                        plot_point['status'] = 'in progress'
+                        plot_point['plotImpact'] = 'Quest activated manually'
+                        quest_activated = True
+                        print(f"INFO: Manually activated main quest '{plot_point.get('title', 'Unknown')}'")
+                        break
+                elif quest_type == 'side' and plot_point.get('sideQuests'):
+                    for side_quest in plot_point['sideQuests']:
+                        if side_quest.get('id') == quest_id:
+                            if side_quest.get('status') == 'not started':
+                                side_quest['status'] = 'available'
+                                side_quest['plotImpact'] = 'Side quest activated manually'
+                                quest_activated = True
+                                print(f"INFO: Manually activated side quest '{side_quest.get('title', 'Unknown')}'")
+                                break
+                    if quest_activated:
+                        break
+            
+            if quest_activated:
+                # Save the updated plot data
+                with open(plot_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(plot_data, f, indent=2, ensure_ascii=False)
+                
+                # Send updated plot data to client
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+                print(f"DEBUG: Quest activation successful, sent updated data to client")
+            else:
+                emit('error', {'message': f'Quest {quest_id} not found or already active'})
+                print(f"DEBUG: Quest activation failed - quest not found or already active")
+        else:
+            emit('error', {'message': 'Plot data not found'})
+            print(f"ERROR: Plot file not found for module {current_module}")
+                
+    except Exception as e:
+        print(f"ERROR: Error activating quest: {e}")
+        emit('error', {'message': f'Error activating quest: {str(e)}'})
+
+@socketio.on('close_quest')
+def handle_close_quest(data):
+    """Handle quest closure/cancellation request"""
+    try:
+        quest_id = data.get('quest_id')
+        quest_type = data.get('quest_type', 'main')  # 'main' or 'side'
+
+        print(f"DEBUG: Received quest closure request - ID: {quest_id}, Type: {quest_type}")
+
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+
+        if os.path.exists(plot_file_path):
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+
+            # Find and close the quest
+            quest_closed = False
+            for plot_point in plot_data['plotPoints']:
+                if quest_type == 'main' and plot_point.get('id') == quest_id:
+                    if plot_point.get('status') in ['in progress', 'available', 'not started']:
+                        plot_point['status'] = 'cancelled'
+                        plot_point['plotImpact'] = 'Quest cancelled by player'
+                        quest_closed = True
+                        print(f"INFO: Closed main quest '{plot_point.get('title', 'Unknown')}'")
+                        break
+                elif quest_type == 'side' and plot_point.get('sideQuests'):
+                    for side_quest in plot_point['sideQuests']:
+                        if side_quest.get('id') == quest_id:
+                            if side_quest.get('status') in ['available', 'not started']:
+                                side_quest['status'] = 'cancelled'
+                                side_quest['plotImpact'] = 'Side quest cancelled by player'
+                                quest_closed = True
+                                print(f"INFO: Closed side quest '{side_quest.get('title', 'Unknown')}'")
+                                break
+                    if quest_closed:
+                        break
+
+            if quest_closed:
+                # Save the updated plot data
+                with open(plot_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(plot_data, f, indent=2, ensure_ascii=False)
+
+                # Send updated plot data to client
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+                print(f"DEBUG: Quest closure successful, sent updated data to client")
+            else:
+                emit('error', {'message': f'Quest {quest_id} not found or cannot be closed'})
+                print(f"DEBUG: Quest closure failed - quest not found or cannot be closed")
+        else:
+            emit('error', {'message': 'Plot data not found'})
+            print(f"ERROR: Plot file not found for module {current_module}")
+
+    except Exception as e:
+        print(f"ERROR: Error closing quest: {e}")
+        emit('error', {'message': f'Error closing quest: {str(e)}'})
+
+@socketio.on('reset_all_quests')
+def handle_reset_all_quests(data):
+    """Handle reset all quests to initial state"""
+    try:
+        print(f"DEBUG: Received reset all quests request")
+
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+
+        if os.path.exists(plot_file_path):
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+
+            # Reset all quests to 'not started'
+            quests_reset = 0
+            for plot_point in plot_data['plotPoints']:
+                # Reset main quest
+                if plot_point.get('status') != 'not started':
+                    plot_point['status'] = 'not started'
+                    plot_point['plotImpact'] = 'Quest reset to initial state'
+                    quests_reset += 1
+                    print(f"INFO: Reset main quest '{plot_point.get('title', 'Unknown')}' to not started")
+                
+                # Reset side quests
+                if plot_point.get('sideQuests'):
+                    for side_quest in plot_point['sideQuests']:
+                        if side_quest.get('status') != 'not started':
+                            side_quest['status'] = 'not started'
+                            side_quest['plotImpact'] = 'Side quest reset to initial state'
+                            quests_reset += 1
+                            print(f"INFO: Reset side quest '{side_quest.get('title', 'Unknown')}' to not started")
+
+            if quests_reset > 0:
+                # Save the updated plot data
+                with open(plot_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(plot_data, f, indent=2, ensure_ascii=False)
+
+                # Send updated plot data to client
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+                print(f"DEBUG: Reset {quests_reset} quests successfully, sent updated data to client")
+                emit('success', {'message': f'Successfully reset {quests_reset} quests to initial state'})
+            else:
+                emit('info', {'message': 'All quests are already in initial state'})
+                print(f"DEBUG: No quests needed reset - all already in initial state")
+        else:
+            emit('error', {'message': 'Plot data not found'})
+            print(f"ERROR: Plot file not found for module {current_module}")
+
+    except Exception as e:
+        print(f"ERROR: Error resetting quests: {e}")
+        emit('error', {'message': f'Error resetting quests: {str(e)}'})
+
+def activate_first_quest_if_needed(plot_data, current_module):
+    """Activate the first quest if no quests are currently active"""
+    try:
+        if not plot_data or 'plotPoints' not in plot_data:
+            print(f"DEBUG: No plot data or plotPoints found for module {current_module}")
+            return plot_data
+        
+        # Check if any quest is active (in progress or completed)
+        has_active_quest = False
+        for plot_point in plot_data['plotPoints']:
+            if plot_point.get('status') in ['in progress', 'completed']:
+                has_active_quest = True
+                print(f"DEBUG: Found active quest '{plot_point.get('title', 'Unknown')}' with status '{plot_point.get('status')}'")
+                break
+        
+        # Riabilita l'attivazione automatica delle quest
+        if not has_active_quest and plot_data['plotPoints']:
+            first_quest = plot_data['plotPoints'][0]
+            if first_quest.get('status') == 'not started':
+                first_quest['status'] = 'in progress'
+                first_quest['plotImpact'] = 'First quest activated automatically'
+                print(f"INFO: Activated first quest '{first_quest.get('title', 'Unknown')}' in module {current_module}")
+                
+                # Also activate the first side quest if available
+                if first_quest.get('sideQuests'):
+                    for side_quest in first_quest['sideQuests']:
+                        if side_quest.get('status') == 'not started':
+                            side_quest['status'] = 'available'
+                            side_quest['plotImpact'] = 'Side quest available'
+                            print(f"INFO: Activated side quest '{side_quest.get('title', 'Unknown')}'")
+                            break
+        else:
+            print(f"DEBUG: No quest activation needed - has_active_quest: {has_active_quest}")
+        
+        return plot_data
+    except Exception as e:
+        print(f"Error activating first quest: {e}")
+        return plot_data
 
 def create_character_from_creation_data(player_name, creation_data):
     """Create a complete character from creation data"""
@@ -1546,6 +1927,358 @@ def start_server():
     print("="*60)
     
     return True
+
+@socketio.on('reject_quest')
+def handle_reject_quest(data):
+    """Handle quest rejection request - permanently remove quest from system"""
+    try:
+        quest_id = data.get('quest_id')
+        quest_type = data.get('quest_type', 'main')  # 'main' or 'side'
+
+        print(f"DEBUG: Received quest rejection request - ID: {quest_id}, Type: {quest_type}")
+
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+
+        if os.path.exists(plot_file_path):
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+
+            # Find and reject the quest
+            quest_rejected = False
+            for plot_point in plot_data['plotPoints']:
+                if quest_type == 'main' and plot_point.get('id') == quest_id:
+                    if plot_point.get('status') == 'not started':
+                        # Mark as rejected and add to rejected quests list
+                        plot_point['status'] = 'rejected'
+                        plot_point['plotImpact'] = 'Quest rejected by player'
+                        quest_rejected = True
+                        print(f"INFO: Rejected main quest '{plot_point.get('title', 'Unknown')}'")
+                        break
+                elif quest_type == 'side' and plot_point.get('sideQuests'):
+                    for side_quest in plot_point['sideQuests']:
+                        if side_quest.get('id') == quest_id:
+                            if side_quest.get('status') == 'not started':
+                                side_quest['status'] = 'rejected'
+                                side_quest['plotImpact'] = 'Side quest rejected by player'
+                                quest_rejected = True
+                                print(f"INFO: Rejected side quest '{side_quest.get('title', 'Unknown')}'")
+                                break
+                    if quest_rejected:
+                        break
+
+            if quest_rejected:
+                # Save the updated plot data
+                with open(plot_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(plot_data, f, indent=2, ensure_ascii=False)
+
+                # Send updated plot data to client
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+                print(f"DEBUG: Quest rejection successful, sent updated data to client")
+            else:
+                emit('error', {'message': f'Quest {quest_id} not found or cannot be rejected'})
+                print(f"DEBUG: Quest rejection failed - quest not found or cannot be rejected")
+        else:
+            emit('error', {'message': 'Plot data not found'})
+            print(f"ERROR: Plot file not found for module {current_module}")
+
+    except Exception as e:
+        print(f"ERROR: Error rejecting quest: {e}")
+        emit('error', {'message': f'Error rejecting quest: {str(e)}'})
+
+@socketio.on('remove_quest')
+def handle_remove_quest(data):
+    """Handle quest removal request - completely remove quest from display"""
+    try:
+        quest_id = data.get('quest_id')
+        quest_type = data.get('quest_type', 'main')  # 'main' or 'side'
+
+        print(f"DEBUG: Received quest removal request - ID: {quest_id}, Type: {quest_type}")
+
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+
+        if os.path.exists(plot_file_path):
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+
+            # Find and remove the quest
+            quest_removed = False
+            for plot_point in plot_data['plotPoints']:
+                if quest_type == 'main' and plot_point.get('id') == quest_id:
+                    if plot_point.get('status') in ['cancelled', 'rejected']:
+                        # Mark as removed (hidden from display)
+                        plot_point['status'] = 'removed'
+                        plot_point['plotImpact'] = 'Quest removed by player'
+                        quest_removed = True
+                        print(f"INFO: Removed main quest '{plot_point.get('title', 'Unknown')}'")
+                        break
+                elif quest_type == 'side' and plot_point.get('sideQuests'):
+                    for side_quest in plot_point['sideQuests']:
+                        if side_quest.get('id') == quest_id:
+                            if side_quest.get('status') in ['cancelled', 'rejected']:
+                                side_quest['status'] = 'removed'
+                                side_quest['plotImpact'] = 'Side quest removed by player'
+                                quest_removed = True
+                                print(f"INFO: Removed side quest '{side_quest.get('title', 'Unknown')}'")
+                                break
+                    if quest_removed:
+                        break
+
+            if quest_removed:
+                # Save the updated plot data
+                with open(plot_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(plot_data, f, indent=2, ensure_ascii=False)
+
+                # Send updated plot data to client
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+                print(f"DEBUG: Quest removal successful, sent updated data to client")
+            else:
+                emit('error', {'message': f'Quest {quest_id} not found or cannot be removed'})
+                print(f"DEBUG: Quest removal failed - quest not found or cannot be removed")
+        else:
+            emit('error', {'message': 'Plot data not found'})
+            print(f"ERROR: Plot file not found for module {current_module}")
+
+    except Exception as e:
+        print(f"ERROR: Error removing quest: {e}")
+        emit('error', {'message': f'Error removing quest: {str(e)}'})
+
+@socketio.on('cleanup_rejected_quests')
+def handle_cleanup_rejected_quests(data):
+    """Handle cleanup of all rejected quests - remove them completely"""
+    try:
+        print(f"🧹 CLEANUP: Received cleanup rejected quests request")
+        print(f"🧹 CLEANUP: Data received: {data}")
+
+        # Get current module from party tracker
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("current_module", "Keep_of_Doom")
+
+        # Load plot data for current module
+        plot_file_path = f"modules/{current_module}/module_plot.json"
+
+        if os.path.exists(plot_file_path):
+            with open(plot_file_path, 'r', encoding='utf-8') as f:
+                plot_data = json.load(f)
+
+            # Cleanup all rejected quests
+            quests_cleaned = 0
+            print(f"🧹 CLEANUP: Starting cleanup process...")
+            for plot_point in plot_data['plotPoints']:
+                print(f"🧹 CLEANUP: Checking quest '{plot_point.get('title', 'Unknown')}' with status '{plot_point.get('status')}'")
+                # Cleanup main quest
+                if plot_point.get('status') == 'rejected':
+                    plot_point['status'] = 'removed'
+                    plot_point['plotImpact'] = 'Quest removed during cleanup'
+                    quests_cleaned += 1
+                    print(f"🧹 CLEANUP: Cleaned up main quest '{plot_point.get('title', 'Unknown')}'")
+                
+                # Cleanup side quests
+                if plot_point.get('sideQuests'):
+                    for side_quest in plot_point['sideQuests']:
+                        print(f"🧹 CLEANUP: Checking side quest '{side_quest.get('title', 'Unknown')}' with status '{side_quest.get('status')}'")
+                        if side_quest.get('status') == 'rejected':
+                            side_quest['status'] = 'removed'
+                            side_quest['plotImpact'] = 'Side quest removed during cleanup'
+                            quests_cleaned += 1
+                            print(f"🧹 CLEANUP: Cleaned up side quest '{side_quest.get('title', 'Unknown')}'")
+
+            if quests_cleaned > 0:
+                # Save the updated plot data
+                with open(plot_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(plot_data, f, indent=2, ensure_ascii=False)
+
+                # Send updated plot data to client
+                emit('plot_data_response', {
+                    'dataType': 'quests',
+                    'data': plot_data
+                })
+                print(f"🧹 CLEANUP: SUCCESS - Cleanup successful, removed {quests_cleaned} quests")
+                emit('success', {'message': f'Successfully cleaned up {quests_cleaned} rejected quests'})
+            else:
+                emit('info', {'message': 'No rejected quests to clean up'})
+                print(f"🧹 CLEANUP: INFO - No rejected quests found for cleanup")
+        else:
+            emit('error', {'message': 'Plot data not found'})
+            print(f"🧹 CLEANUP: ERROR - Plot file not found for module {current_module}")
+
+    except Exception as e:
+        print(f"🧹 CLEANUP: ERROR - Error cleaning up rejected quests: {e}")
+        emit('error', {'message': f'Error cleaning up rejected quests: {str(e)}'})
+
+@socketio.on('clear_chat_history')
+def handle_clear_chat_history(data=None):
+    """Handle clearing of chat history - reset conversation history to empty"""
+    debug_socket_event('clear_chat_history', data)
+    try:
+        print(f"🗑️ CHAT CLEAR: Received clear chat history request")
+        print(f"🗑️ CHAT CLEAR: Data received: {data}")
+        print(f"🗑️ CHAT CLEAR: DEBUG - Event received by server")
+
+        # Clear the conversation history in memory
+        GAME_STATE["conversation_history"] = []
+        
+        # Clear the conversation history file
+        conversation_file_path = "modules/conversation_history/conversation_history.json"
+        
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(conversation_file_path), exist_ok=True)
+        
+        # Write empty array to the file
+        with open(conversation_file_path, 'w', encoding='utf-8') as f:
+            json.dump([], f, indent=2, ensure_ascii=False)
+        
+        print(f"🗑️ CHAT CLEAR: SUCCESS - Chat history cleared successfully")
+        
+        # Broadcast the cleared state to all connected clients
+        broadcast_full_game_state(
+            message_type="chat_cleared",
+            message_content="Chat history has been cleared",
+            message_player="System"
+        )
+        
+        emit('success', {'message': 'Chat history cleared successfully'})
+        
+    except Exception as e:
+        print(f"🗑️ CHAT CLEAR: ERROR - Error clearing chat history: {e}")
+        emit('error', {'message': f'Error clearing chat history: {str(e)}'})
+
+@socketio.on('clear_combat_history')
+def handle_clear_combat_history(data=None):
+    """Handle clearing of combat history - reset combat conversation history"""
+    debug_socket_event('clear_combat_history', data)
+    try:
+        print(f"⚔️ COMBAT CLEAR: Received clear combat history request")
+        print(f"⚔️ COMBAT CLEAR: Data received: {data}")
+
+        # Clear combat conversation history files
+        combat_files = [
+            "modules/conversation_history/combat_conversation_history.json",
+            "modules/conversation_history/combat_validation_log.json"
+        ]
+        
+        cleared_files = 0
+        for file_path in combat_files:
+            try:
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                
+                # Write empty array to the file
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump([], f, indent=2, ensure_ascii=False)
+                
+                cleared_files += 1
+                print(f"⚔️ COMBAT CLEAR: Cleared file {file_path}")
+                
+            except Exception as file_error:
+                print(f"⚔️ COMBAT CLEAR: WARNING - Could not clear {file_path}: {file_error}")
+        
+        print(f"⚔️ COMBAT CLEAR: SUCCESS - Cleared {cleared_files} combat history files")
+        
+        # Broadcast the cleared state to all connected clients
+        broadcast_full_game_state(
+            message_type="combat_cleared",
+            message_content="Combat history has been cleared",
+            message_player="System"
+        )
+        
+        emit('success', {'message': f'Combat history cleared successfully ({cleared_files} files)'})
+        
+    except Exception as e:
+        print(f"⚔️ COMBAT CLEAR: ERROR - Error clearing combat history: {e}")
+        emit('error', {'message': f'Error clearing combat history: {str(e)}'})
+
+@socketio.on('clear_all_history')
+def handle_clear_all_history(data=None):
+    """Handle clearing of all history files - comprehensive cleanup"""
+    debug_socket_event('clear_all_history', data)
+    try:
+        print(f"🧹 FULL CLEAR: Received clear all history request")
+        print(f"🧹 FULL CLEAR: Data received: {data}")
+
+        # List of all history files to clear
+        history_files = [
+            "modules/conversation_history/conversation_history.json",
+            "modules/conversation_history/chat_history.json",
+            "modules/conversation_history/combat_conversation_history.json",
+            "modules/conversation_history/combat_validation_log.json",
+            "modules/conversation_history/second_model_history.json",
+            "modules/conversation_history/third_model_history.json"
+        ]
+        
+        # Additional files that might be in root directory
+        root_files = [
+            "summary_dump.json",
+            "trimmed_summary_dump.json",
+            "debug_encounter_update.json",
+            "debug_initial_response.json",
+            "debug_ai_response.json",
+            "dialogue_summary.json"
+        ]
+        
+        cleared_files = 0
+        
+        # Clear files with directories
+        for file_path in history_files:
+            try:
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
+                
+                # Write empty array to the file
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump([], f, indent=2, ensure_ascii=False)
+                
+                cleared_files += 1
+                print(f"🧹 FULL CLEAR: Cleared file {file_path}")
+                
+            except Exception as file_error:
+                print(f"🧹 FULL CLEAR: WARNING - Could not clear {file_path}: {file_error}")
+        
+        # Clear files in root directory
+        for file_path in root_files:
+            try:
+                # Write empty array to the file (no directory creation needed for root files)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump([], f, indent=2, ensure_ascii=False)
+                
+                cleared_files += 1
+                print(f"🧹 FULL CLEAR: Cleared file {file_path}")
+                
+            except Exception as file_error:
+                print(f"🧹 FULL CLEAR: WARNING - Could not clear {file_path}: {file_error}")
+        
+        # Clear the conversation history in memory
+        GAME_STATE["conversation_history"] = []
+        
+        print(f"🧹 FULL CLEAR: SUCCESS - Cleared {cleared_files} history files")
+        
+        # Broadcast the cleared state to all connected clients
+        broadcast_full_game_state(
+            message_type="all_history_cleared",
+            message_content="All history has been cleared",
+            message_player="System"
+        )
+        
+        emit('success', {'message': f'All history cleared successfully ({cleared_files} files)'})
+        
+    except Exception as e:
+        print(f"🧹 FULL CLEAR: ERROR - Error clearing all history: {e}")
+        emit('error', {'message': f'Error clearing all history: {str(e)}'})
 
 if __name__ == '__main__':
     if start_server():
