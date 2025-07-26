@@ -82,7 +82,11 @@ try:
         OPENAI_ORG_ID,
         DM_MAIN_MODEL,
         DM_SUMMARIZATION_MODEL,
-        DM_VALIDATION_MODEL
+        DM_VALIDATION_MODEL,
+        DM_FULL_MODEL,
+        DM_MINI_MODEL,
+        ENABLE_INTELLIGENT_ROUTING,
+        MAX_VALIDATION_RETRIES
     )
 except ImportError:
     print("ERROR: config.py not found. Please copy config_template.py to config.py and add your OpenAI API key.")
@@ -130,6 +134,9 @@ GAME_STATE = {
 
 # Dizionario per associare SID ai nomi dei giocatori
 PLAYERS_SID_MAP = {}
+
+# Level-up sessions dictionary (player_name -> LevelUpSession)
+LEVEL_UP_SESSIONS = {}
 
 # Game configuration
 TEMPERATURE = 0.8
@@ -203,20 +210,67 @@ def ensure_main_system_prompt(conversation_history, main_system_prompt_text):
     return [{"role": "system", "content": main_system_prompt_text}] + filtered_history
 
 def get_ai_response(conversation_history, validation_retry_count=0, action_text=None):
-    """Get AI response with validation retry logic"""
+    """Get AI response with intelligent model routing like main.py"""
     try:
-        # Use lower temperature for inventory-related actions
-        temperature = TEMPERATURE
-        if action_text and any(word in action_text.lower() for word in ['inventory', 'put', 'store', 'stow', 'add', 'take']):
-            temperature = 0.3  # Lower temperature for more consistent JSON
-            debug(f"Using lower temperature ({temperature}) for inventory action", category="ai_communication")
+        # Import action predictor for intelligent routing
+        from utils.action_predictor import predict_actions_required, extract_actual_actions, log_prediction_accuracy
         
+        # Get the last user message for action prediction
+        user_input = ""
+        for msg in reversed(conversation_history):
+            if msg.get("role") == "user":
+                user_input = msg.get("content", "")
+                break
+        
+        # Check if module creation prompt is present in user input
+        has_module_creation_prompt = "You are a master storyteller, cartographer of myth" in user_input
+        
+        # Predict if actions will be required (unless we're in a validation retry or module creation prompt)
+        if validation_retry_count == 0 and not has_module_creation_prompt:
+            prediction = predict_actions_required(user_input)
+        elif has_module_creation_prompt:
+            # Force full model when module creation prompt is present
+            prediction = {"requires_actions": True, "reason": "Module creation prompt detected - using full model"}
+        else:
+            # On validation retry, force full model and skip prediction
+            prediction = {"requires_actions": True, "reason": "Validation retry - using full model"}
+        
+        # Determine which model to use based on intelligent routing and validation retry
+        if ENABLE_INTELLIGENT_ROUTING and validation_retry_count == 0 and not has_module_creation_prompt:
+            # Use prediction to determine model (Phase 2 of token optimization)
+            selected_model = DM_MINI_MODEL if not prediction["requires_actions"] else DM_FULL_MODEL
+            
+            # Log the routing decision
+            routing_info = "MINI MODEL" if not prediction["requires_actions"] else "FULL MODEL"
+            debug(f"MODEL ROUTING - Selected: {routing_info} (Prediction: {prediction['requires_actions']}, Reason: {prediction['reason']})", category="ai_communication")
+        else:
+            # Use full model (default behavior or validation retry)
+            selected_model = DM_FULL_MODEL
+            if validation_retry_count > 0:
+                debug(f"MODEL ROUTING - VALIDATION RETRY {validation_retry_count}: Using FULL MODEL", category="ai_communication")
+            else:
+                debug(f"MODEL ROUTING - Intelligent routing disabled, using FULL MODEL", category="ai_communication")
+        
+        # Use lower temperature for inventory and level-up actions
+        temperature = TEMPERATURE
+        if action_text and any(word in action_text.lower() for word in ['inventory', 'put', 'store', 'stow', 'add', 'take', 'level up', 'levelup', 'level-up', 'advance']):
+            temperature = 0.2  # Lower temperature for more consistent JSON
+            debug(f"Using lower temperature ({temperature}) for structured action", category="ai_communication")
+        
+        # Generate response with selected model
         response = client.chat.completions.create(
-            model=DM_MAIN_MODEL,
+            model=selected_model,
             temperature=temperature,
             messages=conversation_history
         )
         content = response.choices[0].message.content.strip()
+        
+        # Extract actual actions from the response for accuracy tracking (only on initial attempt)
+        if validation_retry_count == 0:
+            actual_actions = extract_actual_actions(content)
+            # Log prediction accuracy
+            log_prediction_accuracy(user_input, prediction, actual_actions)
+        
         return content
     except Exception as e:
         error(f"FAILURE: Failed to get AI response", exception=e, category="ai_communication")
@@ -607,7 +661,7 @@ def on_player_action_event(data):
         return
     
     # Esegui la logica di gioco in un thread separato per non bloccare il server
-    socketio.start_background_task(target=handle_player_action_logic, player_name=player_name, action_text=action_text)
+    socketio.start_background_task(target=handle_player_action_logic, player_name=player_name, action_text=action_text, sid=sid)
 
 @socketio.on('character_creation_step')
 def handle_character_creation_step(data):
@@ -683,7 +737,7 @@ def handle_character_creation_step(data):
         else:
             emit('error', {'message': 'Error creating character. Please try again.'})
 
-def handle_player_action_logic(player_name, action_text):
+def handle_player_action_logic(player_name, action_text, sid=None):
     """
     Questa è la funzione logica completa che gestisce un turno di gioco.
     È una fusione della logica di main_game_loop e action_handler.
@@ -807,11 +861,101 @@ def handle_player_action_logic(player_name, action_text):
     
     # 5. ELABORAZIONE DELLA RISPOSTA AI (IL CUORE DEL SISTEMA)
     try:
-        parsed_response = json.loads(ai_response_content)
+        # Extract JSON from markdown codeblocks if present
+        def extract_json_from_codeblock(text):
+            import re
+            match = re.search(r'```json\n(.*?)```', text, re.DOTALL)
+            if match:
+                return match.group(1)
+            return text
+        
+        json_content = extract_json_from_codeblock(ai_response_content)
+        
+        # Try to parse as JSON
+        try:
+            parsed_response = json.loads(json_content)
+        except json.JSONDecodeError:
+            # AI generated plain text instead of JSON - wrap it in proper format
+            warning("AI generated plain text instead of JSON - converting to proper format", category="ai_communication")
+            
+            # Check if this looks like a level-up request
+            if any(word in ai_response_content.lower() for word in ['level up', 'level 2', 'hit points', 'class features']):
+                debug("Converting level-up narrative to levelUp action", category="level_up")
+                parsed_response = {
+                    "narration": "Level-up process initiated. Please wait for the level-up interface.",
+                    "actions": [
+                        {
+                            "action": "levelUp",
+                            "parameters": {
+                                "entityName": player_name,  # Use the actual player name
+                                "newLevel": 2
+                            }
+                        }
+                    ]
+                }
+            else:
+                # Default: wrap plain text as narration only
+                parsed_response = {
+                    "narration": ai_response_content,
+                    "actions": []
+                }
         narration = parsed_response.get("narration", "Il DM descrive la scena...")
         actions = parsed_response.get("actions", [])
 
-        # Invia la narrazione iniziale ai giocatori
+        # --- LEVEL-UP DETECTION: Process levelUp actions immediately before narration ---
+        is_levelup_action = any(action.get("action") == "levelUp" for action in actions)
+        
+        if is_levelup_action:
+            debug("STATE_CHANGE: levelUp action detected. Processing directly without narration.", category="level_up")
+            # Process ONLY the levelUp action to start the session
+            for action in actions:
+                if action.get("action") == "levelUp":
+                    result = process_action(
+                        action,
+                        GAME_STATE["party_tracker"], 
+                        GAME_STATE["location_data"], 
+                        GAME_STATE["conversation_history"]
+                    )
+                    
+                    # Handle level-up session start
+                    if isinstance(result, dict) and result.get("status") == "enter_levelup_mode":
+                        debug("STATE_CHANGE: Entering level-up mode", category="action_processing")
+                        
+                        level_up_session = result.get("session")
+                        if level_up_session:
+                            info(f"Level-up session for {level_up_session.character_name} from level {level_up_session.current_level} to {level_up_session.new_level}", category="level_up")
+                            
+                            # Store the session for the specific player
+                            # Use sid parameter passed from the main thread
+                            if sid:
+                                player_name = PLAYERS_SID_MAP.get(sid)
+                            # Fall back to using the player_name parameter if sid is not available
+                            LEVEL_UP_SESSIONS[player_name] = level_up_session
+                            
+                            # Start the level-up session and get the first message
+                            try:
+                                dm_response = level_up_session.start()
+                                
+                                # Send level-up specific UI event
+                                socketio.emit('level_up_started', {
+                                    'character_name': level_up_session.character_name,
+                                    'current_level': level_up_session.current_level,
+                                    'new_level': level_up_session.new_level,
+                                    'dm_response': dm_response
+                                }, to=sid)
+                                
+                                return  # Exit early - level-up mode started successfully
+                                
+                            except Exception as e:
+                                error(f"LEVEL_UP: Error starting level-up session: {e}", category="level_up")
+                                broadcast_full_game_state(message_type="error", message_content="Level-up session failed to start.")
+                                return
+                    
+                    break  # Only process the first levelUp action
+            return  # Exit early if levelUp was processed
+        # --- END LEVEL-UP DETECTION ---
+
+        # Invia la narrazione iniziale ai giocatori (only if not level-up)
         broadcast_full_game_state(message_type="dm", message_content=narration)
 
         # Processa ogni azione ricevuta dall'AI
@@ -917,19 +1061,9 @@ def handle_player_action_logic(player_name, action_text):
                     
                     break # Esce dal ciclo delle azioni
                     
-                # Caso 3: Bisogna entrare in modalità Level-Up
+                # Caso 3: Level-up handled earlier in special detection - this should not happen
                 elif result.get("status") == "enter_levelup_mode":
-                    print("SERVER: Inizio sessione di Level-Up.")
-                    # Per ora, logghiamo solo l'inizio della sessione
-                    # TODO: Implementare la gestione completa del level-up
-                    # Questo richiederà un sistema di "sotto-stati" del server
-                    # per gestire l'interazione one-to-one con il giocatore
-                    level_up_session = result.get("session")
-                    if level_up_session:
-                        print(f"SERVER: Level-up session for {level_up_session.entity_name} from level {level_up_session.current_level} to {level_up_session.new_level}")
-                    
-                    # Invia un messaggio informativo ai giocatori
-                    broadcast_full_game_state(message_type="dm", message_content=f"Iniziando sessione di level-up per {level_up_session.entity_name if level_up_session else 'unknown character'}...")
+                    warning("LEVEL_UP: levelUp action processed in normal flow - should have been caught earlier", category="level_up")
                     break
                     
         # 6. SALVATAGGIO E AGGIORNAMENTO FINALE
@@ -2311,6 +2445,155 @@ def handle_clear_all_history(data=None):
     except Exception as e:
         print(f"🧹 FULL CLEAR: ERROR - Error clearing all history: {e}")
         emit('error', {'message': f'Error clearing all history: {str(e)}'})
+
+# ============================================================================
+# LEVEL-UP SYSTEM EVENT HANDLERS
+# ============================================================================
+
+@socketio.on('level_up_input')
+def handle_level_up_input(data):
+    """Handle level-up user input during interactive session"""
+    debug_socket_event('level_up_input', data)
+    try:
+        sid = request.sid
+        player_name = PLAYERS_SID_MAP.get(sid)
+        
+        if not player_name:
+            emit('level_up_error', {'error': 'Player not found'})
+            return
+        
+        level_up_session = LEVEL_UP_SESSIONS.get(player_name)
+        if not level_up_session:
+            emit('level_up_error', {'error': 'No active level-up session found'})
+            return
+        
+        user_input = data.get('input', '').strip()
+        if not user_input:
+            emit('level_up_error', {'error': 'Empty input not allowed'})
+            return
+        
+        info(f"Level-up input from {player_name}: {user_input}", category="level_up")
+        
+        # Process the input through the level-up session
+        dm_response = level_up_session.handle_input(user_input)
+        
+        # Check if the session is complete
+        if level_up_session.is_complete:
+            if level_up_session.success:
+                info(f"Level-up successful for {player_name}", category="level_up")
+                
+                # Add level-up summary to conversation history
+                level_up_summary = level_up_session.summary
+                GAME_STATE["conversation_history"].append({"role": "assistant", "content": level_up_summary})
+                save_conversation_history(GAME_STATE["conversation_history"])
+                
+                # Send completion event
+                emit('level_up_completed', {
+                    'character_name': level_up_session.character_name,
+                    'new_level': level_up_session.new_level,
+                    'summary': level_up_summary,
+                    'success': True
+                })
+                
+                # Broadcast to other players (exclude the current player)
+                socketio.emit('level_up_notification', {
+                    'player_name': player_name,
+                    'character_name': level_up_session.character_name,
+                    'new_level': level_up_session.new_level,
+                    'message': f"{level_up_session.character_name} has successfully advanced to level {level_up_session.new_level}!",
+                    'completed': True
+                }, skip_sid=sid)
+                
+                # Refresh character data
+                reload_character_data_for_player(player_name)
+                
+            else:
+                warning(f"Level-up failed for {player_name}: {level_up_session.summary}", category="level_up")
+                emit('level_up_completed', {
+                    'character_name': level_up_session.character_name,
+                    'summary': level_up_session.summary,
+                    'success': False
+                })
+            
+            # Clean up the session
+            del LEVEL_UP_SESSIONS[player_name]
+            
+        else:
+            # Session continues, send next DM response
+            emit('level_up_response', {
+                'dm_response': dm_response,
+                'is_complete': False
+            })
+    
+    except Exception as e:
+        error(f"Error handling level-up input: {e}", category="level_up")
+        emit('level_up_error', {'error': f'Error processing level-up input: {str(e)}'})
+
+@socketio.on('cancel_level_up')
+def handle_cancel_level_up(data):
+    """Handle cancellation of level-up session"""
+    debug_socket_event('cancel_level_up', data)
+    try:
+        sid = request.sid
+        player_name = PLAYERS_SID_MAP.get(sid)
+        
+        if not player_name:
+            emit('level_up_error', {'error': 'Player not found'})
+            return
+        
+        level_up_session = LEVEL_UP_SESSIONS.get(player_name)
+        if not level_up_session:
+            emit('level_up_error', {'error': 'No active level-up session found'})
+            return
+        
+        info(f"Level-up cancelled by {player_name}", category="level_up")
+        
+        # Clean up the session
+        del LEVEL_UP_SESSIONS[player_name]
+        
+        # Send cancellation event
+        emit('level_up_cancelled', {
+            'character_name': level_up_session.character_name,
+            'message': 'Level-up session has been cancelled'
+        })
+        
+        # Broadcast to other players
+        socketio.emit('level_up_notification', {
+            'player_name': player_name,
+            'character_name': level_up_session.character_name,
+            'message': f"{player_name} cancelled the level-up session",
+            'cancelled': True
+        }, broadcast=True, include_self=False)
+        
+    except Exception as e:
+        error(f"Error cancelling level-up: {e}", category="level_up")
+        emit('level_up_error', {'error': f'Error cancelling level-up: {str(e)}'})
+
+def reload_character_data_for_player(player_name):
+    """Reload character data for a specific player after level-up"""
+    try:
+        normalized_name = normalize_character_name(player_name)
+        char_file = f"characters/{normalized_name}.json"
+        char_data = safe_read_json(char_file)
+        
+        if char_data:
+            GAME_STATE["character_sheets"][player_name] = char_data
+            info(f"Character data reloaded for {player_name}", category="level_up")
+            
+            # Send updated character data to the player
+            sid = None
+            for s, p in PLAYERS_SID_MAP.items():
+                if p == player_name:
+                    sid = s
+                    break
+            
+            if sid:
+                socketio.emit('character_data_updated', char_data, room=sid)
+        else:
+            warning(f"Could not reload character data for {player_name}", category="level_up")
+            
+    except Exception as e:
+        error(f"Error reloading character data for {player_name}: {e}", category="level_up")
 
 if __name__ == '__main__':
     if start_server():

@@ -1212,10 +1212,12 @@ Exiting the Game:
 Level-Up Management:
 - Monitor playercharacter and party NPC experience points.
 - When a player character has enough XP to level up ask for the player's permission then proceed.
-- When a paarty NPC has enough XP to level up use the "levelUp" action.
+- When a party NPC has enough XP to level up use the "levelUp" action.
+- CRITICAL: When a player says they want to level up or gives permission to level up, you MUST use the "levelUp" action, NOT just narrate it.
 - Only level up the player character or party NPC one level at a time. If they are able to level up more than 1 level then proceed separately for each level to avoid mistakes.
-- Use the following format for level-up actions:
+- Use the following EXACT format for level-up actions:
   {
+    "narration": "Description of the level-up process...",
     "actions": [
       {
         "action": "levelUp",
@@ -1226,6 +1228,20 @@ Level-Up Management:
       }
     ]
   }
+
+EXAMPLE when player requests level-up:
+{
+  "narration": "Exurgodor, you feel a surge of power as your experiences culminate in new abilities and strength.",
+  "actions": [
+    {
+      "action": "levelUp", 
+      "parameters": {
+        "entityName": "Exurgodor",
+        "newLevel": 2
+      }
+    }
+  ]
+}
 - After triggering the "levelUp" action, a DM note will be provided with current core rules for you to use.
 - For player characters, ask for confirmation on choices before applying changes.
 

@@ -1357,6 +1357,49 @@
          socket.on('combat_action_result', (data) => {
              console.log('Combat action result:', data);
          });
+         
+         // ============================================================================
+         // LEVEL-UP SYSTEM EVENT HANDLERS
+         // ============================================================================
+         
+         socket.on('level_up_started', (data) => {
+             console.log('Level-up started:', data);
+             showLevelUpModal(data);
+         });
+         
+         socket.on('level_up_response', (data) => {
+             console.log('Level-up response:', data);
+             handleLevelUpResponse(data);
+         });
+         
+         socket.on('level_up_completed', (data) => {
+             console.log('Level-up completed:', data);
+             handleLevelUpCompleted(data);
+         });
+         
+         socket.on('level_up_cancelled', (data) => {
+             console.log('Level-up cancelled:', data);
+             closeLevelUpModal();
+             addMessage('system', `Level-up session cancelled: ${data.message}`, 'Level-Up System');
+         });
+         
+         socket.on('level_up_notification', (data) => {
+             console.log('Level-up notification:', data);
+             handleLevelUpNotification(data);
+         });
+         
+         socket.on('level_up_error', (data) => {
+             console.error('Level-up error:', data);
+             handleLevelUpError(data);
+         });
+         
+         socket.on('character_data_updated', (data) => {
+             console.log('Character data updated:', data);
+             // Refresh character sheet if visible
+             if (characterPanel.style.display !== 'none') {
+                 loadCharacterData('stats');
+             }
+         });
         
         function showCharacterCreationInterface(data) {
             // Crea l'interfaccia di creazione personaggio
@@ -2362,6 +2405,140 @@
             return str.replace(/\b\w/g, l => l.toUpperCase());
         }
         
+        // ============================================================================
+        // LEVEL-UP SYSTEM FUNCTIONS
+        // ============================================================================
+        
+        let currentLevelUpSession = null;
+        
+        function showLevelUpModal(data) {
+            console.log('Level-up started:', data);
+            currentLevelUpSession = data;
+            
+            // Update modal content
+            document.getElementById('level-up-char-name').textContent = data.character_name;
+            document.getElementById('level-up-from').textContent = data.current_level;
+            document.getElementById('level-up-to').textContent = data.new_level;
+            document.getElementById('level-up-message').textContent = data.dm_response;
+            
+            // Show input area, hide completion area
+            document.getElementById('level-up-content').style.display = 'block';
+            document.getElementById('level-up-complete').style.display = 'none';
+            
+            // Clear input field
+            document.getElementById('level-up-input').value = '';
+            
+            // Show modal
+            document.getElementById('level-up-modal').style.display = 'flex';
+            
+            // Focus input
+            setTimeout(() => {
+                document.getElementById('level-up-input').focus();
+            }, 100);
+        }
+        
+        function closeLevelUpModal() {
+            document.getElementById('level-up-modal').style.display = 'none';
+            currentLevelUpSession = null;
+        }
+        
+        function sendLevelUpInput() {
+            const input = document.getElementById('level-up-input');
+            const userInput = input.value.trim();
+            
+            if (!userInput) {
+                alert('Please enter a response before sending.');
+                return;
+            }
+            
+            console.log('Sending level-up input:', userInput);
+            
+            // Send input to server
+            socket.emit('level_up_input', {
+                input: userInput
+            });
+            
+            // Clear input field
+            input.value = '';
+        }
+        
+        function cancelLevelUp() {
+            if (confirm('Are you sure you want to cancel the level-up session?')) {
+                console.log('Cancelling level-up session');
+                socket.emit('cancel_level_up');
+                closeLevelUpModal();
+            }
+        }
+        
+        function handleLevelUpResponse(data) {
+            console.log('Level-up response:', data);
+            
+            if (data.is_complete === false) {
+                // Update DM message for next step
+                document.getElementById('level-up-message').textContent = data.dm_response;
+                
+                // Focus input for next response
+                setTimeout(() => {
+                    document.getElementById('level-up-input').focus();
+                }, 100);
+            }
+        }
+        
+        function handleLevelUpCompleted(data) {
+            console.log('Level-up completed:', data);
+            
+            // Hide input area, show completion area
+            document.getElementById('level-up-content').style.display = 'none';
+            document.getElementById('level-up-complete').style.display = 'block';
+            
+            // Update completion message
+            if (data.success) {
+                document.getElementById('completion-title').textContent = '🎉 Level-up Complete!';
+                document.getElementById('completion-summary').textContent = data.summary || 'Your character has been successfully upgraded!';
+            } else {
+                document.getElementById('completion-title').textContent = '❌ Level-up Failed';
+                document.getElementById('completion-summary').textContent = data.summary || 'The level-up process encountered an error.';
+            }
+            
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+                closeLevelUpModal();
+            }, 5000);
+        }
+        
+        function handleLevelUpNotification(data) {
+            console.log('Level-up notification:', data);
+            
+            let message = '';
+            if (data.completed) {
+                message = `${data.character_name} has successfully advanced to level ${data.new_level}!`;
+            } else if (data.cancelled) {
+                message = `${data.player_name} cancelled their level-up session.`;
+            } else {
+                message = data.message || `${data.character_name} is leveling up!`;
+            }
+            
+            // Add notification message
+            addMessage('system', message, 'Level-Up System');
+        }
+        
+        function handleLevelUpError(data) {
+            console.error('Level-up error:', data);
+            alert(`Level-up error: ${data.error}`);
+            closeLevelUpModal();
+        }
+        
+        // Add keyboard support for level-up input
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && document.getElementById('level-up-modal').style.display === 'flex') {
+                const input = document.getElementById('level-up-input');
+                if (document.activeElement === input) {
+                    event.preventDefault();
+                    sendLevelUpInput();
+                }
+            }
+        });
+        
                  // Combat functions (simplified for narrative combat)
          function showCombatPanel() {
              // Combat is handled narratively, no special panel needed
@@ -2541,6 +2718,127 @@
 
         .modal-button:hover:not(:disabled) {
             opacity: 0.8;
+        }
+    </style>
+
+    <!-- LEVEL-UP MODAL -->
+    <div id="level-up-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="level-up-title">🎉 Character Level Up</h3>
+                <span class="modal-close" onclick="closeLevelUpModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="level-up-info" class="level-up-info">
+                    <p id="level-up-character">Character: <span id="level-up-char-name"></span></p>
+                    <p id="level-up-progression">Level <span id="level-up-from"></span> → <span id="level-up-to"></span></p>
+                </div>
+                <div id="level-up-content" class="level-up-content">
+                    <div id="level-up-message" class="dm-message-box"></div>
+                    <div id="level-up-input-area" class="level-up-input-area">
+                        <input type="text" id="level-up-input" class="modal-input" placeholder="Enter your response..." maxlength="500">
+                        <div class="level-up-buttons">
+                            <button class="modal-button primary" onclick="sendLevelUpInput()">Send Response</button>
+                            <button class="modal-button secondary" onclick="cancelLevelUp()">Cancel Level-Up</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="level-up-complete" class="level-up-complete" style="display: none;">
+                    <div class="completion-message">
+                        <h4 id="completion-title">Level-up Complete!</h4>
+                        <p id="completion-summary"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Level-Up Modal Specific Styles */
+        .level-up-info {
+            background-color: #1a2f1a;
+            border: 1px solid #4CAF50;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .level-up-info p {
+            margin: 5px 0;
+            color: #e0e0e0;
+        }
+
+        #level-up-char-name {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        #level-up-progression {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #level-up-from {
+            color: #ff9800;
+        }
+
+        #level-up-to {
+            color: #4CAF50;
+        }
+
+        .dm-message-box {
+            background-color: #1a2a3a;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            color: #e0e0e0;
+            font-style: italic;
+        }
+
+        .level-up-input-area {
+            margin-top: 15px;
+        }
+
+        .level-up-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .modal-button.primary {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        .level-up-complete {
+            background-color: #1a2f1a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .completion-message h4 {
+            color: #4CAF50;
+            margin: 0 0 10px 0;
+        }
+
+        .completion-message p {
+            color: #e0e0e0;
+            margin: 0;
+        }
+
+        /* Level-up notification styles */
+        .level-up-notification {
+            background-color: #2a1a3a;
+            border-left: 4px solid #9c27b0;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            color: #e1bee7;
         }
     </style>
 </body>

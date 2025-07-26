@@ -1,0 +1,27 @@
+ISTRUZIONI PER TRIGGARE IL LEVEL-UP CORRETTAMENTE:
+
+Nella chat del gioco, prova questi comandi più specifici:
+
+1. COMANDO DIRETTO (più efficace):
+"DM, please execute the levelUp action for Exurgodor to level 2"
+
+2. COMANDO ROLEPLAY:
+"I formally request to advance Exurgodor from level 1 to level 2 using my 300 experience points"
+
+3. COMANDO SYSTEM:
+"System: Initialize level up process for character Exurgodor to level 2"
+
+Il problema è che l'AI sta narrando il level-up invece di generare l'azione JSON corretta.
+L'azione deve essere nel formato:
+{
+  "narration": "...",
+  "actions": [
+    {
+      "action": "levelUp",
+      "parameters": {
+        "entityName": "Exurgodor",
+        "newLevel": 2
+      }
+    }
+  ]
+}
