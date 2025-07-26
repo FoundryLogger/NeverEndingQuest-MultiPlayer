@@ -72,6 +72,9 @@ from core.managers.combat_service import CombatService
 # Import from main.py for conversation history management
 from main import save_conversation_history
 
+# Import inventory response system
+from core.managers.inventory_manager import process_inventory_response
+
 # Import configuration
 try:
     from config import (
@@ -199,12 +202,18 @@ def ensure_main_system_prompt(conversation_history, main_system_prompt_text):
     
     return [{"role": "system", "content": main_system_prompt_text}] + filtered_history
 
-def get_ai_response(conversation_history, validation_retry_count=0):
+def get_ai_response(conversation_history, validation_retry_count=0, action_text=None):
     """Get AI response with validation retry logic"""
     try:
+        # Use lower temperature for inventory-related actions
+        temperature = TEMPERATURE
+        if action_text and any(word in action_text.lower() for word in ['inventory', 'put', 'store', 'stow', 'add', 'take']):
+            temperature = 0.3  # Lower temperature for more consistent JSON
+            debug(f"Using lower temperature ({temperature}) for inventory action", category="ai_communication")
+        
         response = client.chat.completions.create(
             model=DM_MAIN_MODEL,
-            temperature=TEMPERATURE,
+            temperature=temperature,
             messages=conversation_history
         )
         content = response.choices[0].message.content.strip()
@@ -758,13 +767,18 @@ def handle_player_action_logic(player_name, action_text):
     # Salva la cronologia prima di chiamare l'AI
     safe_write_json("modules/conversation_history/conversation_history.json", GAME_STATE["conversation_history"])
     
-    ai_response_content = get_ai_response(GAME_STATE["conversation_history"])
+    ai_response_content = get_ai_response(GAME_STATE["conversation_history"], action_text=action_text)
     if not ai_response_content:
         try:
             emit('error', {'message': 'Failed to get AI response. Please try again.'})
         except RuntimeError:
             broadcast_full_game_state(message_type="error", message_content="Failed to get AI response. Please try again.")
         return
+    
+    # Process inventory responses with comprehensive verification system
+    ai_response_content, was_modified = process_inventory_response(ai_response_content, player_name, action_text)
+    if was_modified:
+        debug(f"INVENTORY: Response modified for {player_name}", category="inventory_system")
     
     # Validazione della risposta AI
     validation_prompt_text = load_validation_prompt()
@@ -778,13 +792,18 @@ def handle_player_action_logic(player_name, action_text):
     
     if validation_result is not True:
         # Retry con il modello di validazione
-        ai_response_content = get_ai_response(GAME_STATE["conversation_history"], validation_retry_count=1)
+        ai_response_content = get_ai_response(GAME_STATE["conversation_history"], validation_retry_count=1, action_text=action_text)
         if not ai_response_content:
             try:
                 emit('error', {'message': 'Failed to get valid AI response. Please try again.'})
             except RuntimeError:
                 broadcast_full_game_state(message_type="error", message_content="Failed to get valid AI response. Please try again.")
             return
+        
+        # Process inventory responses with comprehensive verification system on retry too
+        ai_response_content, was_modified = process_inventory_response(ai_response_content, player_name, action_text)
+        if was_modified:
+            debug(f"INVENTORY: Response modified for {player_name} on retry", category="inventory_system")
     
     # 5. ELABORAZIONE DELLA RISPOSTA AI (IL CUORE DEL SISTEMA)
     try:
@@ -804,6 +823,59 @@ def handle_player_action_logic(player_name, action_text):
                 GAME_STATE["location_data"], 
                 GAME_STATE["conversation_history"]
             )
+            
+            # FORCE VERIFICATION: Check if inventory updates actually succeeded
+            if action.get("action") == "updateCharacterInfo" and was_modified:
+                char_name = action.get("parameters", {}).get("characterName")
+                changes = action.get("parameters", {}).get("changes", "")
+                
+                if char_name and "equipment" in changes:
+                    from core.managers.inventory_manager import InventoryManager
+                    inv_manager = InventoryManager()
+                    
+                    # Give the file system a moment to update
+                    import time
+                    time.sleep(0.2)
+                    
+                    # Parse what items should have been added
+                    expected_items = []
+                    if "Added" in changes and "equipment" in changes:
+                        # Extract items from changes description
+                        import re
+                        item_matches = re.findall(r'Added ([^(]+)(?:\s*\((\d+)\))?\s+to equipment', changes)
+                        for match in item_matches:
+                            item_name = match[0].strip()
+                            quantity = match[1] if match[1] else "1"
+                            expected_items.append({"name": item_name, "quantity": quantity})
+                    
+                    if expected_items:
+                        # Check if items were actually added
+                        current_inventory = inv_manager.get_character_inventory_snapshot(char_name)
+                        equipment = current_inventory.get("equipment", [])
+                        
+                        added_count = 0
+                        for expected in expected_items:
+                            for item in equipment:
+                                if expected["name"].lower() in item.get("item_name", "").lower():
+                                    added_count += 1
+                                    break
+                        
+                        if added_count == len(expected_items):
+                            info(f"INVENTORY_SUCCESS: All {len(expected_items)} items verified in {char_name}'s equipment", category="inventory_verification")
+                        else:
+                            warning(f"INVENTORY_FAILED: Only {added_count}/{len(expected_items)} items found in {char_name}'s equipment", category="inventory_verification")
+                            
+                            # FORCE RETRY - Use AI fallback to re-analyze and try again
+                            retry_action = inv_manager.ai_fallback_analysis(ai_response_content, action_text, char_name)
+                            if retry_action:
+                                info(f"INVENTORY_RETRY: Attempting forced retry for {char_name}", category="inventory_verification")
+                                # Process the retry action immediately
+                                retry_result = process_action(
+                                    retry_action["actions"][0],
+                                    GAME_STATE["party_tracker"], 
+                                    GAME_STATE["location_data"], 
+                                    GAME_STATE["conversation_history"]
+                                )
             
             # GESTIONE DEI SOTTOSISTEMI SPECIALI
             if isinstance(result, dict):
@@ -959,7 +1031,7 @@ def handle_player_data_request(data):
             # Dati per la tab Inventory
             filtered_data = {
                 'name': character_data.get('name'),
-                'inventory': character_data.get('inventory', []),
+                'equipment': character_data.get('equipment', []),
                 'currency': character_data.get('currency', {'gold': 0, 'silver': 0, 'copper': 0})
             }
         elif data_type == 'spells':
@@ -1360,6 +1432,8 @@ def activate_first_quest_if_needed(plot_data, current_module):
 def create_character_from_creation_data(player_name, creation_data):
     """Create a complete character from creation data"""
     try:
+        from utils.character_creation_template import get_default_character_template, get_starting_equipment
+        
         race = creation_data.get('race', 'Human')
         character_class = creation_data.get('class', 'Fighter')
         background = creation_data.get('background', 'Folk Hero')
@@ -1368,65 +1442,23 @@ def create_character_from_creation_data(player_name, creation_data):
             'intelligence': 10, 'wisdom': 10, 'charisma': 10
         })
         
-        # Calcola HP base basato sulla classe
-        class_hp = {
-            'Fighter': 10, 'Paladin': 10, 'Ranger': 10, 'Barbarian': 12,
-            'Bard': 8, 'Cleric': 8, 'Druid': 8, 'Monk': 8, 'Rogue': 8, 'Warlock': 8,
-            'Sorcerer': 6, 'Wizard': 6
-        }
+        # Get schema-compliant template
+        character_data = get_default_character_template(
+            name=player_name,
+            character_class=character_class,
+            race=race,
+            background=background,
+            abilities=abilities
+        )
         
-        base_hp = class_hp.get(character_class, 8)
-        con_mod = (abilities['constitution'] - 10) // 2
-        max_hp = base_hp + con_mod
+        # Update with class-specific data
+        character_data["skills"] = get_class_skills(character_class, background)
+        character_data["proficiencies"] = get_class_proficiencies(character_class)
+        character_data["classFeatures"] = get_class_features(character_class)
+        character_data["equipment"] = get_starting_equipment(character_class, background)
         
-        # Calcola le abilità di incantesimo se la classe le ha
+        # Add spellcasting if applicable
         spellcasting_data = get_spellcasting_data(character_class, abilities)
-        
-        character_data = {
-            "character_role": "player",
-            "character_type": "player",
-            "name": player_name,
-            "type": "player",
-            "size": "Medium",
-            "level": 1,
-            "race": race,
-            "class": character_class,
-            "alignment": "neutral good",
-            "background": background,
-            "status": "alive",
-            "condition": "none",
-            "condition_affected": [],
-            "hitPoints": max_hp,
-            "maxHitPoints": max_hp,
-            "armorClass": 10 + (abilities['dexterity'] - 10) // 2,
-            "initiative": (abilities['dexterity'] - 10) // 2,
-            "speed": 30,
-            "abilities": abilities,
-            "savingThrows": get_class_saving_throws(character_class),
-            "skills": get_class_skills(character_class, background),
-            "proficiencyBonus": 2,
-            "senses": {
-                "darkvision": 0,
-                "passivePerception": 10 + (abilities['wisdom'] - 10) // 2
-            },
-            "languages": ["Common"],
-            "proficiencies": get_class_proficiencies(character_class),
-            "damageVulnerabilities": [],
-            "damageResistances": [],
-            "damageImmunities": [],
-            "conditionImmunities": [],
-            "experience_points": 0,
-            "classFeatures": get_class_features(character_class),
-            "inventory": get_starting_equipment(character_class, background),
-            "personality": {
-                "traits": "I stand up for what I believe in.",
-                "ideals": "I fight for those who cannot fight for themselves.",
-                "bonds": "I protect those who cannot protect themselves.",
-                "flaws": "I have a weakness for the vices of the city."
-            }
-        }
-        
-        # Aggiungi le abilità di incantesimo se la classe le ha
         if spellcasting_data:
             character_data["spellcasting"] = spellcasting_data
         
@@ -1709,7 +1741,7 @@ def get_class_features(character_class):
     }
     return features.get(character_class, [])
 
-def get_starting_equipment(character_class, background):
+def get_starting_equipment_old(character_class, background):  # Deprecated - use character_creation_template.py instead
     """Get starting equipment for a class and background"""
     equipment = {
         'weapons': [],

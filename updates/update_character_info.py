@@ -1098,7 +1098,7 @@ MAGICAL ITEM EQUIPMENT ENTRY FORMAT:
   "item_subtype": "ring",        // ring, amulet, cloak, boots, gloves, etc.
   "description": "A magical ring that grants +1 bonus to AC and saving throws",
   "quantity": 1,
-  "equipped": true,              // or false if just adding to inventory
+  "equipped": true,              // or false if just adding to equipment
   "effects": [
     {{
       "type": "bonus",           // bonus, resistance, immunity, advantage, disadvantage, ability_score, other
@@ -1241,9 +1241,21 @@ Current spellSlots: {{"level2": {{"current": 2, "max": 2}}}}
 Update: {{"spellcasting": {{"spellSlots": {{"level2": {{"current": 1, "max": 2}}}}}}}}
 Note: Divine Smite is an ability that costs spell slots - update ONLY the spell slots, not any ability usage
 
+EQUIPMENT ITEM EXAMPLES:
+Example 1 - Adding regular items (wood, materials, etc):
+Changes: "Added Firewood (10) to equipment"
+Update: {{"equipment": [{{"item_name": "Firewood", "item_type": "miscellaneous", "description": "Dry branches suitable for campfire", "quantity": 10, "equipped": false, "magical": false}}]}}
+
+Example 2 - Adding multiple items:
+Changes: "Added Branches (5) to equipment; Added Twigs (10) to equipment"
+Update: {{"equipment": [
+  {{"item_name": "Branches", "item_type": "miscellaneous", "description": "Sturdy branches", "quantity": 5, "equipped": false, "magical": false}},
+  {{"item_name": "Twigs", "item_type": "miscellaneous", "description": "Small twigs for kindling", "quantity": 10, "equipped": false, "magical": false}}
+]}}
+
 AMMUNITION EXAMPLES:
 Example 1 - Adding ammunition:
-Changes: "Added 25 crossbow bolts to inventory"
+Changes: "Added 25 crossbow bolts to equipment"
 Update: {{"ammunition": [{{"name": "crossbow bolts", "quantity": 25}}]}}
 
 Example 2 - Removing/Selling ammunition:  
@@ -1346,6 +1358,9 @@ Character Role: {character_role}
                 raise ValueError("No JSON object found in response")
             
             clean_response = json_match.group()
+            # Remove JSON comments that AI sometimes adds
+            clean_response = re.sub(r'//.*', '', clean_response)  # Remove // comments
+            clean_response = re.sub(r'/\*.*?\*/', '', clean_response, flags=re.DOTALL)  # Remove /* */ comments
             updates = json.loads(clean_response)
             
             # Log the parsed JSON update - Commented out to prevent debug leak to player screen

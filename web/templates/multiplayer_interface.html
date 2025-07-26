@@ -1900,12 +1900,86 @@
             let html = '<div class="character-sheet">';
             html += `<div class="character-header"><div class="character-name">${data.name}</div></div>`;
             
-            if (data.inventory && data.inventory.length > 0) {
-                html += '<div class="inventory-section">';
-                data.inventory.forEach(item => {
-                    html += `<div class="inventory-item"><span class="item-name">${item.name}</span><span class="item-qty">×${item.quantity}</span></div>`;
+            // Display equipment items (new schema format)
+            if (data.equipment && data.equipment.length > 0) {
+                // Group items by type
+                const itemTypes = {
+                    weapon: [],
+                    armor: [],
+                    consumable: [],
+                    equipment: [],
+                    miscellaneous: []
+                };
+                
+                // Sort items into categories
+                data.equipment.forEach(item => {
+                    const type = item.item_type || 'miscellaneous';
+                    if (itemTypes[type]) {
+                        itemTypes[type].push(item);
+                    } else {
+                        itemTypes.miscellaneous.push(item);
+                    }
                 });
-                html += '</div>';
+                
+                // Display each category
+                Object.keys(itemTypes).forEach(type => {
+                    if (itemTypes[type].length > 0) {
+                        const categoryName = type.charAt(0).toUpperCase() + type.slice(1);
+                        const displayName = type === 'miscellaneous' ? 'Items' : 
+                                          type === 'equipment' ? 'Tools & Equipment' : categoryName;
+                        
+                        html += `<div class="inventory-section">`;
+                        html += `<h4 style="color: #4CAF50; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px;">${displayName}</h4>`;
+                        
+                        itemTypes[type].forEach(item => {
+                            const quantity = item.quantity > 1 ? ` (×${item.quantity})` : '';
+                            const equipped = item.equipped ? ' [EQUIPPED]' : '';
+                            const magical = item.magical ? ' ✨' : '';
+                            
+                            html += `<div class="inventory-item">`;
+                            html += `<span class="item-name">${item.item_name}${quantity}${equipped}${magical}</span>`;
+                            if (item.description) {
+                                html += `<div style="font-size: 12px; color: #aaa; margin-top: 3px; font-style: italic;">${item.description}</div>`;
+                            }
+                            html += `</div>`;
+                        });
+                        
+                        html += '</div>';
+                    }
+                });
+                
+                // Currency section
+                if (data.currency) {
+                    html += '<div class="inventory-section">';
+                    html += '<h4 style="color: #4CAF50; margin-bottom: 10px; border-bottom: 1px solid #444; padding-bottom: 5px;">Currency</h4>';
+                    
+                    const currencies = ['platinum', 'gold', 'silver', 'copper'];
+                    let hasCurrency = false;
+                    let currencyHtml = '';
+                    
+                    currencies.forEach(coin => {
+                        const amount = data.currency[coin] || 0;
+                        if (amount > 0) {
+                            hasCurrency = true;
+                            const coinSymbol = coin === 'platinum' ? 'pp' : 
+                                             coin === 'gold' ? 'gp' : 
+                                             coin === 'silver' ? 'sp' : 'cp';
+                            const coinColor = coin === 'platinum' ? '#E5E5E5' :
+                                            coin === 'gold' ? '#FFD700' :
+                                            coin === 'silver' ? '#C0C0C0' : '#CD7F32';
+                            currencyHtml += `<span style="color: ${coinColor}; margin-right: 15px;">${amount} ${coinSymbol}</span>`;
+                        }
+                    });
+                    
+                    if (hasCurrency) {
+                        html += `<div class="inventory-item">${currencyHtml}</div>`;
+                    } else {
+                        html += '<div class="inventory-item">No currency</div>';
+                    }
+                    
+                    html += '</div>';
+                }
+                
             } else {
                 html += '<div class="inventory-section"><div class="inventory-item">No items in inventory</div></div>';
             }
