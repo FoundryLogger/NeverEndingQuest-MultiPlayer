@@ -1058,6 +1058,264 @@
         .reload-button:hover {
             background-color: #777;
         }
+
+        /* Module Selection Styles */
+        .module-selector-btn {
+            padding: 8px 15px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .module-selector-btn:hover {
+            background-color: #357ABD;
+        }
+
+        .module-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .module-panel {
+            background-color: #2c2c2c;
+            border: 2px solid #444;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 600px;
+            width: 90%;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .module-panel-header {
+            background-color: #333;
+            padding: 15px 20px;
+            border-bottom: 2px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .module-panel-title {
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .module-close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: color 0.3s, background-color 0.3s;
+        }
+
+        .module-close-btn:hover {
+            color: #fff;
+            background-color: #555;
+        }
+
+        .module-panel-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .current-module-info {
+            background-color: #1a472a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .current-module-info h3 {
+            color: #4CAF50;
+            margin-bottom: 8px;
+        }
+
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .module-card {
+            background-color: #333;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .module-card:hover {
+            border-color: #4A90E2;
+            background-color: #3a3a3a;
+        }
+
+        .module-card.active {
+            border-color: #4CAF50;
+            background-color: #1a472a;
+        }
+
+        .module-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .module-title {
+            color: #4A90E2;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .module-card.active .module-title {
+            color: #4CAF50;
+        }
+
+        .module-type {
+            background-color: #555;
+            color: #ccc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .module-description {
+            color: #ccc;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .module-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .module-completion {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .module-meta {
+            color: #666;
+        }
+
+        .module-select-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .module-select-btn:hover {
+            background-color: #357ABD;
+        }
+
+        .module-select-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .module-card.active .module-select-btn {
+            background-color: #4CAF50;
+            cursor: default;
+        }
+
+        .module-card.active .module-select-btn:hover {
+            background-color: #4CAF50;
+        }
+
+        .refresh-modules-btn {
+            padding: 10px 20px;
+            background-color: #666;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .refresh-modules-btn:hover {
+            background-color: #777;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #444;
+            border-radius: 50%;
+            border-top-color: #4A90E2;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .module-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .module-info-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .module-info-label {
+            color: #888;
+        }
+
+        .module-info-value {
+            color: #ccc;
+            font-weight: bold;
+        }
         
     </style>
 </head>
@@ -1069,6 +1327,9 @@
             <div class="location-details" id="location-details">Loading game state...</div>
         </div>
         <div class="status">
+            <button class="module-selector-btn" id="module-selector-btn" onclick="openModuleSelector()" style="display: none;">
+                Select Module
+            </button>
             <div class="status-indicator" id="connection-status"></div>
             <span id="status-text">Connecting...</span>
         </div>
@@ -1194,7 +1455,38 @@
         </div>
     </div>
 
-    
+    <!-- Module Selection Overlay -->
+    <div id="module-overlay" class="module-overlay">
+        <div class="module-panel">
+            <div class="module-panel-header">
+                <h3 class="module-panel-title">Select Adventure Module</h3>
+                <button class="module-close-btn" onclick="closeModuleSelector()">&times;</button>
+            </div>
+            <div class="module-panel-content">
+                <!-- Current Module Info -->
+                <div id="current-module-info" class="current-module-info">
+                    <h3>Current Module</h3>
+                    <div id="current-module-display">Loading...</div>
+                </div>
+
+                <!-- Available Modules -->
+                <div>
+                    <h3 style="color: #4A90E2; margin-bottom: 15px;">Available Modules</h3>
+                    <div id="modules-grid" class="module-grid">
+                        <div style="text-align: center; color: #888; grid-column: 1 / -1;">
+                            <div class="loading-spinner"></div>
+                            Loading modules...
+                        </div>
+                    </div>
+                    
+                    <button class="refresh-modules-btn" onclick="refreshModules()">
+                        <span id="refresh-spinner" style="display: none;" class="loading-spinner"></span>
+                        Refresh Modules
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Socket.IO connection
@@ -1316,6 +1608,28 @@
         
         socket.on('connected', (data) => {
             console.log('Server connected:', data.message);
+        });
+        
+        // Module switching event handler
+        socket.on('module_switched', (data) => {
+            console.log('Module switched:', data);
+            addMessage('system', `Switched to module: ${data.display_name}`, 'Module Switch');
+            
+            // Update current module info in UI
+            if (currentModuleName !== data.module_name) {
+                currentModuleName = data.module_name;
+                
+                // Update location details to show new module
+                const locationDetails = document.getElementById('location-details');
+                if (locationDetails) {
+                    locationDetails.textContent = `Module: ${data.display_name}`;
+                }
+                
+                // Refresh the page to load new module data after a short delay
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
         });
         
         // Character creation handling
@@ -1576,6 +1890,9 @@
                 playerName.value = name;
                 actionInput.disabled = false;
                 sendButton.disabled = false;
+                
+                // Show module selector button now that player has joined
+                showModuleSelectorButton();
             }
         });
         
@@ -3110,6 +3427,241 @@
                 text: modulePrompt
             });
         }
+
+        // ============================================================================
+        // MODULE SELECTION AND MANAGEMENT FUNCTIONS
+        // ============================================================================
+
+        let currentModules = [];
+        let currentModuleName = '';
+
+        function openModuleSelector() {
+            document.getElementById('module-overlay').style.display = 'flex';
+            loadAvailableModules();
+        }
+
+        function closeModuleSelector() {
+            document.getElementById('module-overlay').style.display = 'none';
+        }
+
+        async function loadAvailableModules() {
+            try {
+                const response = await fetch('/api/modules');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentModules = data.modules;
+                    currentModuleName = data.current_module;
+                    
+                    displayCurrentModule(data.current_module);
+                    displayModuleCards(data.modules);
+                } else {
+                    console.error('Failed to load modules:', data.error);
+                    displayModuleError('Failed to load modules: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error loading modules:', error);
+                displayModuleError('Error connecting to server');
+            }
+        }
+
+        function displayCurrentModule(moduleName) {
+            const currentModuleDisplay = document.getElementById('current-module-display');
+            const currentModuleData = currentModules.find(m => m.name === moduleName);
+            
+            if (currentModuleData) {
+                currentModuleDisplay.innerHTML = `
+                    <h4 style="color: #4CAF50; margin-bottom: 8px;">${currentModuleData.display_name}</h4>
+                    <p style="color: #ccc; font-size: 13px; margin-bottom: 8px;">${currentModuleData.description}</p>
+                    <div class="module-info-grid">
+                        <div class="module-info-item">
+                            <span class="module-info-label">Type:</span>
+                            <span class="module-info-value">${currentModuleData.type}</span>
+                        </div>
+                        <div class="module-info-item">
+                            <span class="module-info-label">Progress:</span>
+                            <span class="module-info-value">${currentModuleData.completion_percentage}%</span>
+                        </div>
+                        <div class="module-info-item">
+                            <span class="module-info-label">Areas:</span>
+                            <span class="module-info-value">${currentModuleData.areas_count}</span>
+                        </div>
+                        <div class="module-info-item">
+                            <span class="module-info-label">NPCs:</span>
+                            <span class="module-info-value">${currentModuleData.npcs_count}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                currentModuleDisplay.innerHTML = `
+                    <h4 style="color: #FFA500;">Module: ${moduleName}</h4>
+                    <p style="color: #888;">Module information not available</p>
+                `;
+            }
+        }
+
+        function displayModuleCards(modules) {
+            const modulesGrid = document.getElementById('modules-grid');
+            
+            if (modules.length === 0) {
+                modulesGrid.innerHTML = `
+                    <div style="text-align: center; color: #888; grid-column: 1 / -1;">
+                        No modules found. Create a new module to get started!
+                    </div>
+                `;
+                return;
+            }
+
+            modulesGrid.innerHTML = modules.map(module => createModuleCard(module)).join('');
+        }
+
+        function createModuleCard(module) {
+            const isActive = module.is_active || module.name === currentModuleName;
+            const activeClass = isActive ? 'active' : '';
+            const buttonText = isActive ? 'Current Module' : 'Select Module';
+            const buttonDisabled = isActive ? 'disabled' : '';
+            
+            return `
+                <div class="module-card ${activeClass}" data-module-name="${module.name}">
+                    <div class="module-card-header">
+                        <h4 class="module-title">${module.display_name}</h4>
+                        <span class="module-type">${module.type}</span>
+                    </div>
+                    <div class="module-description">${module.description}</div>
+                    <div class="module-info-grid">
+                        <div class="module-info-item">
+                            <span class="module-info-label">Areas:</span>
+                            <span class="module-info-value">${module.areas_count}</span>
+                        </div>
+                        <div class="module-info-item">
+                            <span class="module-info-label">NPCs:</span>
+                            <span class="module-info-value">${module.npcs_count}</span>
+                        </div>
+                        <div class="module-info-item">
+                            <span class="module-info-label">Created:</span>
+                            <span class="module-info-value">${module.created_date}</span>
+                        </div>
+                        <div class="module-info-item">
+                            <span class="module-info-label">Last Played:</span>
+                            <span class="module-info-value">${module.last_played}</span>
+                        </div>
+                    </div>
+                    <div class="module-stats">
+                        <span class="module-completion">${module.completion_percentage}% Complete</span>
+                        <span class="module-meta">Level ${module.level_range}</span>
+                    </div>
+                    <button class="module-select-btn" ${buttonDisabled} onclick="selectModule('${module.name}')">
+                        ${buttonText}
+                    </button>
+                </div>
+            `;
+        }
+
+        async function selectModule(moduleName) {
+            if (moduleName === currentModuleName) {
+                return; // Already in this module
+            }
+
+            try {
+                // Show loading state
+                const button = document.querySelector(`[data-module-name="${moduleName}"] .module-select-btn`);
+                const originalText = button.textContent;
+                button.innerHTML = '<span class="loading-spinner"></span>Switching...';
+                button.disabled = true;
+
+                const response = await fetch('/api/switch-module', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ module_name: moduleName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Success - close modal and refresh
+                    closeModuleSelector();
+                    addMessage('system', data.message, 'Module Switch');
+                    
+                    // Update current module info in header
+                    updateModuleInfo(moduleName);
+                    
+                    // Refresh game state
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    // Error
+                    addMessage('system', data.error || 'Failed to switch module', 'Module Switch');
+                    button.textContent = originalText;
+                    button.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error switching module:', error);
+                addMessage('system', 'Error connecting to server', 'Module Switch');
+                
+                // Reset button
+                const button = document.querySelector(`[data-module-name="${moduleName}"] .module-select-btn`);
+                button.textContent = 'Select Module';
+                button.disabled = false;
+            }
+        }
+
+        function updateModuleInfo(moduleName) {
+            const module = currentModules.find(m => m.name === moduleName);
+            if (module) {
+                currentModuleName = moduleName;
+                const locationDetails = document.getElementById('location-details');
+                if (locationDetails) {
+                    locationDetails.textContent = `Module: ${module.display_name}`;
+                }
+            }
+        }
+
+        async function refreshModules() {
+            const refreshButton = document.querySelector('.refresh-modules-btn');
+            const spinner = document.getElementById('refresh-spinner');
+            
+            // Show loading state
+            spinner.style.display = 'inline-block';
+            refreshButton.disabled = true;
+            
+            try {
+                await loadAvailableModules();
+            } catch (error) {
+                console.error('Error refreshing modules:', error);
+            } finally {
+                // Hide loading state
+                spinner.style.display = 'none';
+                refreshButton.disabled = false;
+            }
+        }
+
+        function displayModuleError(message) {
+            const modulesGrid = document.getElementById('modules-grid');
+            modulesGrid.innerHTML = `
+                <div style="text-align: center; color: #ff6b6b; grid-column: 1 / -1;">
+                    <strong>Error:</strong> ${message}
+                    <br><br>
+                    <button onclick="refreshModules()" style="padding: 8px 16px; background-color: #666; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+
+        // Show module selector button once game is joined
+        function showModuleSelectorButton() {
+            const button = document.getElementById('module-selector-btn');
+            if (button) {
+                button.style.display = 'inline-block';
+            }
+        }
+
+        // ============================================================================
+        // END MODULE SELECTION FUNCTIONS
+        // ============================================================================
 
         function showModuleCreationProgress() {
             document.getElementById('module-creation-progress').style.display = 'block';

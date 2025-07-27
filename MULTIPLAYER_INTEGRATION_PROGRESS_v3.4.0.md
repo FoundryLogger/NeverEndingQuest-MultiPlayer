@@ -1,4 +1,4 @@
-# NeverEndingQuest Multiplayer Integration - Progress Report v3.3.0
+# NeverEndingQuest Multiplayer Integration - Progress Report v3.4.0 (current)
 
 ## 🎮 **PROJECT OVERVIEW**
 
@@ -112,6 +112,16 @@ NeverEndingQuest has been successfully transformed from a single-player applicat
 - **Web Interface Integration:** Module creation form properly generates and sends specifications
 - **Module Generation Success:** Successfully created "The Crimson Eclipse" module with all areas
 
+### ✅ **15. Module Selection and Switching System - COMPLETED v3.4.0**
+- **Module Discovery Engine:** Automated scanning and validation of all available modules with metadata extraction
+- **Interactive Web Interface:** Modern modal overlay with responsive module cards and current module highlighting
+- **Real-time Module Switching:** Seamless module transitions with session state management and live updates
+- **Comprehensive API Endpoints:** REST API for module listing, switching, and detailed information retrieval
+- **Advanced Validation:** Path traversal protection, module integrity checks, and combat state validation
+- **SocketIO Integration:** Real-time notifications and UI synchronization across all connected players
+- **Module Metadata Display:** Shows completion percentage, module type, areas count, NPCs, and creation dates
+- **Safety Features:** Prevents module switching during combat or critical operations
+
 ## 🔧 **TECHNICAL IMPLEMENTATIONS**
 
 ### **Module Creation System Architecture - v3.3.0**
@@ -186,6 +196,262 @@ function submitModuleCreation(event) {
         text: modulePrompt
     });
 }
+```
+
+### **Module Selection and Switching System Architecture - v3.4.0**
+```python
+# Module Discovery Engine (server.py)
+def discover_available_modules():
+    """Discover all available modules with metadata"""
+    discovered_modules = []
+    
+    for item in os.listdir(modules_dir):
+        module_path = os.path.join(modules_dir, item)
+        if not os.path.isdir(module_path) or item.startswith('.'):
+            continue
+            
+        # Skip special directories
+        if item in ['conversation_history', 'logs', 'backups', 'campaign_archives', 'campaign_summaries']:
+            continue
+            
+        # Load module context for metadata
+        context_file = os.path.join(module_path, "module_context.json")
+        plot_file = os.path.join(module_path, "module_plot.json")
+        
+        if not os.path.exists(context_file):
+            continue
+            
+        context_data = safe_json_load(context_file)
+        if not context_data or not context_data.get("module_name"):
+            continue
+            
+        # Calculate completion percentage
+        completion_percentage = 0
+        if os.path.exists(plot_file):
+            plot_data = safe_json_load(plot_file)
+            if plot_data and "plotPoints" in plot_data:
+                total_points = len(plot_data["plotPoints"])
+                completed_points = sum(1 for pp in plot_data["plotPoints"] if pp.get("status") == "completed")
+                if total_points > 0:
+                    completion_percentage = int((completed_points / total_points) * 100)
+        
+        module_info = {
+            "name": item,
+            "display_name": context_data.get("module_name", item.replace("_", " ")),
+            "description": get_module_description(plot_data),
+            "type": determine_module_type(context_data),
+            "level_range": "1-20",
+            "completion_percentage": completion_percentage,
+            "created_date": get_module_creation_date(module_path),
+            "last_played": get_module_last_played(module_path),
+            "areas_count": len(context_data.get("areas", {})),
+            "npcs_count": len(context_data.get("npcs", {}))
+        }
+        
+        discovered_modules.append(module_info)
+    
+    return discovered_modules
+
+# Module Switching with Validation (server.py)
+def switch_to_module(new_module_name):
+    """Switch the active module and update game state"""
+    try:
+        # Validate input and sanitize module name (prevent path traversal)
+        if not new_module_name or not isinstance(new_module_name, str):
+            return False
+        new_module_name = new_module_name.replace("..", "").replace("/", "_").replace("\\", "_")
+        
+        # Validate module exists and has required files
+        module_path = os.path.join("modules", new_module_name)
+        context_file = os.path.join(module_path, "module_context.json")
+        if not os.path.exists(module_path) or not os.path.exists(context_file):
+            return False
+        
+        # Update party tracker with new module
+        if "party_tracker" not in GAME_STATE or GAME_STATE["party_tracker"] is None:
+            GAME_STATE["party_tracker"] = {}
+        
+        GAME_STATE["party_tracker"]["module"] = new_module_name.replace("_", " ")
+        GAME_STATE["party_tracker"]["current_module"] = new_module_name
+        
+        # Load new module data (context, party tracker, location data)
+        path_manager = ModulePathManager(new_module_name)
+        
+        # Load party tracker for new module
+        party_tracker_path = os.path.join(module_path, "party_tracker.json")
+        if os.path.exists(party_tracker_path):
+            party_tracker_data = safe_json_load(party_tracker_path)
+            if party_tracker_data:
+                GAME_STATE["party_tracker"].update(party_tracker_data)
+        
+        # Load module context
+        context_path = os.path.join(module_path, "module_context.json")
+        if os.path.exists(context_path):
+            context_data = safe_json_load(context_path)
+            if context_data:
+                GAME_STATE["module_data"] = context_data
+        
+        return True
+    except Exception as e:
+        return False
+```
+
+### **Module Selection API Endpoints - v3.4.0**
+```python
+# Module Listing API (server.py)
+@app.route('/api/modules', methods=['GET'])
+def get_available_modules():
+    """API endpoint to get all available modules with metadata"""
+    try:
+        discovered_modules = discover_available_modules()
+        current_module = get_current_module_name()
+        
+        # Mark current module as active
+        for module in discovered_modules:
+            module["is_active"] = (module["name"] == current_module)
+        
+        response_data = {
+            "modules": discovered_modules,
+            "current_module": current_module,
+            "total_count": len(discovered_modules)
+        }
+        
+        return jsonify(response_data)
+    except Exception as e:
+        return jsonify({"error": "Failed to retrieve modules"}), 500
+
+# Module Switching API with Validation (server.py)
+@app.route('/api/switch-module', methods=['POST'])
+def switch_module():
+    """API endpoint to switch the active module"""
+    try:
+        # Validate request and input
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+            
+        data = request.get_json()
+        if not data or 'module_name' not in data:
+            return jsonify({"error": "Module name is required"}), 400
+        
+        new_module_name = data['module_name']
+        
+        # Validate module name format
+        if not isinstance(new_module_name, str) or len(new_module_name.strip()) == 0:
+            return jsonify({"error": "Invalid module name format"}), 400
+        
+        # Validate module exists
+        available_modules = discover_available_modules()
+        module_names = [m["name"] for m in available_modules]
+        
+        if new_module_name not in module_names:
+            return jsonify({"error": "Module not found"}), 404
+        
+        # Safety check: prevent switching during combat or critical operations
+        if GAME_STATE.get("in_combat", False):
+            return jsonify({"error": "Cannot switch modules during combat"}), 409
+        
+        # Switch to the new module
+        success = switch_to_module(new_module_name)
+        
+        if success:
+            # Broadcast module change to all clients
+            socketio.emit('module_switched', {
+                'module_name': new_module_name,
+                'display_name': new_module_name.replace("_", " "),
+                'previous_module': current_module
+            })
+            
+            return jsonify({
+                "success": True,
+                "message": f"Switched to {new_module_name.replace('_', ' ')}",
+                "module_name": new_module_name
+            })
+        else:
+            return jsonify({"error": "Failed to switch module"}), 500
+    except Exception as e:
+        return jsonify({"error": "Internal server error"}), 500
+```
+
+### **Module Selection Frontend Integration - v3.4.0**
+```javascript
+// Module Selection Modal and Management (multiplayer_interface.html)
+async function loadAvailableModules() {
+    try {
+        const response = await fetch('/api/modules');
+        const data = await response.json();
+        
+        if (response.ok) {
+            currentModules = data.modules;
+            currentModuleName = data.current_module;
+            
+            displayCurrentModule(data.current_module);
+            displayModuleCards(data.modules);
+        } else {
+            displayModuleError('Failed to load modules: ' + data.error);
+        }
+    } catch (error) {
+        displayModuleError('Error connecting to server');
+    }
+}
+
+async function selectModule(moduleName) {
+    if (moduleName === currentModuleName) {
+        return; // Already in this module
+    }
+
+    try {
+        // Show loading state
+        const button = document.querySelector(`[data-module-name="${moduleName}"] .module-select-btn`);
+        button.innerHTML = '<span class="loading-spinner"></span>Switching...';
+        button.disabled = true;
+
+        const response = await fetch('/api/switch-module', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ module_name: moduleName })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            // Success - close modal and refresh
+            closeModuleSelector();
+            addMessage('system', data.message, 'Module Switch');
+            updateModuleInfo(moduleName);
+            
+            // Refresh game state
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            // Error handling
+            addMessage('system', data.error || 'Failed to switch module', 'Module Switch');
+            button.textContent = 'Select Module';
+            button.disabled = false;
+        }
+    } catch (error) {
+        addMessage('system', 'Error connecting to server', 'Module Switch');
+        const button = document.querySelector(`[data-module-name="${moduleName}"] .module-select-btn`);
+        button.textContent = 'Select Module';
+        button.disabled = false;
+    }
+}
+
+// Real-time Module Switch Event Handler
+socket.on('module_switched', (data) => {
+    addMessage('system', `Switched to module: ${data.display_name}`, 'Module Switch');
+    
+    if (currentModuleName !== data.module_name) {
+        currentModuleName = data.module_name;
+        
+        // Update location details to show new module
+        const locationDetails = document.getElementById('location-details');
+        if (locationDetails) {
+            locationDetails.textContent = `Module: ${data.display_name}`;
+        }
+        
+        // Refresh the page to load new module data
+        setTimeout(() => location.reload(), 2000);
+    }
+});
 ```
 
 ### **Level Up System Architecture - v3.2.0**

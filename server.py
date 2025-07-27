@@ -405,6 +405,240 @@ def check_all_modules_plot_completion():
     
     return all_modules_data
 
+def discover_available_modules():
+    """Discover all available modules with metadata"""
+    import os
+    from datetime import datetime
+    
+    modules_dir = "modules"
+    discovered_modules = []
+    
+    if not os.path.exists(modules_dir):
+        return discovered_modules
+    
+    # Find all module directories
+    for item in os.listdir(modules_dir):
+        module_path = os.path.join(modules_dir, item)
+        if not os.path.isdir(module_path) or item.startswith('.'):
+            continue
+            
+        # Skip special directories
+        if item in ['conversation_history', 'logs', 'backups', 'campaign_archives', 'campaign_summaries']:
+            continue
+            
+        try:
+            # Load module context for metadata
+            context_file = os.path.join(module_path, "module_context.json")
+            plot_file = os.path.join(module_path, "module_plot.json")
+            
+            if not os.path.exists(context_file):
+                continue
+                
+            context_data = safe_json_load(context_file)
+            if not context_data:
+                debug(f"Failed to load context data for module {item}", category="module_discovery")
+                continue
+                
+            # Validate required fields in context data
+            if not context_data.get("module_name"):
+                debug(f"Module {item} missing module_name in context", category="module_discovery")
+                continue
+                
+            # Calculate completion percentage
+            completion_percentage = 0
+            if os.path.exists(plot_file):
+                plot_data = safe_json_load(plot_file)
+                if plot_data and "plotPoints" in plot_data:
+                    total_points = len(plot_data["plotPoints"])
+                    completed_points = sum(1 for pp in plot_data["plotPoints"] if pp.get("status") == "completed")
+                    if total_points > 0:
+                        completion_percentage = int((completed_points / total_points) * 100)
+            
+            # Get module metadata
+            module_info = {
+                "name": item,
+                "display_name": context_data.get("module_name", item.replace("_", " ")),
+                "description": get_module_description(plot_data) if 'plot_data' in locals() else "Adventure module",
+                "type": determine_module_type(context_data),
+                "level_range": "1-20",  # Default, could be enhanced
+                "completion_percentage": completion_percentage,
+                "created_date": get_module_creation_date(module_path),
+                "last_played": get_module_last_played(module_path),
+                "areas_count": len(context_data.get("areas", {})),
+                "npcs_count": len(context_data.get("npcs", {}))
+            }
+            
+            discovered_modules.append(module_info)
+            
+        except Exception as e:
+            debug(f"Error processing module {item}: {str(e)}", category="module_discovery")
+            continue
+    
+    # Sort by last played date (most recent first)
+    discovered_modules.sort(key=lambda x: x.get("last_played", "1970-01-01"), reverse=True)
+    
+    return discovered_modules
+
+def get_module_description(plot_data):
+    """Extract description from module plot data"""
+    if not plot_data:
+        return "Adventure module"
+        
+    main_objective = plot_data.get("mainObjective", "")
+    if main_objective:
+        return main_objective[:100] + "..." if len(main_objective) > 100 else main_objective
+        
+    plot_title = plot_data.get("plotTitle", "")
+    if plot_title:
+        return f"Adventure: {plot_title}"
+        
+    return "Adventure module"
+
+def determine_module_type(context_data):
+    """Determine module type based on areas"""
+    areas = context_data.get("areas", {})
+    if not areas:
+        return "mixed"
+        
+    area_types = [area.get("type", "mixed") for area in areas.values()]
+    
+    # If all areas are the same type, return that type
+    unique_types = set(area_types)
+    if len(unique_types) == 1:
+        return list(unique_types)[0]
+    
+    # If there are dungeons, prioritize dungeon
+    if "dungeon" in unique_types:
+        return "dungeon"
+    
+    # If there are towns and wilderness, it's mixed
+    if "town" in unique_types and "wilderness" in unique_types:
+        return "mixed"
+        
+    # Default to mixed
+    return "mixed"
+
+def get_module_creation_date(module_path):
+    """Get module creation date from file system"""
+    try:
+        context_file = os.path.join(module_path, "module_context.json")
+        if os.path.exists(context_file):
+            timestamp = os.path.getctime(context_file)
+            return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d")
+    except:
+        pass
+    return "Unknown"
+
+def get_module_last_played(module_path):
+    """Get module last played date"""
+    try:
+        # Check conversation history for this module
+        conv_history_file = os.path.join("modules", "conversation_history", "conversation_history.json")
+        if os.path.exists(conv_history_file):
+            timestamp = os.path.getmtime(conv_history_file)
+            return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d")
+        
+        # Fallback to party tracker
+        tracker_file = os.path.join(module_path, "party_tracker.json")
+        if os.path.exists(tracker_file):
+            timestamp = os.path.getmtime(tracker_file)
+            return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d")
+    except:
+        pass
+    return "Never"
+
+def get_current_module_name():
+    """Get the current active module name"""
+    try:
+        party_tracker = GAME_STATE.get("party_tracker", {})
+        current_module = party_tracker.get("module", "").replace(" ", "_")
+        if not current_module:
+            current_module = party_tracker.get("current_module", "Keep_of_Doom")
+        return current_module
+    except:
+        return "Keep_of_Doom"
+
+def calculate_module_completion(plot_data):
+    """Calculate module completion percentage"""
+    if not plot_data or "plotPoints" not in plot_data:
+        return 0
+        
+    total_points = len(plot_data["plotPoints"])
+    if total_points == 0:
+        return 0
+        
+    completed_points = sum(1 for pp in plot_data["plotPoints"] if pp.get("status") == "completed")
+    return int((completed_points / total_points) * 100)
+
+def switch_to_module(new_module_name):
+    """Switch the active module and update game state"""
+    try:
+        # Validate input
+        if not new_module_name or not isinstance(new_module_name, str):
+            error("Invalid module name provided", category="module_switching")
+            return False
+            
+        # Sanitize module name (prevent path traversal)
+        new_module_name = new_module_name.replace("..", "").replace("/", "_").replace("\\", "_")
+        
+        # Validate module exists
+        module_path = os.path.join("modules", new_module_name)
+        if not os.path.exists(module_path):
+            error(f"Module {new_module_name} does not exist", category="module_switching")
+            return False
+            
+        # Validate module has required files
+        context_file = os.path.join(module_path, "module_context.json")
+        if not os.path.exists(context_file):
+            error(f"Module {new_module_name} is missing required context file", category="module_switching")
+            return False
+        
+        # Update party tracker with new module
+        if "party_tracker" not in GAME_STATE or GAME_STATE["party_tracker"] is None:
+            GAME_STATE["party_tracker"] = {}
+        
+        GAME_STATE["party_tracker"]["module"] = new_module_name.replace("_", " ")
+        GAME_STATE["party_tracker"]["current_module"] = new_module_name
+        
+        # Load new module data
+        try:
+            path_manager = ModulePathManager(new_module_name)
+            
+            # Load party tracker for new module (it's in the module directory)
+            party_tracker_path = os.path.join(module_path, "party_tracker.json")
+            if os.path.exists(party_tracker_path):
+                party_tracker_data = safe_json_load(party_tracker_path)
+                if party_tracker_data:
+                    # Update current location and other module-specific data
+                    GAME_STATE["party_tracker"].update(party_tracker_data)
+            
+            # Load module context
+            context_path = os.path.join(module_path, "module_context.json")
+            if os.path.exists(context_path):
+                context_data = safe_json_load(context_path)
+                if context_data:
+                    GAME_STATE["module_data"] = context_data
+            
+            # Load current location data if available
+            current_location = GAME_STATE["party_tracker"].get("current_location")
+            if current_location:
+                location_path = path_manager.get_area_file_path(current_location)
+                if os.path.exists(location_path):
+                    location_data = safe_json_load(location_path)
+                    if location_data:
+                        GAME_STATE["location_data"] = location_data
+            
+            info(f"Successfully switched to module: {new_module_name}", category="module_switching")
+            return True
+            
+        except Exception as e:
+            error(f"Failed to load data for module {new_module_name}: {str(e)}", category="module_switching")
+            return False
+        
+    except Exception as e:
+        error(f"Failed to switch to module {new_module_name}: {str(e)}", category="module_switching")
+        return False
+
 def validate_ai_response(primary_response, user_input, validation_prompt_text, conversation_history, party_tracker_data):
     """Validate AI response using secondary model"""
     try:
@@ -633,6 +867,138 @@ def index():
 def get_game_state():
     """API endpoint to get current game state"""
     return jsonify(get_current_state_for_client())
+
+@app.route('/api/modules', methods=['GET'])
+def get_available_modules():
+    """API endpoint to get all available modules with metadata"""
+    try:
+        discovered_modules = discover_available_modules()
+        current_module = get_current_module_name()
+        
+        # Mark current module as active
+        for module in discovered_modules:
+            module["is_active"] = (module["name"] == current_module)
+        
+        response_data = {
+            "modules": discovered_modules,
+            "current_module": current_module,
+            "total_count": len(discovered_modules)
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        error(f"Failed to get available modules: {str(e)}", category="api")
+        return jsonify({"error": "Failed to retrieve modules"}), 500
+
+@app.route('/api/switch-module', methods=['POST'])
+def switch_module():
+    """API endpoint to switch the active module"""
+    try:
+        # Validate request content type
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+            
+        data = request.get_json()
+        if not data or 'module_name' not in data:
+            return jsonify({"error": "Module name is required"}), 400
+        
+        new_module_name = data['module_name']
+        
+        # Validate module name format
+        if not isinstance(new_module_name, str) or len(new_module_name.strip()) == 0:
+            return jsonify({"error": "Invalid module name format"}), 400
+            
+        new_module_name = new_module_name.strip()
+        
+        # Validate module exists
+        available_modules = discover_available_modules()
+        module_names = [m["name"] for m in available_modules]
+        
+        if new_module_name not in module_names:
+            return jsonify({"error": "Module not found"}), 404
+        
+        # Check if we're already in this module
+        current_module = get_current_module_name()
+        if current_module == new_module_name:
+            return jsonify({
+                "success": True,
+                "message": f"Already in module {new_module_name}",
+                "module_name": new_module_name
+            })
+        
+        # Safety check: prevent switching during combat or critical operations
+        if GAME_STATE.get("in_combat", False):
+            return jsonify({"error": "Cannot switch modules during combat"}), 409
+            
+        if len(GAME_STATE.get("connected_players", [])) > 1:
+            # Could add additional checks for multiplayer scenarios
+            pass
+        
+        # Switch to the new module
+        success = switch_to_module(new_module_name)
+        
+        if success:
+            # Broadcast module change to all clients
+            socketio.emit('module_switched', {
+                'module_name': new_module_name,
+                'display_name': new_module_name.replace("_", " "),
+                'previous_module': current_module
+            })
+            
+            return jsonify({
+                "success": True,
+                "message": f"Switched to {new_module_name.replace('_', ' ')}",
+                "module_name": new_module_name
+            })
+        else:
+            return jsonify({"error": "Failed to switch module"}), 500
+            
+    except Exception as e:
+        error(f"Failed to switch module: {str(e)}", category="api")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/module/<module_name>', methods=['GET'])
+def get_module_details(module_name):
+    """API endpoint to get detailed information about a specific module"""
+    try:
+        # Load module data
+        module_path = os.path.join("modules", module_name)
+        if not os.path.exists(module_path):
+            return jsonify({"error": "Module not found"}), 404
+        
+        context_file = os.path.join(module_path, "module_context.json")
+        plot_file = os.path.join(module_path, "module_plot.json")
+        
+        if not os.path.exists(context_file):
+            return jsonify({"error": "Module context not found"}), 404
+        
+        context_data = safe_json_load(context_file)
+        plot_data = safe_json_load(plot_file) if os.path.exists(plot_file) else {}
+        
+        # Get detailed module information
+        module_details = {
+            "name": module_name,
+            "display_name": context_data.get("module_name", module_name.replace("_", " ")),
+            "description": get_module_description(plot_data),
+            "main_objective": plot_data.get("mainObjective", ""),
+            "plot_title": plot_data.get("plotTitle", ""),
+            "type": determine_module_type(context_data),
+            "areas": context_data.get("areas", {}),
+            "npcs": context_data.get("npcs", {}),
+            "plot_points": plot_data.get("plotPoints", []),
+            "areas_count": len(context_data.get("areas", {})),
+            "npcs_count": len(context_data.get("npcs", {})),
+            "plot_points_count": len(plot_data.get("plotPoints", [])),
+            "completion_percentage": calculate_module_completion(plot_data),
+            "validation_issues": context_data.get("validation_issues", [])
+        }
+        
+        return jsonify(module_details)
+        
+    except Exception as e:
+        error(f"Failed to get module details for {module_name}: {str(e)}", category="api")
+        return jsonify({"error": "Failed to retrieve module details"}), 500
 
 # ============================================================================
 # SOCKET.IO EVENT HANDLERS
