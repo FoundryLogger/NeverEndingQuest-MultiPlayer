@@ -1,4 +1,4 @@
-# NeverEndingQuest Multiplayer Integration - Progress Report v3.4.0 (current)
+# NeverEndingQuest Multiplayer Integration - Progress Report v3.5.0 (current)
 
 ## 🎮 **PROJECT OVERVIEW**
 
@@ -121,6 +121,18 @@ NeverEndingQuest has been successfully transformed from a single-player applicat
 - **SocketIO Integration:** Real-time notifications and UI synchronization across all connected players
 - **Module Metadata Display:** Shows completion percentage, module type, areas count, NPCs, and creation dates
 - **Safety Features:** Prevents module switching during combat or critical operations
+
+### ✅ **16. Save/Load Game System - COMPLETED v3.5.0**
+- **Multiplayer Save Manager:** Extended SaveGameManager with thread-safe multiplayer functionality
+- **Permission System:** Host-only save/load permissions with clear UI warnings for non-host players
+- **Complete REST API:** Five endpoints for save creation, listing, loading, deletion, and metadata retrieval
+- **Real-time SocketIO Events:** Broadcast notifications for all save/load operations across connected players
+- **Interactive Web UI:** Save and Load game buttons with elegant modal interfaces for game management
+- **Atomic Operations:** Thread-safe save operations with backup creation and integrity validation
+- **Auto-save Support:** Configurable automatic saving system with visual indicators
+- **Comprehensive Metadata:** Multiplayer-specific save data including all players, host info, and character details
+- **Essential vs Full Saves:** Two save modes - essential files (29 files) vs complete backup (31+ files)
+- **Directory Management:** Module-specific save organization in `modules/[module]/saved_games/multiplayer/`
 
 ## 🔧 **TECHNICAL IMPLEMENTATIONS**
 
@@ -450,6 +462,130 @@ socket.on('module_switched', (data) => {
         
         // Refresh the page to load new module data
         setTimeout(() => location.reload(), 2000);
+    }
+});
+```
+
+### **Save/Load Game System Architecture - v3.5.0**
+```python
+# Multiplayer Save Manager (core/managers/multiplayer_save_manager.py)
+class MultiplayerSaveManager(SaveGameManager):
+    """Extends SaveGameManager with multiplayer-specific functionality"""
+    
+    def __init__(self):
+        super().__init__()
+        self.save_lock = threading.Lock()
+        self.active_players: Set[str] = set()
+        self.host_player: Optional[str] = None
+        self.auto_save_enabled = True
+        self.auto_save_interval = 300  # 5 minutes
+        
+    def create_save_game_thread_safe(self, player_name: str, description: str, 
+                                   save_mode: str = "essential") -> Tuple[bool, str]:
+        """Thread-safe save game creation with host permission check"""
+        if not self.can_player_save(player_name):
+            return False, f"Only the host ({self.host_player}) can save the game"
+            
+        with self.save_lock:
+            success, message = self.create_save_game(description, save_mode)
+            if success:
+                self.last_save_time = datetime.now()
+                message = f"{message}\nSaved by: {player_name}"
+            return success, message
+
+# REST API Endpoints (server.py)
+@app.route('/api/save-game', methods=['POST'])
+def create_save_game():
+    """API endpoint to create a new save game with permission validation"""
+    data = request.get_json()
+    player_name = data.get('player_name', '')
+    description = data.get('description', '')
+    save_mode = data.get('save_mode', 'essential')
+    
+    # Update save manager with current players and set host
+    current_players = list(GAME_STATE.get("character_sheets", {}).keys())
+    save_manager.set_active_players(current_players)
+    
+    if not save_manager.host_player and current_players:
+        save_manager.set_host_player(current_players[0])
+    
+    success, message = save_manager.create_save_game_thread_safe(player_name, description, save_mode)
+    
+    if success:
+        # Notify all players via SocketIO
+        socketio.emit('save_game_created', {
+            'success': True,
+            'message': message,
+            'saved_by': player_name,
+            'timestamp': datetime.now().isoformat()
+        })
+```
+
+### **Save/Load SocketIO Events - v3.5.0**
+```python
+# Save Game Event Handler (server.py)
+@socketio.on('save_game')
+def handle_save_game(data):
+    """Handle save game request with real-time validation and notifications"""
+    player_name = PLAYERS_SID_MAP.get(request.sid)
+    description = data.get('description', '')
+    save_mode = data.get('save_mode', 'essential')
+    
+    success, message = save_manager.create_save_game_thread_safe(player_name, description, save_mode)
+    
+    if success:
+        # Broadcast to all players
+        socketio.emit('save_game_created', {
+            'success': True,
+            'message': message,
+            'saved_by': player_name,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+        emit('save_game_response', {'success': True, 'message': message})
+    else:
+        emit('save_game_response', {'success': False, 'error': message})
+```
+
+### **Save/Load UI Components - v3.5.0**
+```javascript
+// Save Game Modal and Functions (multiplayer_interface.html)
+function showSaveModal() {
+    const modal = document.getElementById('save-modal');
+    const hostWarning = document.getElementById('save-host-warning');
+    
+    // Check if player can save (host permissions)
+    if (!canSave) {
+        hostWarning.style.display = 'block';
+        document.getElementById('save-confirm-btn').disabled = true;
+    } else {
+        hostWarning.style.display = 'none';
+        document.getElementById('save-confirm-btn').disabled = false;
+    }
+    
+    modal.style.display = 'block';
+}
+
+function saveGame() {
+    const description = document.getElementById('save-description').value;
+    const saveMode = document.getElementById('save-mode').value;
+    
+    // Send save request via SocketIO for real-time processing
+    socket.emit('save_game', {
+        description: description.trim(),
+        save_mode: saveMode
+    });
+}
+
+// Real-time Save Event Handlers
+socket.on('save_game_created', (data) => {
+    if (data.success) {
+        addMessage('system', data.message, 'Save Manager');
+        
+        // Show auto-save indicator
+        const autoSaveStatus = document.getElementById('auto-save-status');
+        autoSaveStatus.style.display = 'inline-block';
+        setTimeout(() => autoSaveStatus.style.display = 'none', 3000);
     }
 });
 ```

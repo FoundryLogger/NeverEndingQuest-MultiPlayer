@@ -130,6 +130,22 @@
             background-color: #1976D2;
         }
         
+        .save-button {
+            background-color: #FF9800;
+        }
+        
+        .save-button:hover {
+            background-color: #F57C00;
+        }
+        
+        .load-button {
+            background-color: #9C27B0;
+        }
+        
+        .load-button:hover {
+            background-color: #7B1FA2;
+        }
+        
         .panel-content {
             flex: 1;
             padding: 15px;
@@ -1350,8 +1366,11 @@
                 <div class="panel-header">
                     <span>Game Output</span>
                     <div class="header-buttons">
+                        <button class="toggle-button save-button" onclick="showSaveModal()">💾 Save Game</button>
+                        <button class="toggle-button load-button" onclick="showLoadModal()">📁 Load Game</button>
                         <button class="toggle-button secondary" id="toggle-character-btn" onclick="toggleCharacterPanel()">Show Character Sheet</button>
                         <span id="game-status">Waiting for players...</span>
+                        <span id="auto-save-status" class="auto-save-indicator" style="display: none;">Auto-saved</span>
                     </div>
                 </div>
                 <div class="panel-content">
@@ -1570,6 +1589,13 @@
         socket.on('player_joined', (data) => {
             addMessage('system', data.message);
             updateGameState(data);
+            
+            // Initialize save/load permissions (first player becomes host)
+            if (data.player_name === gameState.playerName) {
+                // Check if this player can save/load (usually the first player)
+                canSave = true; // Will be updated by server later
+                canLoad = true; // Will be updated by server later
+            }
         });
         
         socket.on('chat_message', (data) => {
@@ -1712,6 +1738,102 @@
              // Refresh character sheet if visible
              if (characterPanel.style.display !== 'none') {
                  loadCharacterData('stats');
+             }
+         });
+         
+         // ============================================================================
+         // SAVE/LOAD SYSTEM EVENT HANDLERS
+         // ============================================================================
+         
+         socket.on('save_game_response', (data) => {
+             console.log('Save game response:', data);
+             const saveBtn = document.getElementById('save-confirm-btn');
+             saveBtn.disabled = false;
+             saveBtn.textContent = 'Save Game';
+             
+             if (data.success) {
+                 addMessage('system', data.message, 'Save Manager');
+                 closeSaveModal();
+             } else {
+                 addMessage('system', data.error || 'Failed to save game', 'Save Manager');
+             }
+         });
+         
+         socket.on('save_game_created', (data) => {
+             console.log('Save game created:', data);
+             if (data.success) {
+                 addMessage('system', data.message, 'Save Manager');
+                 
+                 // Show auto-save indicator briefly
+                 const autoSaveStatus = document.getElementById('auto-save-status');
+                 autoSaveStatus.style.display = 'inline-block';
+                 setTimeout(() => {
+                     autoSaveStatus.style.display = 'none';
+                 }, 3000);
+             }
+         });
+         
+         socket.on('load_game_response', (data) => {
+             console.log('Load game response:', data);
+             const loadBtn = document.getElementById('load-confirm-btn');
+             loadBtn.disabled = false;
+             loadBtn.textContent = 'Load Game';
+             
+             if (data.success) {
+                 addMessage('system', data.message, 'Save Manager');
+                 closeLoadModal();
+                 // Refresh the page after loading
+                 setTimeout(() => {
+                     location.reload();
+                 }, 2000);
+             } else {
+                 addMessage('system', data.error || 'Failed to load game', 'Save Manager');
+             }
+         });
+         
+         socket.on('save_game_loaded', (data) => {
+             console.log('Save game loaded:', data);
+             if (data.success) {
+                 addMessage('system', data.message, 'Save Manager');
+                 // Refresh the page for all players
+                 setTimeout(() => {
+                     location.reload();
+                 }, 2000);
+             }
+         });
+         
+         socket.on('list_saves_response', (data) => {
+             console.log('List saves response:', data);
+             if (data.success) {
+                 displaySaveList(data.saves, data.can_load);
+                 // Update permission flags
+                 canSave = data.can_load; // Usually same as load permissions
+                 canLoad = data.can_load;
+             } else {
+                 const loading = document.getElementById('save-loading');
+                 const noSaves = document.getElementById('no-saves-message');
+                 loading.style.display = 'none';
+                 noSaves.style.display = 'block';
+                 noSaves.textContent = data.error || 'Failed to load saves';
+             }
+         });
+         
+         socket.on('save_game_deleted', (data) => {
+             console.log('Save game deleted:', data);
+             if (data.success) {
+                 addMessage('system', data.message, 'Save Manager');
+             }
+         });
+         
+         socket.on('auto_save_completed', (data) => {
+             console.log('Auto-save completed:', data);
+             if (data.success) {
+                 // Show auto-save indicator briefly
+                 const autoSaveStatus = document.getElementById('auto-save-status');
+                 autoSaveStatus.style.display = 'inline-block';
+                 setTimeout(() => {
+                     autoSaveStatus.style.display = 'none';
+                 }, 3000);
              }
          });
         
@@ -3036,6 +3158,82 @@
         .modal-button:hover:not(:disabled) {
             opacity: 0.8;
         }
+        
+        /* Save/Load specific styles */
+        .save-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        
+        .save-item {
+            padding: 12px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            background-color: #2a2a2a;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .save-item:hover {
+            background-color: #333;
+        }
+        
+        .save-item.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .save-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .save-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .save-item-date {
+            font-size: 12px;
+            color: #FFA500;
+        }
+        
+        .save-item-description {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 8px;
+        }
+        
+        .save-item-details {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .auto-save-indicator {
+            background-color: #4CAF50;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-left: 10px;
+        }
+        
+        .host-only-warning {
+            background-color: #f44336;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 14px;
+        }
     </style>
 
     <!-- LEVEL-UP MODAL -->
@@ -3425,6 +3623,274 @@
             socket.emit('player_action', {
                 player_name: gameState.playerName,
                 text: modulePrompt
+            });
+        }
+
+    </script>
+
+    <!-- SAVE GAME MODAL -->
+    <div id="save-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💾 Save Game</h3>
+                <span class="modal-close" onclick="closeSaveModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="save-host-warning" class="host-only-warning" style="display: none;">
+                    Only the host player can save the game.
+                </div>
+                <div class="modal-input">
+                    <label for="save-description">Save Description:</label>
+                    <input type="text" id="save-description" placeholder="Enter a description for this save..." maxlength="100">
+                </div>
+                <div class="modal-input">
+                    <label for="save-mode">Save Mode:</label>
+                    <select id="save-mode">
+                        <option value="essential">Essential Files Only (Faster)</option>
+                        <option value="full">Complete Save (Includes all files)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="closeSaveModal()">Cancel</button>
+                <button class="modal-button" onclick="saveGame()" id="save-confirm-btn">Save Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOAD GAME MODAL -->
+    <div id="load-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📁 Load Game</h3>
+                <span class="modal-close" onclick="closeLoadModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="load-host-warning" class="host-only-warning" style="display: none;">
+                    Only the host player can load saves.
+                </div>
+                <div id="save-loading" style="display: none; text-align: center; padding: 20px;">
+                    <div class="spinner"></div>
+                    <p>Loading save games...</p>
+                </div>
+                <div id="save-list" class="save-list">
+                    <!-- Save games will be loaded here dynamically -->
+                </div>
+                <div id="no-saves-message" style="display: none; text-align: center; padding: 20px; color: #999;">
+                    No save games found.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="closeLoadModal()">Cancel</button>
+                <button class="modal-button danger" onclick="deleteSelectedSave()" id="delete-save-btn" style="display: none;">Delete Save</button>
+                <button class="modal-button" onclick="loadSelectedSave()" id="load-confirm-btn" disabled>Load Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // SAVE/LOAD GAME FUNCTIONS
+        // ============================================================================
+
+        let selectedSaveId = null;
+        let currentSaves = [];
+        let canSave = false;
+        let canLoad = false;
+
+        // Save Game Functions
+        function showSaveModal() {
+            const modal = document.getElementById('save-modal');
+            const hostWarning = document.getElementById('save-host-warning');
+            const saveBtn = document.getElementById('save-confirm-btn');
+            
+            // Check if player can save
+            if (!canSave) {
+                hostWarning.style.display = 'block';
+                saveBtn.disabled = true;
+            } else {
+                hostWarning.style.display = 'none';
+                saveBtn.disabled = false;
+            }
+            
+            modal.style.display = 'block';
+            document.getElementById('save-description').focus();
+        }
+
+        function closeSaveModal() {
+            document.getElementById('save-modal').style.display = 'none';
+            document.getElementById('save-description').value = '';
+            document.getElementById('save-mode').value = 'essential';
+        }
+
+        function saveGame() {
+            const description = document.getElementById('save-description').value;
+            const saveMode = document.getElementById('save-mode').value;
+            
+            if (!description.trim()) {
+                alert('Please enter a description for the save game.');
+                return;
+            }
+            
+            const saveBtn = document.getElementById('save-confirm-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            // Send save request via SocketIO
+            socket.emit('save_game', {
+                description: description.trim(),
+                save_mode: saveMode
+            });
+        }
+
+        // Load Game Functions
+        function showLoadModal() {
+            const modal = document.getElementById('load-modal');
+            const hostWarning = document.getElementById('load-host-warning');
+            const loadBtn = document.getElementById('load-confirm-btn');
+            const deleteBtn = document.getElementById('delete-save-btn');
+            
+            modal.style.display = 'block';
+            selectedSaveId = null;
+            loadBtn.disabled = true;
+            deleteBtn.style.display = 'none';
+            
+            // Check if player can load
+            if (!canLoad) {
+                hostWarning.style.display = 'block';
+                loadBtn.disabled = true;
+                deleteBtn.style.display = 'none';
+            } else {
+                hostWarning.style.display = 'none';
+            }
+            
+            loadSaveList();
+        }
+
+        function closeLoadModal() {
+            document.getElementById('load-modal').style.display = 'none';
+            selectedSaveId = null;
+        }
+
+        function loadSaveList() {
+            const loading = document.getElementById('save-loading');
+            const saveList = document.getElementById('save-list');
+            const noSaves = document.getElementById('no-saves-message');
+            
+            loading.style.display = 'block';
+            saveList.innerHTML = '';
+            noSaves.style.display = 'none';
+            
+            // Request save list via SocketIO
+            socket.emit('list_saves', {});
+        }
+
+        function selectSave(saveFolder, element) {
+            // Remove previous selection
+            document.querySelectorAll('.save-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Select this save
+            element.classList.add('selected');
+            selectedSaveId = saveFolder;
+            
+            const loadBtn = document.getElementById('load-confirm-btn');
+            const deleteBtn = document.getElementById('delete-save-btn');
+            
+            if (canLoad) {
+                loadBtn.disabled = false;
+                deleteBtn.style.display = 'inline-block';
+            }
+        }
+
+        function loadSelectedSave() {
+            if (!selectedSaveId) return;
+            
+            const loadBtn = document.getElementById('load-confirm-btn');
+            loadBtn.disabled = true;
+            loadBtn.textContent = 'Loading...';
+            
+            // Send load request via SocketIO
+            socket.emit('load_game', {
+                save_id: selectedSaveId
+            });
+        }
+
+        function deleteSelectedSave() {
+            if (!selectedSaveId) return;
+            
+            const saveItem = currentSaves.find(save => save.save_folder === selectedSaveId);
+            const saveName = saveItem ? saveItem.description || 'Unnamed Save' : 'Unknown Save';
+            
+            if (!confirm(`Are you sure you want to delete "${saveName}"? This action cannot be undone.`)) {
+                return;
+            }
+            
+            // Send delete request via API
+            fetch(`/api/delete-save/${selectedSaveId}?player_name=${encodeURIComponent(gameState.playerName)}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addMessage('system', data.message, 'Save Manager');
+                    loadSaveList(); // Refresh the list
+                } else {
+                    addMessage('system', data.error || 'Failed to delete save', 'Save Manager');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting save:', error);
+                addMessage('system', 'Error deleting save game', 'Save Manager');
+            });
+        }
+
+        function displaySaveList(saves, playerCanLoad) {
+            const loading = document.getElementById('save-loading');
+            const saveList = document.getElementById('save-list');
+            const noSaves = document.getElementById('no-saves-message');
+            
+            loading.style.display = 'none';
+            currentSaves = saves;
+            canLoad = playerCanLoad;
+            
+            if (saves.length === 0) {
+                noSaves.style.display = 'block';
+                return;
+            }
+            
+            saveList.innerHTML = '';
+            
+            saves.forEach(save => {
+                const saveItem = document.createElement('div');
+                saveItem.className = 'save-item';
+                if (!playerCanLoad) {
+                    saveItem.classList.add('disabled');
+                }
+                
+                const isMultiplayer = save.multiplayer || false;
+                const playerCount = save.player_count || 0;
+                const module = save.module || 'Unknown';
+                
+                saveItem.innerHTML = `
+                    <div class="save-item-header">
+                        <span>${save.description || 'Unnamed Save'}</span>
+                        <span class="save-item-date">${new Date(save.save_timestamp).toLocaleString()}</span>
+                    </div>
+                    <div class="save-item-details">
+                        <span>Module: ${module}</span>
+                        <span>Players: ${playerCount}</span>
+                        <span>Mode: ${save.save_mode || 'essential'}</span>
+                        ${isMultiplayer ? '<span style="color: #4CAF50;">[Multiplayer]</span>' : ''}
+                    </div>
+                `;
+                
+                if (playerCanLoad) {
+                    saveItem.onclick = () => selectSave(save.save_folder, saveItem);
+                }
+                
+                saveList.appendChild(saveItem);
             });
         }
 

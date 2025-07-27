@@ -75,6 +75,9 @@ from main import save_conversation_history
 # Import inventory response system
 from core.managers.inventory_manager import process_inventory_response
 
+# Import save game manager for multiplayer
+from core.managers.multiplayer_save_manager import get_multiplayer_save_manager
+
 # Import configuration
 try:
     from config import (
@@ -137,6 +140,9 @@ PLAYERS_SID_MAP = {}
 
 # Level-up sessions dictionary (player_name -> LevelUpSession)
 LEVEL_UP_SESSIONS = {}
+
+# Initialize multiplayer save manager
+save_manager = get_multiplayer_save_manager()
 
 # Game configuration
 TEMPERATURE = 0.8
@@ -999,6 +1005,178 @@ def get_module_details(module_name):
     except Exception as e:
         error(f"Failed to get module details for {module_name}: {str(e)}", category="api")
         return jsonify({"error": "Failed to retrieve module details"}), 500
+
+# ============================================================================
+# SAVE/LOAD GAME API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/save-game', methods=['POST'])
+def create_save_game():
+    """API endpoint to create a new save game"""
+    try:
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+        
+        data = request.get_json()
+        player_name = data.get('player_name', '')
+        description = data.get('description', '')
+        save_mode = data.get('save_mode', 'essential')
+        
+        if not player_name:
+            return jsonify({"error": "Player name is required"}), 400
+        
+        # Update save manager with current players
+        current_players = list(GAME_STATE.get("character_sheets", {}).keys())
+        save_manager.set_active_players(current_players)
+        
+        # Set host if not already set (first player becomes host)
+        if not save_manager.host_player and current_players:
+            save_manager.set_host_player(current_players[0])
+        
+        # Create save game
+        success, message = save_manager.create_save_game_thread_safe(player_name, description, save_mode)
+        
+        if success:
+            # Notify all players via SocketIO
+            socketio.emit('save_game_created', {
+                'success': True,
+                'message': message,
+                'saved_by': player_name,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            return jsonify({
+                "success": True,
+                "message": message
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": message
+            }), 400
+            
+    except Exception as e:
+        error(f"Failed to create save game: {str(e)}", category="save_api")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/list-saves', methods=['GET'])
+def list_save_games():
+    """API endpoint to list all available save games"""
+    try:
+        player_name = request.args.get('player_name', '')
+        
+        # Get saves with permission info
+        saves, can_load = save_manager.list_save_games_with_permissions(player_name)
+        
+        return jsonify({
+            "saves": saves,
+            "can_load": can_load,
+            "host_player": save_manager.host_player,
+            "total_count": len(saves)
+        })
+        
+    except Exception as e:
+        error(f"Failed to list save games: {str(e)}", category="save_api")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/load-save/<save_id>', methods=['POST'])
+def load_save_game(save_id):
+    """API endpoint to load a specific save game"""
+    try:
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
+        
+        data = request.get_json()
+        player_name = data.get('player_name', '')
+        
+        if not player_name:
+            return jsonify({"error": "Player name is required"}), 400
+        
+        # Load save game
+        success, message = save_manager.restore_save_game_thread_safe(player_name, save_id)
+        
+        if success:
+            # Reload game state after loading
+            reload_game_state()
+            
+            # Notify all players via SocketIO
+            socketio.emit('save_game_loaded', {
+                'success': True,
+                'message': message,
+                'loaded_by': player_name,
+                'save_id': save_id,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            return jsonify({
+                "success": True,
+                "message": message,
+                "save_id": save_id
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": message
+            }), 400
+            
+    except Exception as e:
+        error(f"Failed to load save game: {str(e)}", category="save_api")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/delete-save/<save_id>', methods=['DELETE'])
+def delete_save_game(save_id):
+    """API endpoint to delete a specific save game"""
+    try:
+        player_name = request.args.get('player_name', '')
+        
+        if not player_name:
+            return jsonify({"error": "Player name is required"}), 400
+        
+        # Check permissions (only host can delete)
+        if not save_manager.can_player_save(player_name):
+            return jsonify({"error": f"Only the host ({save_manager.host_player}) can delete saves"}), 403
+        
+        # Delete save game
+        success, message = save_manager.delete_save_game(save_id)
+        
+        if success:
+            # Notify all players via SocketIO
+            socketio.emit('save_game_deleted', {
+                'success': True,
+                'message': message,
+                'deleted_by': player_name,
+                'save_id': save_id,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            return jsonify({
+                "success": True,
+                "message": message
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": message
+            }), 400
+            
+    except Exception as e:
+        error(f"Failed to delete save game: {str(e)}", category="save_api")
+        return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/save-metadata/<save_id>', methods=['GET'])
+def get_save_metadata(save_id):
+    """API endpoint to get detailed metadata about a specific save"""
+    try:
+        save_info = save_manager.get_save_info(save_id)
+        
+        if save_info:
+            return jsonify(save_info)
+        else:
+            return jsonify({"error": "Save not found"}), 404
+            
+    except Exception as e:
+        error(f"Failed to get save metadata: {str(e)}", category="save_api")
+        return jsonify({"error": "Internal server error"}), 500
 
 # ============================================================================
 # SOCKET.IO EVENT HANDLERS
@@ -3217,6 +3395,159 @@ def handle_cancel_level_up(data):
     except Exception as e:
         error(f"Error cancelling level-up: {e}", category="level_up")
         emit('level_up_error', {'error': f'Error cancelling level-up: {str(e)}'})
+
+# ============================================================================
+# SAVE/LOAD SOCKET.IO EVENT HANDLERS
+# ============================================================================
+
+@socketio.on('save_game')
+def handle_save_game(data):
+    """Handle save game request via SocketIO"""
+    debug_socket_event('save_game', data)
+    try:
+        sid = request.sid
+        player_name = PLAYERS_SID_MAP.get(sid)
+        
+        if not player_name:
+            emit('save_game_response', {'success': False, 'error': 'Player not found'})
+            return
+        
+        description = data.get('description', '')
+        save_mode = data.get('save_mode', 'essential')
+        
+        # Update save manager with current players
+        current_players = list(GAME_STATE.get("character_sheets", {}).keys())
+        save_manager.set_active_players(current_players)
+        
+        # Set host if not already set
+        if not save_manager.host_player and current_players:
+            save_manager.set_host_player(current_players[0])
+        
+        # Create save game
+        success, message = save_manager.create_save_game_thread_safe(player_name, description, save_mode)
+        
+        if success:
+            # Notify all players
+            socketio.emit('save_game_created', {
+                'success': True,
+                'message': message,
+                'saved_by': player_name,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            # Respond to the requesting player
+            emit('save_game_response', {
+                'success': True,
+                'message': message
+            })
+        else:
+            emit('save_game_response', {
+                'success': False,
+                'error': message
+            })
+            
+    except Exception as e:
+        error(f"Error handling save game: {e}", category="save_api")
+        emit('save_game_response', {'success': False, 'error': f'Error saving game: {str(e)}'})
+
+@socketio.on('load_game')
+def handle_load_game(data):
+    """Handle load game request via SocketIO"""
+    debug_socket_event('load_game', data)
+    try:
+        sid = request.sid
+        player_name = PLAYERS_SID_MAP.get(sid)
+        
+        if not player_name:
+            emit('load_game_response', {'success': False, 'error': 'Player not found'})
+            return
+        
+        save_id = data.get('save_id', '')
+        
+        if not save_id:
+            emit('load_game_response', {'success': False, 'error': 'Save ID is required'})
+            return
+        
+        # Load save game
+        success, message = save_manager.restore_save_game_thread_safe(player_name, save_id)
+        
+        if success:
+            # Reload game state after loading
+            reload_game_state()
+            
+            # Notify all players
+            socketio.emit('save_game_loaded', {
+                'success': True,
+                'message': message,
+                'loaded_by': player_name,
+                'save_id': save_id,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            # Respond to the requesting player
+            emit('load_game_response', {
+                'success': True,
+                'message': message,
+                'save_id': save_id
+            })
+        else:
+            emit('load_game_response', {
+                'success': False,
+                'error': message
+            })
+            
+    except Exception as e:
+        error(f"Error handling load game: {e}", category="save_api")
+        emit('load_game_response', {'success': False, 'error': f'Error loading game: {str(e)}'})
+
+@socketio.on('list_saves')
+def handle_list_saves(data):
+    """Handle list saves request via SocketIO"""
+    debug_socket_event('list_saves', data)
+    try:
+        sid = request.sid
+        player_name = PLAYERS_SID_MAP.get(sid)
+        
+        if not player_name:
+            emit('list_saves_response', {'success': False, 'error': 'Player not found'})
+            return
+        
+        # Get saves with permission info
+        saves, can_load = save_manager.list_save_games_with_permissions(player_name)
+        
+        emit('list_saves_response', {
+            'success': True,
+            'saves': saves,
+            'can_load': can_load,
+            'host_player': save_manager.host_player,
+            'total_count': len(saves)
+        })
+        
+    except Exception as e:
+        error(f"Error listing saves: {e}", category="save_api")
+        emit('list_saves_response', {'success': False, 'error': f'Error listing saves: {str(e)}'})
+
+@socketio.on('auto_save')
+def handle_auto_save(data):
+    """Handle auto-save request"""
+    debug_socket_event('auto_save', data)
+    try:
+        # Check if auto-save should trigger
+        if save_manager.should_auto_save():
+            success, message = save_manager.create_auto_save()
+            
+            if success:
+                # Notify all players about auto-save
+                socketio.emit('auto_save_completed', {
+                    'success': True,
+                    'message': message,
+                    'timestamp': datetime.now().isoformat()
+                })
+            else:
+                warning(f"Auto-save failed: {message}", category="save_api")
+        
+    except Exception as e:
+        error(f"Error during auto-save: {e}", category="save_api")
 
 def reload_character_data_for_player(player_name):
     """Reload character data for a specific player after level-up"""
