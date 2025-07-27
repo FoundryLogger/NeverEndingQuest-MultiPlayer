@@ -197,6 +197,42 @@ def initialize_game_state():
         error(f"FAILURE: Failed to initialize game state", exception=e, category="initialization")
         return False
 
+def reload_game_state():
+    """Reload game state after module creation or changes"""
+    global GAME_STATE
+    
+    try:
+        debug("RELOAD: Reloading game state after module creation", category="module_management")
+        
+        # Reload party tracker (might have new module info)
+        GAME_STATE["party_tracker"] = safe_json_load("party_tracker.json")
+        
+        # Reload location data if party tracker is valid
+        if GAME_STATE["party_tracker"]:
+            current_area_id = GAME_STATE["party_tracker"]["worldConditions"]["currentAreaId"]
+            GAME_STATE["location_data"] = location_manager.get_location_info(
+                GAME_STATE["party_tracker"]["worldConditions"]["currentLocation"],
+                GAME_STATE["party_tracker"]["worldConditions"]["currentArea"],
+                current_area_id
+            )
+            
+            # Reload plot and module data for current module
+            module_name = GAME_STATE["party_tracker"].get("module", "").replace(" ", "_")
+            path_manager = ModulePathManager(module_name)
+            
+            GAME_STATE["plot_data"] = safe_json_load(path_manager.get_plot_path())
+            GAME_STATE["module_data"] = safe_json_load(path_manager.get_module_file_path())
+        
+        # Broadcast updated game state to all players
+        broadcast_full_game_state(message_type="system", message_content="Game state updated after module creation.")
+        
+        info("SUCCESS: Game state reloaded successfully", category="module_management")
+        return True
+        
+    except Exception as e:
+        error(f"FAILURE: Failed to reload game state", exception=e, category="module_management")
+        return False
+
 def ensure_main_system_prompt(conversation_history, main_system_prompt_text):
     """Ensure the main system prompt is first in the conversation history"""
     main_prompt_start = main_system_prompt_text[:50]
@@ -222,8 +258,11 @@ def get_ai_response(conversation_history, validation_retry_count=0, action_text=
                 user_input = msg.get("content", "")
                 break
         
-        # Check if module creation prompt is present in user input
-        has_module_creation_prompt = "You are a master storyteller, cartographer of myth" in user_input
+        # Check if module creation prompt is present in user input OR if user is requesting module creation
+        has_module_creation_prompt = ("You are a master storyteller, cartographer of myth" in user_input or 
+                                     "I am ready to embark on a new adventure" in user_input or
+                                     "create and explore a new module" in user_input or
+                                     "let's create this specific adventure module" in user_input)
         
         # Predict if actions will be required (unless we're in a validation retry or module creation prompt)
         if validation_retry_count == 0 and not has_module_creation_prompt:
@@ -251,9 +290,9 @@ def get_ai_response(conversation_history, validation_retry_count=0, action_text=
             else:
                 debug(f"MODEL ROUTING - Intelligent routing disabled, using FULL MODEL", category="ai_communication")
         
-        # Use lower temperature for inventory and level-up actions
+        # Use lower temperature for inventory, level-up, and module creation actions
         temperature = TEMPERATURE
-        if action_text and any(word in action_text.lower() for word in ['inventory', 'put', 'store', 'stow', 'add', 'take', 'level up', 'levelup', 'level-up', 'advance']):
+        if action_text and any(word in action_text.lower() for word in ['inventory', 'put', 'store', 'stow', 'add', 'take', 'level up', 'levelup', 'level-up', 'advance', 'create', 'module', 'adventure', 'new module', 'embark']):
             temperature = 0.2  # Lower temperature for more consistent JSON
             debug(f"Using lower temperature ({temperature}) for structured action", category="ai_communication")
         
@@ -275,6 +314,96 @@ def get_ai_response(conversation_history, validation_retry_count=0, action_text=
     except Exception as e:
         error(f"FAILURE: Failed to get AI response", exception=e, category="ai_communication")
         return None
+
+def check_all_modules_plot_completion():
+    """Check plot completion status for all available modules"""
+    import os
+    from utils.file_operations import safe_read_json
+    
+    modules_dir = "modules"
+    all_modules_data = {
+        "modules_checked": [],
+        "all_complete": True,
+        "completion_summary": {}
+    }
+    
+    if not os.path.exists(modules_dir):
+        debug("Modules directory not found", category="module_management")
+        return all_modules_data
+    
+    # Find all available modules
+    available_modules = []
+    for item in os.listdir(modules_dir):
+        if os.path.isdir(os.path.join(modules_dir, item)) and not item.startswith('.'):
+            # Check if it has a _module.json file to confirm it's a valid module
+            module_file = os.path.join(modules_dir, item, f"{item}_module.json")
+            if os.path.exists(module_file):
+                available_modules.append(item)
+    
+    # No modules found
+    if not available_modules:
+        return all_modules_data
+    
+    # Check each module
+    for module_name in available_modules:
+        try:
+            # Load the module plot file
+            plot_file = os.path.join(modules_dir, module_name, "module_plot.json")
+            
+            if os.path.exists(plot_file):
+                plot_data = safe_read_json(plot_file)
+                
+                # Check for plot points
+                if plot_data and "plotPoints" in plot_data and isinstance(plot_data["plotPoints"], list):
+                    total_plots = len(plot_data["plotPoints"])
+                    completed_plots = sum(1 for plot in plot_data["plotPoints"] if plot.get("completed", False))
+                    
+                    module_complete = completed_plots == total_plots and total_plots > 0
+                    
+                    all_modules_data["completion_summary"][module_name] = {
+                        "total_plots": total_plots,
+                        "completed_plots": completed_plots,
+                        "is_complete": module_complete,
+                        "plot_file_exists": True
+                    }
+                    
+                    if not module_complete:
+                        all_modules_data["all_complete"] = False
+                        
+                else:
+                    debug(f"Module {module_name} has no plot data or plotPoints", category="module_management")
+                    all_modules_data["completion_summary"][module_name] = {
+                        "total_plots": 0,
+                        "completed_plots": 0,
+                        "is_complete": False,
+                        "plot_file_exists": False
+                    }
+                    all_modules_data["all_complete"] = False
+                    
+            else:
+                debug(f"Module {module_name} has no module_plot.json file", category="module_management")
+                all_modules_data["completion_summary"][module_name] = {
+                    "total_plots": 0,
+                    "completed_plots": 0,
+                    "is_complete": False,
+                    "plot_file_exists": False
+                }
+                all_modules_data["all_complete"] = False
+                
+        except Exception as e:
+            error(f"Error loading plot data for module {module_name}: {e}", category="module_management")
+            all_modules_data["completion_summary"][module_name] = {
+                "total_plots": 0,
+                "completed_plots": 0,
+                "is_complete": False,
+                "plot_file_exists": False,
+                "error": str(e)
+            }
+            all_modules_data["all_complete"] = False
+    
+    all_modules_data["modules_checked"] = available_modules
+    
+    return all_modules_data
 
 def validate_ai_response(primary_response, user_input, validation_prompt_text, conversation_history, party_tracker_data):
     """Validate AI response using secondary model"""
@@ -778,8 +907,68 @@ def handle_player_action_logic(player_name, action_text, sid=None):
     
     # 3. COSTRUZIONE DELLA DM NOTE
     # Questa è la logica complessa di main.py per costruire la nota per l'AI
-    dm_note = f"Dungeon Master Note: Current date and time: {GAME_STATE['party_tracker']['worldConditions']['time']}. "
-    dm_note += f"Current location: {GAME_STATE['party_tracker']['worldConditions']['currentLocation']} in {GAME_STATE['party_tracker']['worldConditions']['currentArea']}. "
+    
+    # Check ALL modules for plot completion before suggesting module creation
+    module_creation_prompt = ""
+    should_inject_creation_prompt = False
+    try:
+        # Use new comprehensive module completion checker
+        all_modules_completion = check_all_modules_plot_completion()
+        
+        # Extract results
+        all_modules_complete = all_modules_completion["all_complete"]
+        modules_checked = all_modules_completion["modules_checked"]
+        completion_summary = all_modules_completion["completion_summary"]
+        
+        # Print summary of all modules
+        debug("=== ALL MODULES COMPLETION SUMMARY ===", category="module_management")
+        for module_name, summary in completion_summary.items():
+            status = "COMPLETE" if summary["is_complete"] else "INCOMPLETE"
+            debug(f"{module_name}: {summary['completed_plots']}/{summary['total_plots']} plots - {status}", category="module_management")
+        debug("=== END SUMMARY ===", category="module_management")
+        
+        # Determine if we should inject module creation prompt
+        # Inject if ALL modules are complete OR if user explicitly requested module creation
+        user_requesting_module_creation = ("I am ready to embark on a new adventure" in action_text or
+                                          "create and explore a new module" in action_text or
+                                          "let's create this specific adventure module" in action_text)
+        should_inject_creation_prompt = ((all_modules_complete and len(modules_checked) > 0) or 
+                                        user_requesting_module_creation)
+        
+        debug(f"All modules complete: {all_modules_complete}", category="module_management")
+        debug(f"User requesting module creation: {user_requesting_module_creation}", category="module_management")
+        debug(f"Should inject module creation prompt: {should_inject_creation_prompt}", category="module_management")
+        
+        # If ALL modules are complete, inject creation prompt
+        if should_inject_creation_prompt:
+            debug("*** MODULE CREATION PROMPT INJECTION TRIGGERED ***", category="module_management")
+            debug("All available modules have completed plots - suggesting new module creation", category="module_management")
+            # Load the module creation prompt
+            import os
+            if os.path.exists("prompts/generators/module_creation_prompt.txt"):
+                with open("prompts/generators/module_creation_prompt.txt", "r", encoding="utf-8") as f:
+                    module_creation_prompt = "\n\n" + f.read()
+                debug(f"Module creation prompt loaded ({len(module_creation_prompt)} characters)", category="module_management")
+            else:
+                warning("module_creation_prompt.txt not found!", category="module_management")
+        else:
+            incomplete_modules = [name for name, summary in completion_summary.items() if not summary["is_complete"]]
+            if incomplete_modules:
+                debug(f"Module creation prompt NOT injected - incomplete modules: {incomplete_modules}", category="module_management")
+            else:
+                debug("Module creation prompt NOT injected - no modules found to check", category="module_management")
+                
+    except Exception as e:
+        error(f"Error checking module completion: {e}", category="module_management")
+    
+    # Build DM note - exclude plot/quest info when module creation is active
+    if should_inject_creation_prompt:
+        # Simplified DM note for module creation - no confusing plot/quest info
+        dm_note = (f"Dungeon Master Note: Current date and time: {GAME_STATE['party_tracker']['worldConditions']['time']}. "
+                  f"Current location: {GAME_STATE['party_tracker']['worldConditions']['currentLocation']} in {GAME_STATE['party_tracker']['worldConditions']['currentArea']}. ")
+    else:
+        dm_note = f"Dungeon Master Note: Current date and time: {GAME_STATE['party_tracker']['worldConditions']['time']}. "
+        dm_note += f"Current location: {GAME_STATE['party_tracker']['worldConditions']['currentLocation']} in {GAME_STATE['party_tracker']['worldConditions']['currentArea']}. "
     
     # Aggiungi informazioni sui membri del party con slot incantesimo
     party_members = GAME_STATE["party_tracker"].get("partyMembers", [])
@@ -813,7 +1002,14 @@ def handle_player_action_logic(player_name, action_text, sid=None):
         
         dm_note += f"Party members: {', '.join(member_names)}. "
     
-    dm_note += f"Player ({player_name}): {action_text}"
+    # Add the action text and module creation prompt if needed
+    if should_inject_creation_prompt:
+        dm_note += (f"Player ({player_name}): {action_text}. "
+                   "Consider whether the party's action trigger traps in this location. "
+                   "Consider updating the plot elements on every action the player and NPCs take."
+                   f"{module_creation_prompt}")
+    else:
+        dm_note += f"Player ({player_name}): {action_text}"
     
     # 4. AGGIORNAMENTO CRONOLOGIA E CHIAMATA AI
     GAME_STATE["conversation_history"].append({"role": "user", "content": dm_note})
@@ -829,10 +1025,46 @@ def handle_player_action_logic(player_name, action_text, sid=None):
             broadcast_full_game_state(message_type="error", message_content="Failed to get AI response. Please try again.")
         return
     
+    # DEBUG: Log AI response for module creation requests
+    if "create" in action_text.lower() and "module" in action_text.lower():
+        debug(f"MODULE_CREATION_DEBUG: AI Response for module creation request:", category="module_creation")
+        debug(f"MODULE_CREATION_DEBUG: {ai_response_content[:500]}...", category="module_creation")
+    
     # Process inventory responses with comprehensive verification system
     ai_response_content, was_modified = process_inventory_response(ai_response_content, player_name, action_text)
     if was_modified:
         debug(f"INVENTORY: Response modified for {player_name}", category="inventory_system")
+    
+    # FORCE createNewModule action when module creation is requested but AI didn't generate it
+    if should_inject_creation_prompt and '"action": "createNewModule"' not in ai_response_content:
+        debug("FORCED MODULE CREATION: AI didn't generate createNewModule action, forcing it", category="module_management")
+        
+        # Try to extract module details from the user's request
+        module_narrative = ""
+        if "Module Name:" in action_text and "Adventure Type:" in action_text:
+            # User provided explicit module details
+            module_narrative = action_text
+            debug("FORCED MODULE CREATION: Using user-provided module details", category="module_management")
+        else:
+            # Use AI's narrative content
+            module_narrative = ai_response_content.strip()
+            debug("FORCED MODULE CREATION: Using AI-generated narrative", category="module_management")
+        
+        # Force the correct JSON action
+        forced_action = {
+            "narration": "The threads of fate weave together, opening a path to new adventures. Your destiny calls from distant lands...",
+            "actions": [
+                {
+                    "action": "createNewModule",
+                    "parameters": {
+                        "narrative": module_narrative
+                    }
+                }
+            ]
+        }
+        
+        ai_response_content = json.dumps(forced_action, indent=2)
+        debug(f"FORCED MODULE CREATION: Converted to createNewModule action", category="module_management")
     
     # Validazione della risposta AI
     validation_prompt_text = load_validation_prompt()
@@ -960,7 +1192,58 @@ def handle_player_action_logic(player_name, action_text, sid=None):
 
         # Processa ogni azione ricevuta dall'AI
         for action in actions:
-            # Chiama l'action_handler importato
+            # DEBUG: Log all actions for module creation requests
+            if "create" in action_text.lower() and "module" in action_text.lower():
+                debug(f"MODULE_CREATION_DEBUG: Processing action: {action}", category="module_creation")
+            
+            # Check for module creation action - needs special handling for progress tracking
+            if action.get("action") == "createNewModule":
+                debug("MODULE_CREATION: createNewModule action detected - starting with progress tracking", category="module_management")
+                
+                # Notify all players that module creation is starting
+                socketio.emit('module_creation_started', {
+                    'message': 'Module creation in progress... This may take several minutes.',
+                    'parameters': action.get("parameters", {})
+                })
+                
+                # Process the action with progress updates
+                try:
+                    result = process_action(
+                        action, 
+                        GAME_STATE["party_tracker"], 
+                        GAME_STATE["location_data"], 
+                        GAME_STATE["conversation_history"]
+                    )
+                    
+                    # Check if module creation was successful
+                    if isinstance(result, dict) and result.get("success"):
+                        debug("MODULE_CREATION: Module creation completed successfully", category="module_management")
+                        socketio.emit('module_creation_completed', {
+                            'success': True,
+                            'message': 'New module created successfully! You can now explore this new adventure.',
+                            'needs_dm_response': result.get("needs_dm_response", False)
+                        })
+                        
+                        # Reload game state to reflect new module
+                        reload_game_state()
+                        
+                    else:
+                        error("MODULE_CREATION: Module creation failed", category="module_management")
+                        socketio.emit('module_creation_completed', {
+                            'success': False,
+                            'message': 'Module creation failed. Please try again.'
+                        })
+                
+                except Exception as e:
+                    error(f"MODULE_CREATION: Error during module creation: {e}", category="module_management")
+                    socketio.emit('module_creation_completed', {
+                        'success': False,
+                        'message': f'Module creation error: {str(e)}'
+                    })
+                
+                continue  # Skip normal processing for module creation
+            
+            # Normal action processing for other actions
             result = process_action(
                 action, 
                 GAME_STATE["party_tracker"], 

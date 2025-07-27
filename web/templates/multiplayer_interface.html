@@ -2840,6 +2840,333 @@
             border-radius: 5px;
             color: #e1bee7;
         }
+
+        /* Module Management Styles */
+        .module-management-section {
+            background-color: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .module-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+
+        .module-button:hover {
+            background-color: #45a049;
+        }
+
+        .module-button.secondary {
+            background-color: #2196F3;
+        }
+
+        .module-button.secondary:hover {
+            background-color: #1976D2;
+        }
+
+        .module-status {
+            color: #b0b0b0;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .module-creation-progress {
+            background-color: #1a2a1a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .progress-message {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .progress-spinner {
+            width: 40px;
+            height: 40px;
+            margin: 10px auto;
+            border: 4px solid #444;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Module Creation Modal */
+        .module-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .module-modal-content {
+            background-color: #2a2a2a;
+            margin: 5% auto;
+            padding: 20px;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            color: white;
+        }
+
+        .module-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .module-modal-close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .module-modal-close:hover {
+            color: white;
+        }
+
+        .module-form-group {
+            margin-bottom: 15px;
+        }
+
+        .module-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #b0b0b0;
+        }
+
+        .module-form-group input,
+        .module-form-group textarea,
+        .module-form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+        }
+
+        .module-form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .module-form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
     </style>
+
+    <!-- MODULE CREATION MODAL -->
+    <div id="module-modal" class="module-modal">
+        <div class="module-modal-content">
+            <div class="module-modal-header">
+                <h3>🏰 Create New Adventure Module</h3>
+                <span class="module-modal-close" onclick="closeModuleModal()">&times;</span>
+            </div>
+            
+            <form id="module-creation-form" onsubmit="submitModuleCreation(event)">
+                <div class="module-form-group">
+                    <label for="module-concept">Adventure Concept *</label>
+                    <textarea id="module-concept" name="concept" 
+                        placeholder="Describe your adventure idea (e.g., 'A haunted mansion on a hill where a noble family disappeared mysteriously. The party must investigate supernatural occurrences and uncover dark family secrets.')" 
+                        required maxlength="1000"></textarea>
+                </div>
+                
+                <div class="module-form-group">
+                    <label for="module-name">Module Name (Optional)</label>
+                    <input type="text" id="module-name" name="module_name" 
+                        placeholder="Leave blank to auto-generate from concept" maxlength="50">
+                </div>
+                
+                <div class="module-form-group">
+                    <label for="level-range">Level Range</label>
+                    <select id="level-range" name="level_range">
+                        <option value="1-3">Levels 1-3 (Novice)</option>
+                        <option value="4-6" selected>Levels 4-6 (Intermediate)</option>
+                        <option value="7-9">Levels 7-9 (Advanced)</option>
+                        <option value="10-12">Levels 10-12 (Expert)</option>
+                        <option value="13-15">Levels 13-15 (Epic)</option>
+                        <option value="16-20">Levels 16-20 (Legendary)</option>
+                    </select>
+                </div>
+                
+                <div class="module-form-group">
+                    <label for="adventure-type">Adventure Type</label>
+                    <select id="adventure-type" name="adventure_type">
+                        <option value="mixed" selected>Mixed (Combat, Exploration, Social)</option>
+                        <option value="dungeon">Dungeon Crawl</option>
+                        <option value="urban">Urban Adventure</option>
+                        <option value="wilderness">Wilderness Exploration</option>
+                        <option value="mystery">Mystery/Investigation</option>
+                        <option value="social">Social/Political</option>
+                    </select>
+                </div>
+                
+                <div class="module-form-group">
+                    <label for="num-areas">Number of Areas</label>
+                    <select id="num-areas" name="num_areas">
+                        <option value="2" selected>2 Areas (Small Adventure)</option>
+                        <option value="3">3 Areas (Medium Adventure)</option>
+                        <option value="4">4 Areas (Large Adventure)</option>
+                        <option value="5">5 Areas (Epic Adventure)</option>
+                    </select>
+                </div>
+                
+                <div class="module-form-buttons">
+                    <button type="button" class="module-button secondary" onclick="closeModuleModal()">Cancel</button>
+                    <button type="submit" class="module-button">Create Adventure</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODULE CREATION PROGRESS -->
+    <div id="module-creation-progress" class="module-creation-progress">
+        <div class="progress-message" id="progress-message">Creating your adventure module...</div>
+        <div class="progress-spinner"></div>
+        <div class="module-status">This may take several minutes. Please wait...</div>
+    </div>
+
+    <script>
+        // Module Management Functions
+        function showModuleModal() {
+            document.getElementById('module-modal').style.display = 'block';
+        }
+
+        function closeModuleModal() {
+            document.getElementById('module-modal').style.display = 'none';
+            document.getElementById('module-creation-form').reset();
+        }
+
+        function submitModuleCreation(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // Create the action message to send to AI
+            const concept = formData.get('concept');
+            const moduleName = formData.get('module_name');
+            const levelRange = formData.get('level_range');
+            const adventureType = formData.get('adventure_type');
+            const numAreas = formData.get('num_areas');
+            
+            // Build a descriptive prompt for the AI with module creation trigger
+            let modulePrompt = `I am ready to embark on a new adventure! I want to create and explore a new module with these specifications:\n\n`;
+            modulePrompt += `Adventure Concept: ${concept}\n`;
+            if (moduleName) modulePrompt += `Module Name: ${moduleName}\n`;
+            modulePrompt += `Level Range: ${levelRange}\n`;
+            modulePrompt += `Adventure Type: ${adventureType}\n`;
+            modulePrompt += `Number of Areas: ${numAreas}\n\n`;
+            modulePrompt += `Yes, let's create this specific adventure module and begin our journey!`;
+            
+            // Close modal and show progress
+            closeModuleModal();
+            showModuleCreationProgress();
+            
+            // Send to server
+            socket.emit('player_action', {
+                player_name: gameState.playerName,
+                text: modulePrompt
+            });
+        }
+
+        function showModuleCreationProgress() {
+            document.getElementById('module-creation-progress').style.display = 'block';
+        }
+
+        function hideModuleCreationProgress() {
+            document.getElementById('module-creation-progress').style.display = 'none';
+        }
+
+        // Socket event handlers for module creation
+        socket.on('module_creation_started', (data) => {
+            console.log('Module creation started:', data);
+            showModuleCreationProgress();
+            document.getElementById('progress-message').textContent = data.message;
+        });
+
+        socket.on('module_creation_completed', (data) => {
+            console.log('Module creation completed:', data);
+            hideModuleCreationProgress();
+            
+            if (data.success) {
+                addMessage('system', data.message, 'Module Creation');
+                // Refresh page to load new module data
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                addMessage('system', `Error: ${data.message}`, 'Module Creation');
+            }
+        });
+
+        // Add module creation button to existing UI
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add module management section to the first panel (game panel)
+            const gamePanel = document.querySelector('.panel .panel-content');
+            if (gamePanel) {
+                const moduleSection = document.createElement('div');
+                moduleSection.className = 'module-management-section';
+                moduleSection.innerHTML = `
+                    <div class="module-header">
+                        <h4>🏰 Adventure Modules</h4>
+                        <button class="module-button" onclick="showModuleModal()">Create New Module</button>
+                    </div>
+                    <div class="module-status">Create custom adventures or explore existing modules</div>
+                `;
+                gamePanel.appendChild(moduleSection);
+            }
+        });
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('module-modal');
+            if (event.target == modal) {
+                closeModuleModal();
+            }
+        }
+    </script>
+
 </body>
 </html> 

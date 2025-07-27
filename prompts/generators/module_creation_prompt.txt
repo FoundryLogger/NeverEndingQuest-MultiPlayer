@@ -68,5 +68,16 @@ The module you describe should be a NEW DESTINATION with:
 - Fresh locations never visited before
 - Original settlements with unique identities
 
-When the player explicitly commits to investigating a specific adventure hook, use the createNewModule action:
-createNewModule("Your complete narrative including all embedded parameters...")
+When the player explicitly commits to investigating a specific adventure hook, respond with proper JSON format using the createNewModule action:
+
+{
+  "narration": "Your immersive transition dialogue or atmospheric description",
+  "actions": [
+    {
+      "action": "createNewModule",
+      "parameters": {
+        "narrative": "Your complete narrative including all embedded parameters - the vivid adventure concept, Module Name with underscores, Adventure Type, Level Range, Number of Areas, Plot Themes, etc."
+      }
+    }
+  ]
+}

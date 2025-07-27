@@ -66,34 +66,40 @@ Always respond with a JSON object in the following format:
 // Example Response 5: False - Invalid createNewModule usage
 {
   "valid": false,
-  "reason": "The assistant's response uses 'createNewModule' action when the player only asked a vague question like 'What next?' or 'What should we do?'. The createNewModule action should ONLY be used when the player explicitly commits to investigating a specific adventure hook. The assistant should have provided roleplay hooks and waited for player commitment. Try again without the createNewModule action."
+  "reason": "The assistant's response uses 'createNewModule' action when the player only asked a vague question like 'What next?' or 'What should we do?'. The createNewModule action should ONLY be used when the player explicitly commits to investigating a specific adventure hook OR when the player explicitly requests module creation with phrases like 'create a new module', 'let's create this adventure', 'Yes, let's create', or provides detailed module specifications. The assistant should have provided roleplay hooks and waited for player commitment. Try again without the createNewModule action."
 }
 
-// Example Response 6: True - Valid response with no action required
+// Example Response 6: True - Valid createNewModule usage
+{
+  "valid": true,
+  "reason": "The assistant correctly uses 'createNewModule' action when the player explicitly committed to creating a new adventure with phrases like 'Yes, let's create this specific adventure module' or provided detailed module specifications including name, type, level range, and areas."
+}
+
+// Example Response 7: True - Valid response with no action required
 {
   "valid": true,
   "reason": "The assistant's response engages in roleplay with Thalor about his prepared spells and doesn't require any actions since no action was directed by the player when requesting what spells Thalor had prepared."
 }
 
-// Example Response 7: False - Wrong action for module travel
+// Example Response 8: False - Wrong action for module travel
 {
   "valid": false,
   "reason": "The assistant's response mentions traveling to 'Frostward Peaks' (another module) but uses 'transitionLocation' which only works within the current module. When traveling to another module, the assistant must use 'updatePartyTracker' with the module parameter set to the target module name. Try again using updatePartyTracker action."
 }
 
-// Example Response 8: True - Correct module travel
+// Example Response 9: True - Correct module travel
 {
   "valid": true,
   "reason": "The assistant correctly uses 'updatePartyTracker' with module parameter to transition from Desert_Crown to Frostward_Peaks after the player explicitly requested travel to that module."
 }
 
-// Example Response 9: False - NPC Hallucination
+// Example Response 10: False - NPC Hallucination
 {
   "valid": false,
   "reason": "The response references 'Tomas the smith', 'Lysa the baker', and 'young Bran' who are not listed as valid characters in the provided module data. Only the following NPCs are valid for this module and area: Elen the Ranger, Mirna the Village Elder, Old Fenwick the Tavernkeeper, Torren the Merchant, Willow the Herbalist, Merritt the Watchful, Kella of the Glades, Tavrin Quickfoot, Bandit Lieutenant Karsk, Sereth Dolen, and Caretaker Voss. Do not reference created or invented NPCs such as 'Tomas'. Revise the response to use only established characters from the module."
 }
 
-// Example Response 10: False - Location Hallucination  
+// Example Response 11: False - Location Hallucination  
 {
   "valid": false,
   "reason": "The response references 'the forge', 'the bakery', and other locations that do not exist in the current area data. Only reference locations that exist in the module's area files. Rewrite the response using only established locations."
