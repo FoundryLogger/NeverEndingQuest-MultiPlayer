@@ -1949,7 +1949,33 @@ def handle_player_action_logic(player_name, action_text, sid=None):
         except Exception as e:
             error(f"Failed to process module transitions", exception=e, category="module_transitions")
 
-        # 6.2 EFFECT EXPIRATION PROCESSING - Check for expired character effects
+        # 6.2 LOCATION TRANSITION PROCESSING - Check for location transitions and compress history
+        try:
+            from enhanced_location_transitions import check_and_process_location_transitions_multiplayer
+            
+            # Get current path manager for location processing
+            current_module = GAME_STATE["party_tracker"].get("module", "").replace(" ", "_")
+            path_manager = ModulePathManager(current_module) if current_module else ModulePathManager()
+            
+            # Check and process any location transitions with enhanced summaries
+            processed_history = check_and_process_location_transitions_multiplayer(
+                GAME_STATE["conversation_history"], 
+                GAME_STATE["party_tracker"],
+                path_manager
+            )
+            
+            # Update conversation history if it was processed (compressed)
+            if len(processed_history) != len(GAME_STATE["conversation_history"]):
+                original_length = len(GAME_STATE["conversation_history"])
+                GAME_STATE["conversation_history"] = processed_history
+                safe_write_json("modules/conversation_history/conversation_history.json", GAME_STATE["conversation_history"])
+                debug(f"Location transition processed: history compressed from {original_length} to {len(processed_history)} messages", 
+                     category="location_transitions")
+                info("Enhanced location transition processing completed", category="location_transitions")
+        except Exception as e:
+            debug(f"Location transition processing failed (non-critical): {str(e)}", category="location_transitions")
+
+        # 6.3 EFFECT EXPIRATION PROCESSING - Check for expired character effects
         try:
             from updates.process_effect_expirations import process_all_effect_expirations
             debug("EFFECTS: Checking for expired effects", category="effects_tracking")

@@ -1,0 +1,3052 @@
+{
+  "analysis_date": "2025-07-28",
+  "file_analyzed": "server.py",
+  "functions": [
+    {
+      "name": "debug_socket_event",
+      "args": [
+        "event_name",
+        "data"
+      ],
+      "docstring": "Debug function to log all socket events",
+      "line_number": 113
+    },
+    {
+      "name": "load_validation_prompt",
+      "args": [],
+      "docstring": "Load the validation prompt for AI response validation",
+      "line_number": 162
+    },
+    {
+      "name": "load_system_prompt",
+      "args": [],
+      "docstring": "Load the main system prompt",
+      "line_number": 170
+    },
+    {
+      "name": "initialize_game_state",
+      "args": [],
+      "docstring": "Initialize the game state by loading all necessary files",
+      "line_number": 178
+    },
+    {
+      "name": "reload_game_state",
+      "args": [],
+      "docstring": "Reload game state after module creation or changes",
+      "line_number": 216
+    },
+    {
+      "name": "ensure_main_system_prompt",
+      "args": [
+        "conversation_history",
+        "main_system_prompt_text"
+      ],
+      "docstring": "Ensure the main system prompt is first in the conversation history",
+      "line_number": 252
+    },
+    {
+      "name": "get_ai_response",
+      "args": [
+        "conversation_history",
+        "validation_retry_count",
+        "action_text"
+      ],
+      "docstring": "Get AI response with intelligent model routing like main.py",
+      "line_number": 264
+    },
+    {
+      "name": "check_all_modules_plot_completion",
+      "args": [],
+      "docstring": "Check plot completion status for all available modules",
+      "line_number": 334
+    },
+    {
+      "name": "discover_available_modules",
+      "args": [],
+      "docstring": "Discover all available modules with metadata",
+      "line_number": 424
+    },
+    {
+      "name": "get_module_description",
+      "args": [
+        "plot_data"
+      ],
+      "docstring": "Extract description from module plot data",
+      "line_number": 498
+    },
+    {
+      "name": "determine_module_type",
+      "args": [
+        "context_data"
+      ],
+      "docstring": "Determine module type based on areas",
+      "line_number": 513
+    },
+    {
+      "name": "get_module_creation_date",
+      "args": [
+        "module_path"
+      ],
+      "docstring": "Get module creation date from file system",
+      "line_number": 537
+    },
+    {
+      "name": "get_module_last_played",
+      "args": [
+        "module_path"
+      ],
+      "docstring": "Get module last played date",
+      "line_number": 548
+    },
+    {
+      "name": "get_current_module_name",
+      "args": [],
+      "docstring": "Get the current active module name",
+      "line_number": 566
+    },
+    {
+      "name": "calculate_module_completion",
+      "args": [
+        "plot_data"
+      ],
+      "docstring": "Calculate module completion percentage",
+      "line_number": 577
+    },
+    {
+      "name": "switch_to_module",
+      "args": [
+        "new_module_name"
+      ],
+      "docstring": "Switch the active module and update game state",
+      "line_number": 589
+    },
+    {
+      "name": "validate_ai_response",
+      "args": [
+        "primary_response",
+        "user_input",
+        "validation_prompt_text",
+        "conversation_history",
+        "party_tracker_data"
+      ],
+      "docstring": "Validate AI response using secondary model",
+      "line_number": 658
+    },
+    {
+      "name": "process_ai_response",
+      "args": [
+        "response",
+        "party_tracker_data",
+        "location_data",
+        "conversation_history"
+      ],
+      "docstring": "Process AI response and execute actions",
+      "line_number": 693
+    },
+    {
+      "name": "broadcast_full_game_state",
+      "args": [
+        "message_type",
+        "message_content",
+        "message_player"
+      ],
+      "docstring": "Costruisce l'intero stato del gioco e lo invia a tutti i client.\nQuesto diventa l'UNICO modo per aggiornare l'interfaccia.",
+      "line_number": 733
+    },
+    {
+      "name": "get_current_state_for_client",
+      "args": [],
+      "docstring": "Get current game state formatted for client consumption",
+      "line_number": 789
+    },
+    {
+      "name": "index",
+      "args": [],
+      "docstring": "Serve the main game interface",
+      "line_number": 878
+    },
+    {
+      "name": "get_game_state",
+      "args": [],
+      "docstring": "API endpoint to get current game state",
+      "line_number": 883
+    },
+    {
+      "name": "get_available_modules",
+      "args": [],
+      "docstring": "API endpoint to get all available modules with metadata",
+      "line_number": 888
+    },
+    {
+      "name": "switch_module",
+      "args": [],
+      "docstring": "API endpoint to switch the active module",
+      "line_number": 911
+    },
+    {
+      "name": "get_module_details",
+      "args": [
+        "module_name"
+      ],
+      "docstring": "API endpoint to get detailed information about a specific module",
+      "line_number": 978
+    },
+    {
+      "name": "create_save_game",
+      "args": [],
+      "docstring": "API endpoint to create a new save game",
+      "line_number": 1024
+    },
+    {
+      "name": "list_save_games",
+      "args": [],
+      "docstring": "API endpoint to list all available save games",
+      "line_number": 1073
+    },
+    {
+      "name": "load_save_game",
+      "args": [
+        "save_id"
+      ],
+      "docstring": "API endpoint to load a specific save game",
+      "line_number": 1093
+    },
+    {
+      "name": "delete_save_game",
+      "args": [
+        "save_id"
+      ],
+      "docstring": "API endpoint to delete a specific save game",
+      "line_number": 1137
+    },
+    {
+      "name": "get_save_metadata",
+      "args": [
+        "save_id"
+      ],
+      "docstring": "API endpoint to get detailed metadata about a specific save",
+      "line_number": 1177
+    },
+    {
+      "name": "handle_connect",
+      "args": [],
+      "docstring": "Handle client connection",
+      "line_number": 1196
+    },
+    {
+      "name": "handle_disconnect",
+      "args": [],
+      "docstring": "Handle client disconnection",
+      "line_number": 1212
+    },
+    {
+      "name": "handle_join_game",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle player joining the game",
+      "line_number": 1243
+    },
+    {
+      "name": "on_player_action_event",
+      "args": [
+        "data"
+      ],
+      "docstring": "Questa funzione riceve l'evento dal client e lo passa al gestore della logica.",
+      "line_number": 1325
+    },
+    {
+      "name": "handle_character_creation_step",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle character creation steps",
+      "line_number": 1350
+    },
+    {
+      "name": "handle_player_action_logic",
+      "args": [
+        "player_name",
+        "action_text",
+        "sid"
+      ],
+      "docstring": "Questa è la funzione logica completa che gestisce un turno di gioco.\nÈ una fusione della logica di main_game_loop e action_handler.",
+      "line_number": 1423
+    },
+    {
+      "name": "handle_game_state_request",
+      "args": [],
+      "docstring": "Handle request for current game state",
+      "line_number": 2000
+    },
+    {
+      "name": "handle_player_data_request",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle player data request from client",
+      "line_number": 2006
+    },
+    {
+      "name": "reload_character_data",
+      "args": [
+        "player_name"
+      ],
+      "docstring": "Reload character data from file",
+      "line_number": 2075
+    },
+    {
+      "name": "handle_reload_character_data",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle character data reload request from client",
+      "line_number": 2101
+    },
+    {
+      "name": "handle_plot_data_request",
+      "args": [],
+      "docstring": "Handle plot data request from client",
+      "line_number": 2119
+    },
+    {
+      "name": "handle_chat_message",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle chat messages between players",
+      "line_number": 2174
+    },
+    {
+      "name": "on_combat_action",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle combat actions from players",
+      "line_number": 2195
+    },
+    {
+      "name": "handle_combat_state_request",
+      "args": [],
+      "docstring": "Handle requests for current combat state",
+      "line_number": 2219
+    },
+    {
+      "name": "handle_activate_quest",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle manual quest activation request",
+      "line_number": 2228
+    },
+    {
+      "name": "handle_close_quest",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle quest closure/cancellation request",
+      "line_number": 2292
+    },
+    {
+      "name": "handle_reset_all_quests",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle reset all quests to initial state",
+      "line_number": 2356
+    },
+    {
+      "name": "activate_first_quest_if_needed",
+      "args": [
+        "plot_data",
+        "current_module"
+      ],
+      "docstring": "Activate the first quest if no quests are currently active",
+      "line_number": 2414
+    },
+    {
+      "name": "create_character_from_creation_data",
+      "args": [
+        "player_name",
+        "creation_data"
+      ],
+      "docstring": "Create a complete character from creation data",
+      "line_number": 2453
+    },
+    {
+      "name": "get_spellcasting_data",
+      "args": [
+        "character_class",
+        "abilities"
+      ],
+      "docstring": "Get spellcasting data for spellcasting classes",
+      "line_number": 2492
+    },
+    {
+      "name": "get_class_saving_throws",
+      "args": [
+        "character_class"
+      ],
+      "docstring": "Get saving throws for a class",
+      "line_number": 2695
+    },
+    {
+      "name": "get_class_skills",
+      "args": [
+        "character_class",
+        "background"
+      ],
+      "docstring": "Get skills for a class and background",
+      "line_number": 2711
+    },
+    {
+      "name": "get_class_proficiencies",
+      "args": [
+        "character_class"
+      ],
+      "docstring": "Get proficiencies for a class",
+      "line_number": 2719
+    },
+    {
+      "name": "get_class_features",
+      "args": [
+        "character_class"
+      ],
+      "docstring": "Get class features for a class",
+      "line_number": 2744
+    },
+    {
+      "name": "get_starting_equipment_old",
+      "args": [
+        "character_class",
+        "background"
+      ],
+      "docstring": "Get starting equipment for a class and background",
+      "line_number": 2765
+    },
+    {
+      "name": "handle_combat_action_logic",
+      "args": [
+        "player_name",
+        "action_text"
+      ],
+      "docstring": "Handle combat action logic using CombatService.\nThis function processes player actions during combat.",
+      "line_number": 2819
+    },
+    {
+      "name": "process_ai_combat_turns",
+      "args": [],
+      "docstring": "Process AI turns in combat.\nThis function runs in a background thread to handle AI actions.",
+      "line_number": 2868
+    },
+    {
+      "name": "start_combat_session",
+      "args": [
+        "encounter_id"
+      ],
+      "docstring": "Start a new combat session using CombatService.\nThis function is called when an encounter is triggered.",
+      "line_number": 2908
+    },
+    {
+      "name": "is_player_turn",
+      "args": [
+        "character_name"
+      ],
+      "docstring": "Check if the current turn belongs to a player character.",
+      "line_number": 2956
+    },
+    {
+      "name": "start_server",
+      "args": [],
+      "docstring": "Start the multiplayer server",
+      "line_number": 2964
+    },
+    {
+      "name": "handle_reject_quest",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle quest rejection request - permanently remove quest from system",
+      "line_number": 2985
+    },
+    {
+      "name": "handle_remove_quest",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle quest removal request - completely remove quest from display",
+      "line_number": 3050
+    },
+    {
+      "name": "handle_cleanup_rejected_quests",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle cleanup of all rejected quests - remove them completely",
+      "line_number": 3115
+    },
+    {
+      "name": "handle_clear_chat_history",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle clearing of chat history - reset conversation history to empty",
+      "line_number": 3178
+    },
+    {
+      "name": "handle_clear_combat_history",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle clearing of combat history - reset combat conversation history",
+      "line_number": 3215
+    },
+    {
+      "name": "handle_clear_all_history",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle clearing of all history files - comprehensive cleanup",
+      "line_number": 3260
+    },
+    {
+      "name": "handle_level_up_input",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle level-up user input during interactive session",
+      "line_number": 3341
+    },
+    {
+      "name": "handle_cancel_level_up",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle cancellation of level-up session",
+      "line_number": 3420
+    },
+    {
+      "name": "handle_save_game",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle save game request via SocketIO",
+      "line_number": 3464
+    },
+    {
+      "name": "handle_load_game",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle load game request via SocketIO",
+      "line_number": 3514
+    },
+    {
+      "name": "handle_list_saves",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle list saves request via SocketIO",
+      "line_number": 3564
+    },
+    {
+      "name": "handle_auto_save",
+      "args": [
+        "data"
+      ],
+      "docstring": "Handle auto-save request",
+      "line_number": 3591
+    },
+    {
+      "name": "reload_character_data_for_player",
+      "args": [
+        "player_name"
+      ],
+      "docstring": "Reload character data for a specific player after level-up",
+      "line_number": 3612
+    },
+    {
+      "name": "extract_json_from_codeblock",
+      "args": [
+        "text"
+      ],
+      "docstring": "No docstring",
+      "line_number": 1676
+    }
+  ],
+  "imports": {
+    "standard": [
+      "json",
+      "os",
+      "sys",
+      "threading",
+      "time",
+      "re",
+      "datetime.datetime",
+      "os",
+      "os",
+      "datetime.datetime",
+      "re",
+      "os",
+      "re",
+      "time",
+      "re",
+      "re"
+    ],
+    "third_party": [
+      "flask.Flask",
+      "flask.render_template",
+      "flask.request",
+      "flask.jsonify",
+      "flask_socketio.SocketIO",
+      "flask_socketio.emit",
+      "flask_socketio.join_room",
+      "flask_socketio.leave_room",
+      "flask_socketio.disconnect",
+      "openai.OpenAI",
+      "main.save_conversation_history",
+      "main.save_conversation_history",
+      "config.OPENAI_API_KEY",
+      "config.OPENAI_ORG_ID",
+      "config.DM_MAIN_MODEL",
+      "config.DM_SUMMARIZATION_MODEL",
+      "config.DM_VALIDATION_MODEL",
+      "config.DM_FULL_MODEL",
+      "config.DM_MINI_MODEL",
+      "config.ENABLE_INTELLIGENT_ROUTING",
+      "config.MAX_VALIDATION_RETRIES"
+    ],
+    "local": [
+      "utils.encoding_utils.sanitize_text",
+      "utils.encoding_utils.safe_json_load",
+      "utils.encoding_utils.safe_json_dump",
+      "utils.file_operations.safe_write_json",
+      "utils.file_operations.safe_read_json",
+      "utils.module_path_manager.ModulePathManager",
+      "core.ai.action_handler.process_action",
+      "core.managers.location_manager",
+      "core.ai.conversation_utils.update_conversation_history",
+      "core.ai.conversation_utils.update_character_data",
+      "updates.update_character_info.normalize_character_name",
+      "utils.enhanced_logger.debug",
+      "utils.enhanced_logger.info",
+      "utils.enhanced_logger.warning",
+      "utils.enhanced_logger.error",
+      "utils.enhanced_logger.set_script_name",
+      "core.managers.combat_service.CombatService",
+      "core.managers.inventory_manager.process_inventory_response",
+      "core.managers.multiplayer_save_manager.get_multiplayer_save_manager",
+      "core.managers.multiplayer_transition_manager.get_multiplayer_transition_manager",
+      "core.validation.dm_response_validator.DMResponseValidator",
+      "utils.file_operations.safe_read_json",
+      "utils.action_predictor.predict_actions_required",
+      "utils.action_predictor.extract_actual_actions",
+      "utils.action_predictor.log_prediction_accuracy",
+      "utils.character_creation_template.get_default_character_template",
+      "utils.character_creation_template.get_starting_equipment",
+      "updates.process_effect_expirations.process_all_effect_expirations",
+      "core.managers.inventory_manager.InventoryManager"
+    ]
+  },
+  "global_variables": [
+    {
+      "name": "app",
+      "line": 108,
+      "definition": "app = Flask(__name__, template_folder='web/templates', static_folder='web/static')"
+    },
+    {
+      "name": "socketio",
+      "line": 110,
+      "definition": "socketio = SocketIO(app, cors_allowed_origins=\"*\", async_mode='threading')"
+    },
+    {
+      "name": "client_kwargs",
+      "line": 118,
+      "definition": "client_kwargs = {\"api_key\": OPENAI_API_KEY}"
+    },
+    {
+      "name": "client",
+      "line": 121,
+      "definition": "client = OpenAI(**client_kwargs)"
+    },
+    {
+      "name": "GAME_STATE",
+      "line": 124,
+      "definition": "GAME_STATE = {"
+    },
+    {
+      "name": "PLAYERS_SID_MAP",
+      "line": 145,
+      "definition": "PLAYERS_SID_MAP = {}"
+    },
+    {
+      "name": "LEVEL_UP_SESSIONS",
+      "line": 148,
+      "definition": "LEVEL_UP_SESSIONS = {}"
+    },
+    {
+      "name": "save_manager",
+      "line": 151,
+      "definition": "save_manager = get_multiplayer_save_manager()"
+    },
+    {
+      "name": "transition_manager",
+      "line": 154,
+      "definition": "transition_manager = get_multiplayer_transition_manager()"
+    },
+    {
+      "name": "TEMPERATURE",
+      "line": 158,
+      "definition": "TEMPERATURE = 0.8"
+    },
+    {
+      "name": "MAX_PLAYERS",
+      "line": 159,
+      "definition": "MAX_PLAYERS = 4"
+    },
+    {
+      "name": "TURN_TIMEOUT",
+      "line": 160,
+      "definition": "TURN_TIMEOUT = 300  # 5 minutes per turn"
+    },
+    {
+      "name": "current_area_id",
+      "line": 194,
+      "definition": "current_area_id = GAME_STATE[\"party_tracker\"][\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "module_name",
+      "line": 203,
+      "definition": "module_name = GAME_STATE[\"party_tracker\"].get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 204,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "current_area_id",
+      "line": 228,
+      "definition": "current_area_id = GAME_STATE[\"party_tracker\"][\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "module_name",
+      "line": 236,
+      "definition": "module_name = GAME_STATE[\"party_tracker\"].get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 237,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "main_prompt_start",
+      "line": 254,
+      "definition": "main_prompt_start = main_system_prompt_text[:50]"
+    },
+    {
+      "name": "filtered_history",
+      "line": 256,
+      "definition": "filtered_history = []"
+    },
+    {
+      "name": "user_input",
+      "line": 271,
+      "definition": "user_input = \"\""
+    },
+    {
+      "name": "user_input",
+      "line": 274,
+      "definition": "user_input = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "has_module_creation_prompt",
+      "line": 278,
+      "definition": "has_module_creation_prompt = (\"You are a master storyteller, cartographer of myth\" in user_input or"
+    },
+    {
+      "name": "prediction",
+      "line": 285,
+      "definition": "prediction = predict_actions_required(user_input)"
+    },
+    {
+      "name": "prediction",
+      "line": 288,
+      "definition": "prediction = {\"requires_actions\": True, \"reason\": \"Module creation prompt detected - using full model\"}"
+    },
+    {
+      "name": "prediction",
+      "line": 291,
+      "definition": "prediction = {\"requires_actions\": True, \"reason\": \"Validation retry - using full model\"}"
+    },
+    {
+      "name": "selected_model",
+      "line": 296,
+      "definition": "selected_model = DM_MINI_MODEL if not prediction[\"requires_actions\"] else DM_FULL_MODEL"
+    },
+    {
+      "name": "routing_info",
+      "line": 299,
+      "definition": "routing_info = \"MINI MODEL\" if not prediction[\"requires_actions\"] else \"FULL MODEL\""
+    },
+    {
+      "name": "selected_model",
+      "line": 303,
+      "definition": "selected_model = DM_FULL_MODEL"
+    },
+    {
+      "name": "temperature",
+      "line": 310,
+      "definition": "temperature = TEMPERATURE"
+    },
+    {
+      "name": "temperature",
+      "line": 312,
+      "definition": "temperature = 0.2  # Lower temperature for more consistent JSON"
+    },
+    {
+      "name": "response",
+      "line": 316,
+      "definition": "response = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 317,
+      "definition": "model=selected_model,"
+    },
+    {
+      "name": "temperature",
+      "line": 318,
+      "definition": "temperature=temperature,"
+    },
+    {
+      "name": "messages",
+      "line": 319,
+      "definition": "messages=conversation_history"
+    },
+    {
+      "name": "content",
+      "line": 321,
+      "definition": "content = response.choices[0].message.content.strip()"
+    },
+    {
+      "name": "actual_actions",
+      "line": 325,
+      "definition": "actual_actions = extract_actual_actions(content)"
+    },
+    {
+      "name": "modules_dir",
+      "line": 339,
+      "definition": "modules_dir = \"modules\""
+    },
+    {
+      "name": "all_modules_data",
+      "line": 340,
+      "definition": "all_modules_data = {"
+    },
+    {
+      "name": "available_modules",
+      "line": 351,
+      "definition": "available_modules = []"
+    },
+    {
+      "name": "module_file",
+      "line": 355,
+      "definition": "module_file = os.path.join(modules_dir, item, f\"{item}_module.json\")"
+    },
+    {
+      "name": "plot_file",
+      "line": 367,
+      "definition": "plot_file = os.path.join(modules_dir, module_name, \"module_plot.json\")"
+    },
+    {
+      "name": "plot_data",
+      "line": 370,
+      "definition": "plot_data = safe_read_json(plot_file)"
+    },
+    {
+      "name": "total_plots",
+      "line": 374,
+      "definition": "total_plots = len(plot_data[\"plotPoints\"])"
+    },
+    {
+      "name": "completed_plots",
+      "line": 375,
+      "definition": "completed_plots = sum(1 for plot in plot_data[\"plotPoints\"] if plot.get(\"completed\", False))"
+    },
+    {
+      "name": "module_complete",
+      "line": 377,
+      "definition": "module_complete = completed_plots == total_plots and total_plots > 0"
+    },
+    {
+      "name": "modules_dir",
+      "line": 429,
+      "definition": "modules_dir = \"modules\""
+    },
+    {
+      "name": "discovered_modules",
+      "line": 430,
+      "definition": "discovered_modules = []"
+    },
+    {
+      "name": "module_path",
+      "line": 437,
+      "definition": "module_path = os.path.join(modules_dir, item)"
+    },
+    {
+      "name": "context_file",
+      "line": 447,
+      "definition": "context_file = os.path.join(module_path, \"module_context.json\")"
+    },
+    {
+      "name": "plot_file",
+      "line": 448,
+      "definition": "plot_file = os.path.join(module_path, \"module_plot.json\")"
+    },
+    {
+      "name": "context_data",
+      "line": 453,
+      "definition": "context_data = safe_json_load(context_file)"
+    },
+    {
+      "name": "completion_percentage",
+      "line": 464,
+      "definition": "completion_percentage = 0"
+    },
+    {
+      "name": "plot_data",
+      "line": 466,
+      "definition": "plot_data = safe_json_load(plot_file)"
+    },
+    {
+      "name": "total_points",
+      "line": 468,
+      "definition": "total_points = len(plot_data[\"plotPoints\"])"
+    },
+    {
+      "name": "completed_points",
+      "line": 469,
+      "definition": "completed_points = sum(1 for pp in plot_data[\"plotPoints\"] if pp.get(\"status\") == \"completed\")"
+    },
+    {
+      "name": "completion_percentage",
+      "line": 471,
+      "definition": "completion_percentage = int((completed_points / total_points) * 100)"
+    },
+    {
+      "name": "module_info",
+      "line": 474,
+      "definition": "module_info = {"
+    },
+    {
+      "name": "main_objective",
+      "line": 503,
+      "definition": "main_objective = plot_data.get(\"mainObjective\", \"\")"
+    },
+    {
+      "name": "plot_title",
+      "line": 507,
+      "definition": "plot_title = plot_data.get(\"plotTitle\", \"\")"
+    },
+    {
+      "name": "areas",
+      "line": 515,
+      "definition": "areas = context_data.get(\"areas\", {})"
+    },
+    {
+      "name": "area_types",
+      "line": 519,
+      "definition": "area_types = [area.get(\"type\", \"mixed\") for area in areas.values()]"
+    },
+    {
+      "name": "unique_types",
+      "line": 522,
+      "definition": "unique_types = set(area_types)"
+    },
+    {
+      "name": "context_file",
+      "line": 540,
+      "definition": "context_file = os.path.join(module_path, \"module_context.json\")"
+    },
+    {
+      "name": "timestamp",
+      "line": 542,
+      "definition": "timestamp = os.path.getctime(context_file)"
+    },
+    {
+      "name": "conv_history_file",
+      "line": 552,
+      "definition": "conv_history_file = os.path.join(\"modules\", \"conversation_history\", \"conversation_history.json\")"
+    },
+    {
+      "name": "timestamp",
+      "line": 554,
+      "definition": "timestamp = os.path.getmtime(conv_history_file)"
+    },
+    {
+      "name": "tracker_file",
+      "line": 558,
+      "definition": "tracker_file = os.path.join(module_path, \"party_tracker.json\")"
+    },
+    {
+      "name": "timestamp",
+      "line": 560,
+      "definition": "timestamp = os.path.getmtime(tracker_file)"
+    },
+    {
+      "name": "party_tracker",
+      "line": 569,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 570,
+      "definition": "current_module = party_tracker.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "current_module",
+      "line": 572,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "total_points",
+      "line": 582,
+      "definition": "total_points = len(plot_data[\"plotPoints\"])"
+    },
+    {
+      "name": "completed_points",
+      "line": 586,
+      "definition": "completed_points = sum(1 for pp in plot_data[\"plotPoints\"] if pp.get(\"status\") == \"completed\")"
+    },
+    {
+      "name": "new_module_name",
+      "line": 598,
+      "definition": "new_module_name = new_module_name.replace(\"..\", \"\").replace(\"/\", \"_\").replace(\"\\\\\", \"_\")"
+    },
+    {
+      "name": "module_path",
+      "line": 601,
+      "definition": "module_path = os.path.join(\"modules\", new_module_name)"
+    },
+    {
+      "name": "context_file",
+      "line": 607,
+      "definition": "context_file = os.path.join(module_path, \"module_context.json\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 621,
+      "definition": "path_manager = ModulePathManager(new_module_name)"
+    },
+    {
+      "name": "party_tracker_path",
+      "line": 624,
+      "definition": "party_tracker_path = os.path.join(module_path, \"party_tracker.json\")"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 626,
+      "definition": "party_tracker_data = safe_json_load(party_tracker_path)"
+    },
+    {
+      "name": "context_path",
+      "line": 632,
+      "definition": "context_path = os.path.join(module_path, \"module_context.json\")"
+    },
+    {
+      "name": "context_data",
+      "line": 634,
+      "definition": "context_data = safe_json_load(context_path)"
+    },
+    {
+      "name": "current_location",
+      "line": 639,
+      "definition": "current_location = GAME_STATE[\"party_tracker\"].get(\"current_location\")"
+    },
+    {
+      "name": "location_path",
+      "line": 641,
+      "definition": "location_path = path_manager.get_area_file_path(current_location)"
+    },
+    {
+      "name": "location_data",
+      "line": 643,
+      "definition": "location_data = safe_json_load(location_path)"
+    },
+    {
+      "name": "last_two_messages",
+      "line": 662,
+      "definition": "last_two_messages = conversation_history[-2:]"
+    },
+    {
+      "name": "validation_conversation",
+      "line": 666,
+      "definition": "validation_conversation = ["
+    },
+    {
+      "name": "validation_result",
+      "line": 674,
+      "definition": "validation_result = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 675,
+      "definition": "model=DM_VALIDATION_MODEL,"
+    },
+    {
+      "name": "temperature",
+      "line": 676,
+      "definition": "temperature=TEMPERATURE,"
+    },
+    {
+      "name": "messages",
+      "line": 677,
+      "definition": "messages=validation_conversation"
+    },
+    {
+      "name": "validation_response",
+      "line": 680,
+      "definition": "validation_response = validation_result.choices[0].message.content.strip()"
+    },
+    {
+      "name": "validation_json",
+      "line": 683,
+      "definition": "validation_json = json.loads(validation_response)"
+    },
+    {
+      "name": "is_valid",
+      "line": 684,
+      "definition": "is_valid = validation_json.get(\"valid\", False)"
+    },
+    {
+      "name": "json_match",
+      "line": 698,
+      "definition": "json_match = re.search(r'```json\\n(.*?)```', response, re.DOTALL)"
+    },
+    {
+      "name": "json_content",
+      "line": 700,
+      "definition": "json_content = json_match.group(1)"
+    },
+    {
+      "name": "json_content",
+      "line": 702,
+      "definition": "json_content = response"
+    },
+    {
+      "name": "parsed_response",
+      "line": 704,
+      "definition": "parsed_response = json.loads(json_content)"
+    },
+    {
+      "name": "actions",
+      "line": 705,
+      "definition": "actions = parsed_response.get(\"actions\", [])"
+    },
+    {
+      "name": "narration",
+      "line": 706,
+      "definition": "narration = parsed_response.get(\"narration\", \"\")"
+    },
+    {
+      "name": "result",
+      "line": 710,
+      "definition": "result = process_action(action, party_tracker_data, location_data, conversation_history)"
+    },
+    {
+      "name": "formatted_messages",
+      "line": 740,
+      "definition": "formatted_messages = []"
+    },
+    {
+      "name": "history",
+      "line": 741,
+      "definition": "history = GAME_STATE[\"conversation_history\"][-20:] # Invia solo gli ultimi 20 messaggi"
+    },
+    {
+      "name": "role",
+      "line": 743,
+      "definition": "role = msg.get(\"role\")"
+    },
+    {
+      "name": "content",
+      "line": 744,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "parsed",
+      "line": 748,
+      "definition": "parsed = json.loads(content)"
+    },
+    {
+      "name": "narration",
+      "line": 749,
+      "definition": "narration = parsed.get(\"narration\", content)"
+    },
+    {
+      "name": "narration",
+      "line": 751,
+      "definition": "narration = content"
+    },
+    {
+      "name": "match",
+      "line": 755,
+      "definition": "match = re.search(r'Player \\(([^)]+)\\): (.*)', content, re.DOTALL)"
+    },
+    {
+      "name": "connected_player_names",
+      "line": 768,
+      "definition": "connected_player_names = [PLAYERS_SID_MAP.get(sid, f'Player_{sid[:8]}') for sid in GAME_STATE[\"connected_players\"]]"
+    },
+    {
+      "name": "state_data",
+      "line": 770,
+      "definition": "state_data = {"
+    },
+    {
+      "name": "recent_messages",
+      "line": 796,
+      "definition": "recent_messages = GAME_STATE[\"conversation_history\"][-10:] if GAME_STATE[\"conversation_history\"] else []"
+    },
+    {
+      "name": "formatted_messages",
+      "line": 799,
+      "definition": "formatted_messages = []"
+    },
+    {
+      "name": "content",
+      "line": 803,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "parsed",
+      "line": 805,
+      "definition": "parsed = json.loads(content)"
+    },
+    {
+      "name": "narration",
+      "line": 806,
+      "definition": "narration = parsed.get(\"narration\", content)"
+    },
+    {
+      "name": "narration",
+      "line": 808,
+      "definition": "narration = content"
+    },
+    {
+      "name": "content",
+      "line": 819,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "match",
+      "line": 823,
+      "definition": "match = re.search(r'Player \\(([^)]+)\\): (.+)', content)"
+    },
+    {
+      "name": "player_name",
+      "line": 825,
+      "definition": "player_name = match.group(1)"
+    },
+    {
+      "name": "action",
+      "line": 826,
+      "definition": "action = match.group(2)"
+    },
+    {
+      "name": "connected_player_names",
+      "line": 844,
+      "definition": "connected_player_names = [PLAYERS_SID_MAP.get(sid, f'Player_{sid[:8]}') for sid in GAME_STATE[\"connected_players\"]]"
+    },
+    {
+      "name": "combat_state",
+      "line": 847,
+      "definition": "combat_state = None"
+    },
+    {
+      "name": "combat_state",
+      "line": 849,
+      "definition": "combat_state = GAME_STATE[\"active_combat\"].get_current_combat_state()"
+    },
+    {
+      "name": "discovered_modules",
+      "line": 891,
+      "definition": "discovered_modules = discover_available_modules()"
+    },
+    {
+      "name": "current_module",
+      "line": 892,
+      "definition": "current_module = get_current_module_name()"
+    },
+    {
+      "name": "response_data",
+      "line": 898,
+      "definition": "response_data = {"
+    },
+    {
+      "name": "data",
+      "line": 918,
+      "definition": "data = request.get_json()"
+    },
+    {
+      "name": "new_module_name",
+      "line": 922,
+      "definition": "new_module_name = data['module_name']"
+    },
+    {
+      "name": "new_module_name",
+      "line": 928,
+      "definition": "new_module_name = new_module_name.strip()"
+    },
+    {
+      "name": "available_modules",
+      "line": 931,
+      "definition": "available_modules = discover_available_modules()"
+    },
+    {
+      "name": "module_names",
+      "line": 932,
+      "definition": "module_names = [m[\"name\"] for m in available_modules]"
+    },
+    {
+      "name": "current_module",
+      "line": 938,
+      "definition": "current_module = get_current_module_name()"
+    },
+    {
+      "name": "success",
+      "line": 955,
+      "definition": "success = switch_to_module(new_module_name)"
+    },
+    {
+      "name": "module_path",
+      "line": 982,
+      "definition": "module_path = os.path.join(\"modules\", module_name)"
+    },
+    {
+      "name": "context_file",
+      "line": 986,
+      "definition": "context_file = os.path.join(module_path, \"module_context.json\")"
+    },
+    {
+      "name": "plot_file",
+      "line": 987,
+      "definition": "plot_file = os.path.join(module_path, \"module_plot.json\")"
+    },
+    {
+      "name": "context_data",
+      "line": 992,
+      "definition": "context_data = safe_json_load(context_file)"
+    },
+    {
+      "name": "plot_data",
+      "line": 993,
+      "definition": "plot_data = safe_json_load(plot_file) if os.path.exists(plot_file) else {}"
+    },
+    {
+      "name": "module_details",
+      "line": 996,
+      "definition": "module_details = {"
+    },
+    {
+      "name": "data",
+      "line": 1030,
+      "definition": "data = request.get_json()"
+    },
+    {
+      "name": "player_name",
+      "line": 1031,
+      "definition": "player_name = data.get('player_name', '')"
+    },
+    {
+      "name": "description",
+      "line": 1032,
+      "definition": "description = data.get('description', '')"
+    },
+    {
+      "name": "save_mode",
+      "line": 1033,
+      "definition": "save_mode = data.get('save_mode', 'essential')"
+    },
+    {
+      "name": "current_players",
+      "line": 1039,
+      "definition": "current_players = list(GAME_STATE.get(\"character_sheets\", {}).keys())"
+    },
+    {
+      "name": "player_name",
+      "line": 1076,
+      "definition": "player_name = request.args.get('player_name', '')"
+    },
+    {
+      "name": "data",
+      "line": 1099,
+      "definition": "data = request.get_json()"
+    },
+    {
+      "name": "player_name",
+      "line": 1100,
+      "definition": "player_name = data.get('player_name', '')"
+    },
+    {
+      "name": "player_name",
+      "line": 1140,
+      "definition": "player_name = request.args.get('player_name', '')"
+    },
+    {
+      "name": "save_info",
+      "line": 1180,
+      "definition": "save_info = save_manager.get_save_info(save_id)"
+    },
+    {
+      "name": "sid",
+      "line": 1198,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "current_state",
+      "line": 1206,
+      "definition": "current_state = get_current_state_for_client()"
+    },
+    {
+      "name": "sid",
+      "line": 1214,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 1217,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid, f'Player_{sid[:8]}')"
+    },
+    {
+      "name": "current_index",
+      "line": 1230,
+      "definition": "current_index = GAME_STATE[\"turn_order\"].index(player_name) if player_name in GAME_STATE[\"turn_order\"] else -1"
+    },
+    {
+      "name": "next_index",
+      "line": 1232,
+      "definition": "next_index = (current_index + 1) % len(GAME_STATE[\"turn_order\"])"
+    },
+    {
+      "name": "sid",
+      "line": 1245,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 1246,
+      "definition": "player_name = data.get('player_name', f'Player_{sid[:8]}')"
+    },
+    {
+      "name": "module_name",
+      "line": 1275,
+      "definition": "module_name = GAME_STATE[\"party_tracker\"].get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 1276,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "char_file",
+      "line": 1277,
+      "definition": "char_file = path_manager.get_character_path(normalize_character_name(player_name))"
+    },
+    {
+      "name": "char_data",
+      "line": 1285,
+      "definition": "char_data = safe_json_load(char_file)"
+    },
+    {
+      "name": "sid",
+      "line": 1328,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 1329,
+      "definition": "player_name = data.get('player_name', f'Player_{sid[:8]}')"
+    },
+    {
+      "name": "action_text",
+      "line": 1330,
+      "definition": "action_text = data.get('text', '')"
+    },
+    {
+      "name": "sid",
+      "line": 1352,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 1353,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "step",
+      "line": 1354,
+      "definition": "step = data.get('step')"
+    },
+    {
+      "name": "step_data",
+      "line": 1355,
+      "definition": "step_data = data.get('data', {})"
+    },
+    {
+      "name": "creation_state",
+      "line": 1361,
+      "definition": "creation_state = GAME_STATE[\"character_creation\"][player_name]"
+    },
+    {
+      "name": "character_data",
+      "line": 1398,
+      "definition": "character_data = create_character_from_creation_data(player_name, creation_state[\"data\"])"
+    },
+    {
+      "name": "module_name",
+      "line": 1401,
+      "definition": "module_name = GAME_STATE[\"party_tracker\"].get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 1402,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "char_file",
+      "line": 1403,
+      "definition": "char_file = path_manager.get_character_path(normalize_character_name(player_name))"
+    },
+    {
+      "name": "module_name",
+      "line": 1451,
+      "definition": "module_name = GAME_STATE[\"party_tracker\"].get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 1452,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "current_area_id",
+      "line": 1455,
+      "definition": "current_area_id = GAME_STATE[\"party_tracker\"][\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "module_creation_prompt",
+      "line": 1466,
+      "definition": "module_creation_prompt = \"\""
+    },
+    {
+      "name": "should_inject_creation_prompt",
+      "line": 1467,
+      "definition": "should_inject_creation_prompt = False"
+    },
+    {
+      "name": "all_modules_completion",
+      "line": 1470,
+      "definition": "all_modules_completion = check_all_modules_plot_completion()"
+    },
+    {
+      "name": "all_modules_complete",
+      "line": 1473,
+      "definition": "all_modules_complete = all_modules_completion[\"all_complete\"]"
+    },
+    {
+      "name": "modules_checked",
+      "line": 1474,
+      "definition": "modules_checked = all_modules_completion[\"modules_checked\"]"
+    },
+    {
+      "name": "completion_summary",
+      "line": 1475,
+      "definition": "completion_summary = all_modules_completion[\"completion_summary\"]"
+    },
+    {
+      "name": "status",
+      "line": 1480,
+      "definition": "status = \"COMPLETE\" if summary[\"is_complete\"] else \"INCOMPLETE\""
+    },
+    {
+      "name": "user_requesting_module_creation",
+      "line": 1486,
+      "definition": "user_requesting_module_creation = (\"I am ready to embark on a new adventure\" in action_text or"
+    },
+    {
+      "name": "should_inject_creation_prompt",
+      "line": 1489,
+      "definition": "should_inject_creation_prompt = ((all_modules_complete and len(modules_checked) > 0) or"
+    },
+    {
+      "name": "module_creation_prompt",
+      "line": 1504,
+      "definition": "module_creation_prompt = \"\\n\\n\" + f.read()"
+    },
+    {
+      "name": "incomplete_modules",
+      "line": 1509,
+      "definition": "incomplete_modules = [name for name, summary in completion_summary.items() if not summary[\"is_complete\"]]"
+    },
+    {
+      "name": "dm_note",
+      "line": 1521,
+      "definition": "dm_note = (f\"Dungeon Master Note: Current date and time: {GAME_STATE['party_tracker']['worldConditions']['time']}. \""
+    },
+    {
+      "name": "dm_note",
+      "line": 1524,
+      "definition": "dm_note = f\"Dungeon Master Note: Current date and time: {GAME_STATE['party_tracker']['worldConditions']['time']}. \""
+    },
+    {
+      "name": "party_members",
+      "line": 1528,
+      "definition": "party_members = GAME_STATE[\"party_tracker\"].get(\"partyMembers\", [])"
+    },
+    {
+      "name": "member_names",
+      "line": 1530,
+      "definition": "member_names = []"
+    },
+    {
+      "name": "member_name",
+      "line": 1532,
+      "definition": "member_name = member.get(\"name\", \"Unknown\")"
+    },
+    {
+      "name": "member_data_path",
+      "line": 1537,
+      "definition": "member_data_path = f\"modules/{GAME_STATE['party_tracker'].get('module', '').replace(' ', '_')}/characters/{member_name}.json\""
+    },
+    {
+      "name": "member_data",
+      "line": 1538,
+      "definition": "member_data = safe_json_load(member_data_path)"
+    },
+    {
+      "name": "spellcasting",
+      "line": 1540,
+      "definition": "spellcasting = member_data.get(\"spellcasting\", {})"
+    },
+    {
+      "name": "spell_slots",
+      "line": 1542,
+      "definition": "spell_slots = spellcasting[\"spellSlots\"]"
+    },
+    {
+      "name": "slot_parts",
+      "line": 1543,
+      "definition": "slot_parts = []"
+    },
+    {
+      "name": "level_key",
+      "line": 1545,
+      "definition": "level_key = f\"level{level}\""
+    },
+    {
+      "name": "slot_data",
+      "line": 1547,
+      "definition": "slot_data = spell_slots[level_key]"
+    },
+    {
+      "name": "current",
+      "line": 1548,
+      "definition": "current = slot_data.get(\"current\", 0)"
+    },
+    {
+      "name": "maximum",
+      "line": 1549,
+      "definition": "maximum = slot_data.get(\"max\", 0)"
+    },
+    {
+      "name": "ai_response_content",
+      "line": 1574,
+      "definition": "ai_response_content = get_ai_response(GAME_STATE[\"conversation_history\"], action_text=action_text)"
+    },
+    {
+      "name": "module_narrative",
+      "line": 1597,
+      "definition": "module_narrative = \"\""
+    },
+    {
+      "name": "module_narrative",
+      "line": 1600,
+      "definition": "module_narrative = action_text"
+    },
+    {
+      "name": "module_narrative",
+      "line": 1604,
+      "definition": "module_narrative = ai_response_content.strip()"
+    },
+    {
+      "name": "forced_action",
+      "line": 1608,
+      "definition": "forced_action = {"
+    },
+    {
+      "name": "ai_response_content",
+      "line": 1620,
+      "definition": "ai_response_content = json.dumps(forced_action, indent=2)"
+    },
+    {
+      "name": "validation_prompt_text",
+      "line": 1624,
+      "definition": "validation_prompt_text = load_validation_prompt()"
+    },
+    {
+      "name": "validation_result",
+      "line": 1625,
+      "definition": "validation_result = validate_ai_response("
+    },
+    {
+      "name": "dm_validator",
+      "line": 1636,
+      "definition": "dm_validator = DMResponseValidator()"
+    },
+    {
+      "name": "ai_response_content",
+      "line": 1660,
+      "definition": "ai_response_content = get_ai_response(GAME_STATE[\"conversation_history\"], validation_retry_count=1, action_text=action_text)"
+    },
+    {
+      "name": "match",
+      "line": 1678,
+      "definition": "match = re.search(r'```json\\n(.*?)```', text, re.DOTALL)"
+    },
+    {
+      "name": "json_content",
+      "line": 1683,
+      "definition": "json_content = extract_json_from_codeblock(ai_response_content)"
+    },
+    {
+      "name": "parsed_response",
+      "line": 1687,
+      "definition": "parsed_response = json.loads(json_content)"
+    },
+    {
+      "name": "parsed_response",
+      "line": 1695,
+      "definition": "parsed_response = {"
+    },
+    {
+      "name": "parsed_response",
+      "line": 1709,
+      "definition": "parsed_response = {"
+    },
+    {
+      "name": "narration",
+      "line": 1713,
+      "definition": "narration = parsed_response.get(\"narration\", \"Il DM descrive la scena...\")"
+    },
+    {
+      "name": "actions",
+      "line": 1714,
+      "definition": "actions = parsed_response.get(\"actions\", [])"
+    },
+    {
+      "name": "is_levelup_action",
+      "line": 1717,
+      "definition": "is_levelup_action = any(action.get(\"action\") == \"levelUp\" for action in actions)"
+    },
+    {
+      "name": "result",
+      "line": 1724,
+      "definition": "result = process_action("
+    },
+    {
+      "name": "level_up_session",
+      "line": 1735,
+      "definition": "level_up_session = result.get(\"session\")"
+    },
+    {
+      "name": "player_name",
+      "line": 1742,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "dm_response",
+      "line": 1748,
+      "definition": "dm_response = level_up_session.start()"
+    },
+    {
+      "name": "result",
+      "line": 1790,
+      "definition": "result = process_action("
+    },
+    {
+      "name": "result",
+      "line": 1826,
+      "definition": "result = process_action("
+    },
+    {
+      "name": "char_name",
+      "line": 1835,
+      "definition": "char_name = action.get(\"parameters\", {}).get(\"characterName\")"
+    },
+    {
+      "name": "changes",
+      "line": 1836,
+      "definition": "changes = action.get(\"parameters\", {}).get(\"changes\", \"\")"
+    },
+    {
+      "name": "inv_manager",
+      "line": 1840,
+      "definition": "inv_manager = InventoryManager()"
+    },
+    {
+      "name": "expected_items",
+      "line": 1847,
+      "definition": "expected_items = []"
+    },
+    {
+      "name": "item_matches",
+      "line": 1851,
+      "definition": "item_matches = re.findall(r'Added ([^(]+)(?:\\s*\\((\\d+)\\))?\\s+to equipment', changes)"
+    },
+    {
+      "name": "item_name",
+      "line": 1853,
+      "definition": "item_name = match[0].strip()"
+    },
+    {
+      "name": "quantity",
+      "line": 1854,
+      "definition": "quantity = match[1] if match[1] else \"1\""
+    },
+    {
+      "name": "current_inventory",
+      "line": 1859,
+      "definition": "current_inventory = inv_manager.get_character_inventory_snapshot(char_name)"
+    },
+    {
+      "name": "equipment",
+      "line": 1860,
+      "definition": "equipment = current_inventory.get(\"equipment\", [])"
+    },
+    {
+      "name": "added_count",
+      "line": 1862,
+      "definition": "added_count = 0"
+    },
+    {
+      "name": "retry_action",
+      "line": 1875,
+      "definition": "retry_action = inv_manager.ai_fallback_analysis(ai_response_content, action_text, char_name)"
+    },
+    {
+      "name": "retry_result",
+      "line": 1879,
+      "definition": "retry_result = process_action("
+    },
+    {
+      "name": "encounter_id",
+      "line": 1890,
+      "definition": "encounter_id = result.get(\"encounter_id\")"
+    },
+    {
+      "name": "post_combat_history",
+      "line": 1905,
+      "definition": "post_combat_history = safe_json_load(\"modules/conversation_history/conversation_history.json\")"
+    },
+    {
+      "name": "post_combat_narration",
+      "line": 1906,
+      "definition": "post_combat_narration = get_ai_response(post_combat_history)"
+    },
+    {
+      "name": "parsed_post_combat",
+      "line": 1911,
+      "definition": "parsed_post_combat = json.loads(post_combat_narration)"
+    },
+    {
+      "name": "post_narration",
+      "line": 1912,
+      "definition": "post_narration = parsed_post_combat.get(\"narration\", \"Il combattimento è terminato.\")"
+    },
+    {
+      "name": "processed_history",
+      "line": 1939,
+      "definition": "processed_history = transition_manager.check_and_process_module_transitions("
+    },
+    {
+      "name": "category",
+      "line": 1948,
+      "definition": "category=\"module_transitions\")"
+    },
+    {
+      "name": "current_index",
+      "line": 1967,
+      "definition": "current_index = GAME_STATE[\"turn_order\"].index(player_name)"
+    },
+    {
+      "name": "next_index",
+      "line": 1968,
+      "definition": "next_index = (current_index + 1) % len(GAME_STATE[\"turn_order\"])"
+    },
+    {
+      "name": "current_index",
+      "line": 1990,
+      "definition": "current_index = GAME_STATE[\"turn_order\"].index(player_name)"
+    },
+    {
+      "name": "next_index",
+      "line": 1991,
+      "definition": "next_index = (current_index + 1) % len(GAME_STATE[\"turn_order\"])"
+    },
+    {
+      "name": "current_state",
+      "line": 2002,
+      "definition": "current_state = get_current_state_for_client()"
+    },
+    {
+      "name": "sid",
+      "line": 2008,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 2009,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "data_type",
+      "line": 2010,
+      "definition": "data_type = data.get('dataType', 'stats')"
+    },
+    {
+      "name": "success",
+      "line": 2018,
+      "definition": "success = reload_character_data(player_name)"
+    },
+    {
+      "name": "character_data",
+      "line": 2024,
+      "definition": "character_data = GAME_STATE[\"character_sheets\"][player_name]"
+    },
+    {
+      "name": "filtered_data",
+      "line": 2027,
+      "definition": "filtered_data = {}"
+    },
+    {
+      "name": "filtered_data",
+      "line": 2031,
+      "definition": "filtered_data = {"
+    },
+    {
+      "name": "filtered_data",
+      "line": 2053,
+      "definition": "filtered_data = {"
+    },
+    {
+      "name": "filtered_data",
+      "line": 2060,
+      "definition": "filtered_data = {"
+    },
+    {
+      "name": "filtered_data",
+      "line": 2066,
+      "definition": "filtered_data = character_data"
+    },
+    {
+      "name": "module_name",
+      "line": 2079,
+      "definition": "module_name = GAME_STATE[\"party_tracker\"].get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 2080,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "char_file",
+      "line": 2081,
+      "definition": "char_file = path_manager.get_character_path(normalize_character_name(player_name))"
+    },
+    {
+      "name": "char_data",
+      "line": 2085,
+      "definition": "char_data = safe_json_load(char_file)"
+    },
+    {
+      "name": "sid",
+      "line": 2103,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 2104,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "success",
+      "line": 2110,
+      "definition": "success = reload_character_data(player_name)"
+    },
+    {
+      "name": "party_tracker",
+      "line": 2125,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 2126,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 2130,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 2136,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "plot_data",
+      "line": 2141,
+      "definition": "plot_data = activate_first_quest_if_needed(plot_data, current_module)"
+    },
+    {
+      "name": "backup_plot_path",
+      "line": 2151,
+      "definition": "backup_plot_path = f\"modules/{current_module}/module_plot_BU.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 2155,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "plot_data",
+      "line": 2158,
+      "definition": "plot_data = activate_first_quest_if_needed(plot_data, current_module)"
+    },
+    {
+      "name": "sid",
+      "line": 2176,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 2177,
+      "definition": "player_name = data.get('player_name', f'Player_{sid[:8]}')"
+    },
+    {
+      "name": "message",
+      "line": 2178,
+      "definition": "message = data.get('message', '')"
+    },
+    {
+      "name": "sid",
+      "line": 2197,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 2198,
+      "definition": "player_name = data.get('player_name')"
+    },
+    {
+      "name": "action_text",
+      "line": 2199,
+      "definition": "action_text = data.get('text', '')"
+    },
+    {
+      "name": "combat_state",
+      "line": 2222,
+      "definition": "combat_state = GAME_STATE[\"active_combat\"].get_current_combat_state()"
+    },
+    {
+      "name": "quest_id",
+      "line": 2231,
+      "definition": "quest_id = data.get('quest_id')"
+    },
+    {
+      "name": "quest_type",
+      "line": 2232,
+      "definition": "quest_type = data.get('quest_type', 'main')  # 'main' or 'side'"
+    },
+    {
+      "name": "party_tracker",
+      "line": 2237,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 2238,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 2241,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 2245,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "quest_activated",
+      "line": 2248,
+      "definition": "quest_activated = False"
+    },
+    {
+      "name": "quest_activated",
+      "line": 2254,
+      "definition": "quest_activated = True"
+    },
+    {
+      "name": "quest_activated",
+      "line": 2263,
+      "definition": "quest_activated = True"
+    },
+    {
+      "name": "quest_id",
+      "line": 2295,
+      "definition": "quest_id = data.get('quest_id')"
+    },
+    {
+      "name": "quest_type",
+      "line": 2296,
+      "definition": "quest_type = data.get('quest_type', 'main')  # 'main' or 'side'"
+    },
+    {
+      "name": "party_tracker",
+      "line": 2301,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 2302,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 2305,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 2309,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "quest_closed",
+      "line": 2312,
+      "definition": "quest_closed = False"
+    },
+    {
+      "name": "quest_closed",
+      "line": 2318,
+      "definition": "quest_closed = True"
+    },
+    {
+      "name": "quest_closed",
+      "line": 2327,
+      "definition": "quest_closed = True"
+    },
+    {
+      "name": "party_tracker",
+      "line": 2362,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 2363,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 2366,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 2370,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "quests_reset",
+      "line": 2373,
+      "definition": "quests_reset = 0"
+    },
+    {
+      "name": "has_active_quest",
+      "line": 2422,
+      "definition": "has_active_quest = False"
+    },
+    {
+      "name": "has_active_quest",
+      "line": 2425,
+      "definition": "has_active_quest = True"
+    },
+    {
+      "name": "first_quest",
+      "line": 2431,
+      "definition": "first_quest = plot_data['plotPoints'][0]"
+    },
+    {
+      "name": "race",
+      "line": 2458,
+      "definition": "race = creation_data.get('race', 'Human')"
+    },
+    {
+      "name": "character_class",
+      "line": 2459,
+      "definition": "character_class = creation_data.get('class', 'Fighter')"
+    },
+    {
+      "name": "background",
+      "line": 2460,
+      "definition": "background = creation_data.get('background', 'Folk Hero')"
+    },
+    {
+      "name": "abilities",
+      "line": 2461,
+      "definition": "abilities = creation_data.get('abilities', {"
+    },
+    {
+      "name": "character_data",
+      "line": 2467,
+      "definition": "character_data = get_default_character_template("
+    },
+    {
+      "name": "name",
+      "line": 2468,
+      "definition": "name=player_name,"
+    },
+    {
+      "name": "character_class",
+      "line": 2469,
+      "definition": "character_class=character_class,"
+    },
+    {
+      "name": "race",
+      "line": 2470,
+      "definition": "race=race,"
+    },
+    {
+      "name": "background",
+      "line": 2471,
+      "definition": "background=background,"
+    },
+    {
+      "name": "abilities",
+      "line": 2472,
+      "definition": "abilities=abilities"
+    },
+    {
+      "name": "spellcasting_data",
+      "line": 2482,
+      "definition": "spellcasting_data = get_spellcasting_data(character_class, abilities)"
+    },
+    {
+      "name": "spellcasting_classes",
+      "line": 2494,
+      "definition": "spellcasting_classes = {"
+    },
+    {
+      "name": "saving_throws",
+      "line": 2697,
+      "definition": "saving_throws = {"
+    },
+    {
+      "name": "proficiencies",
+      "line": 2721,
+      "definition": "proficiencies = {"
+    },
+    {
+      "name": "features",
+      "line": 2746,
+      "definition": "features = {"
+    },
+    {
+      "name": "equipment",
+      "line": 2767,
+      "definition": "equipment = {"
+    },
+    {
+      "name": "result",
+      "line": 2832,
+      "definition": "result = GAME_STATE[\"active_combat\"].process_player_turn(player_name, action_text)"
+    },
+    {
+      "name": "current_turn",
+      "line": 2859,
+      "definition": "current_turn = result.get(\"current_turn\")"
+    },
+    {
+      "name": "result",
+      "line": 2880,
+      "definition": "result = GAME_STATE[\"active_combat\"].process_ai_turns()"
+    },
+    {
+      "name": "current_location_id",
+      "line": 2917,
+      "definition": "current_location_id = GAME_STATE[\"party_tracker\"][\"worldConditions\"][\"currentLocationId\"]"
+    },
+    {
+      "name": "location_data",
+      "line": 2918,
+      "definition": "location_data = location_manager.get_location_info("
+    },
+    {
+      "name": "combat_service",
+      "line": 2929,
+      "definition": "combat_service = CombatService(encounter_id, GAME_STATE[\"party_tracker\"], location_data)"
+    },
+    {
+      "name": "initial_state",
+      "line": 2941,
+      "definition": "initial_state = combat_service.get_current_combat_state()"
+    },
+    {
+      "name": "connected_players",
+      "line": 2961,
+      "definition": "connected_players = list(GAME_STATE[\"connected_players\"].values())"
+    },
+    {
+      "name": "quest_id",
+      "line": 2988,
+      "definition": "quest_id = data.get('quest_id')"
+    },
+    {
+      "name": "quest_type",
+      "line": 2989,
+      "definition": "quest_type = data.get('quest_type', 'main')  # 'main' or 'side'"
+    },
+    {
+      "name": "party_tracker",
+      "line": 2994,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 2995,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 2998,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 3002,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "quest_rejected",
+      "line": 3005,
+      "definition": "quest_rejected = False"
+    },
+    {
+      "name": "quest_rejected",
+      "line": 3012,
+      "definition": "quest_rejected = True"
+    },
+    {
+      "name": "quest_rejected",
+      "line": 3021,
+      "definition": "quest_rejected = True"
+    },
+    {
+      "name": "quest_id",
+      "line": 3053,
+      "definition": "quest_id = data.get('quest_id')"
+    },
+    {
+      "name": "quest_type",
+      "line": 3054,
+      "definition": "quest_type = data.get('quest_type', 'main')  # 'main' or 'side'"
+    },
+    {
+      "name": "party_tracker",
+      "line": 3059,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 3060,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 3063,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 3067,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "quest_removed",
+      "line": 3070,
+      "definition": "quest_removed = False"
+    },
+    {
+      "name": "quest_removed",
+      "line": 3077,
+      "definition": "quest_removed = True"
+    },
+    {
+      "name": "quest_removed",
+      "line": 3086,
+      "definition": "quest_removed = True"
+    },
+    {
+      "name": "party_tracker",
+      "line": 3122,
+      "definition": "party_tracker = GAME_STATE.get(\"party_tracker\", {})"
+    },
+    {
+      "name": "current_module",
+      "line": 3123,
+      "definition": "current_module = party_tracker.get(\"current_module\", \"Keep_of_Doom\")"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 3126,
+      "definition": "plot_file_path = f\"modules/{current_module}/module_plot.json\""
+    },
+    {
+      "name": "plot_data",
+      "line": 3130,
+      "definition": "plot_data = json.load(f)"
+    },
+    {
+      "name": "quests_cleaned",
+      "line": 3133,
+      "definition": "quests_cleaned = 0"
+    },
+    {
+      "name": "conversation_file_path",
+      "line": 3190,
+      "definition": "conversation_file_path = \"modules/conversation_history/conversation_history.json\""
+    },
+    {
+      "name": "message_type",
+      "line": 3203,
+      "definition": "message_type=\"chat_cleared\","
+    },
+    {
+      "name": "message_content",
+      "line": 3204,
+      "definition": "message_content=\"Chat history has been cleared\","
+    },
+    {
+      "name": "message_player",
+      "line": 3205,
+      "definition": "message_player=\"System\""
+    },
+    {
+      "name": "combat_files",
+      "line": 3223,
+      "definition": "combat_files = ["
+    },
+    {
+      "name": "cleared_files",
+      "line": 3228,
+      "definition": "cleared_files = 0"
+    },
+    {
+      "name": "message_type",
+      "line": 3248,
+      "definition": "message_type=\"combat_cleared\","
+    },
+    {
+      "name": "message_content",
+      "line": 3249,
+      "definition": "message_content=\"Combat history has been cleared\","
+    },
+    {
+      "name": "message_player",
+      "line": 3250,
+      "definition": "message_player=\"System\""
+    },
+    {
+      "name": "history_files",
+      "line": 3268,
+      "definition": "history_files = ["
+    },
+    {
+      "name": "root_files",
+      "line": 3278,
+      "definition": "root_files = ["
+    },
+    {
+      "name": "cleared_files",
+      "line": 3287,
+      "definition": "cleared_files = 0"
+    },
+    {
+      "name": "message_type",
+      "line": 3325,
+      "definition": "message_type=\"all_history_cleared\","
+    },
+    {
+      "name": "message_content",
+      "line": 3326,
+      "definition": "message_content=\"All history has been cleared\","
+    },
+    {
+      "name": "message_player",
+      "line": 3327,
+      "definition": "message_player=\"System\""
+    },
+    {
+      "name": "sid",
+      "line": 3345,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 3346,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "level_up_session",
+      "line": 3352,
+      "definition": "level_up_session = LEVEL_UP_SESSIONS.get(player_name)"
+    },
+    {
+      "name": "user_input",
+      "line": 3357,
+      "definition": "user_input = data.get('input', '').strip()"
+    },
+    {
+      "name": "dm_response",
+      "line": 3365,
+      "definition": "dm_response = level_up_session.handle_input(user_input)"
+    },
+    {
+      "name": "level_up_summary",
+      "line": 3373,
+      "definition": "level_up_summary = level_up_session.summary"
+    },
+    {
+      "name": "sid",
+      "line": 3424,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 3425,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "level_up_session",
+      "line": 3431,
+      "definition": "level_up_session = LEVEL_UP_SESSIONS.get(player_name)"
+    },
+    {
+      "name": "sid",
+      "line": 3468,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 3469,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "description",
+      "line": 3475,
+      "definition": "description = data.get('description', '')"
+    },
+    {
+      "name": "save_mode",
+      "line": 3476,
+      "definition": "save_mode = data.get('save_mode', 'essential')"
+    },
+    {
+      "name": "current_players",
+      "line": 3479,
+      "definition": "current_players = list(GAME_STATE.get(\"character_sheets\", {}).keys())"
+    },
+    {
+      "name": "sid",
+      "line": 3518,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 3519,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "save_id",
+      "line": 3525,
+      "definition": "save_id = data.get('save_id', '')"
+    },
+    {
+      "name": "sid",
+      "line": 3568,
+      "definition": "sid = request.sid"
+    },
+    {
+      "name": "player_name",
+      "line": 3569,
+      "definition": "player_name = PLAYERS_SID_MAP.get(sid)"
+    },
+    {
+      "name": "normalized_name",
+      "line": 3615,
+      "definition": "normalized_name = normalize_character_name(player_name)"
+    },
+    {
+      "name": "char_file",
+      "line": 3616,
+      "definition": "char_file = f\"characters/{normalized_name}.json\""
+    },
+    {
+      "name": "char_data",
+      "line": 3617,
+      "definition": "char_data = safe_read_json(char_file)"
+    },
+    {
+      "name": "sid",
+      "line": 3624,
+      "definition": "sid = None"
+    },
+    {
+      "name": "sid",
+      "line": 3627,
+      "definition": "sid = s"
+    },
+    {
+      "name": "host",
+      "line": 3643,
+      "definition": "host='0.0.0.0',"
+    },
+    {
+      "name": "port",
+      "line": 3644,
+      "definition": "port=5000,"
+    },
+    {
+      "name": "debug",
+      "line": 3645,
+      "definition": "debug=False,"
+    },
+    {
+      "name": "allow_unsafe_werkzeug",
+      "line": 3646,
+      "definition": "allow_unsafe_werkzeug=True"
+    }
+  ],
+  "socketio_handlers": [
+    {
+      "event": "connect",
+      "function": "handle_connect",
+      "line_number": 1195
+    },
+    {
+      "event": "disconnect",
+      "function": "handle_disconnect",
+      "line_number": 1211
+    },
+    {
+      "event": "join_game",
+      "function": "handle_join_game",
+      "line_number": 1242
+    },
+    {
+      "event": "player_action",
+      "function": "on_player_action_event",
+      "line_number": 1324
+    },
+    {
+      "event": "character_creation_step",
+      "function": "handle_character_creation_step",
+      "line_number": 1349
+    },
+    {
+      "event": "request_game_state",
+      "function": "handle_game_state_request",
+      "line_number": 1999
+    },
+    {
+      "event": "request_player_data",
+      "function": "handle_player_data_request",
+      "line_number": 2005
+    },
+    {
+      "event": "reload_character_data",
+      "function": "handle_reload_character_data",
+      "line_number": 2100
+    },
+    {
+      "event": "request_plot_data",
+      "function": "handle_plot_data_request",
+      "line_number": 2118
+    },
+    {
+      "event": "chat_message",
+      "function": "handle_chat_message",
+      "line_number": 2173
+    },
+    {
+      "event": "combat_action",
+      "function": "on_combat_action",
+      "line_number": 2194
+    },
+    {
+      "event": "request_combat_state",
+      "function": "handle_combat_state_request",
+      "line_number": 2218
+    },
+    {
+      "event": "activate_quest",
+      "function": "handle_activate_quest",
+      "line_number": 2227
+    },
+    {
+      "event": "close_quest",
+      "function": "handle_close_quest",
+      "line_number": 2291
+    },
+    {
+      "event": "reset_all_quests",
+      "function": "handle_reset_all_quests",
+      "line_number": 2355
+    },
+    {
+      "event": "reject_quest",
+      "function": "handle_reject_quest",
+      "line_number": 2984
+    },
+    {
+      "event": "remove_quest",
+      "function": "handle_remove_quest",
+      "line_number": 3049
+    },
+    {
+      "event": "cleanup_rejected_quests",
+      "function": "handle_cleanup_rejected_quests",
+      "line_number": 3114
+    },
+    {
+      "event": "clear_chat_history",
+      "function": "handle_clear_chat_history",
+      "line_number": 3177
+    },
+    {
+      "event": "clear_combat_history",
+      "function": "handle_clear_combat_history",
+      "line_number": 3214
+    },
+    {
+      "event": "clear_all_history",
+      "function": "handle_clear_all_history",
+      "line_number": 3259
+    },
+    {
+      "event": "level_up_input",
+      "function": "handle_level_up_input",
+      "line_number": 3340
+    },
+    {
+      "event": "cancel_level_up",
+      "function": "handle_cancel_level_up",
+      "line_number": 3419
+    },
+    {
+      "event": "save_game",
+      "function": "handle_save_game",
+      "line_number": 3463
+    },
+    {
+      "event": "load_game",
+      "function": "handle_load_game",
+      "line_number": 3513
+    },
+    {
+      "event": "list_saves",
+      "function": "handle_list_saves",
+      "line_number": 3563
+    },
+    {
+      "event": "auto_save",
+      "function": "handle_auto_save",
+      "line_number": 3590
+    }
+  ],
+  "systems": {
+    "multiplayer_features": [
+      "player_name",
+      "connected_players",
+      "GAME_STATE",
+      "sid",
+      "multiplayer"
+    ],
+    "socketio_events": [
+      "module_creation_completed",
+      "auto_save_completed",
+      "combat_started",
+      "level_up_started",
+      "save_game_loaded",
+      "character_data_updated",
+      "module_switched",
+      "combat_state_update",
+      "save_game_deleted",
+      "module_creation_started",
+      "combat_ended",
+      "game_state_update",
+      "chat_message",
+      "save_game_created",
+      "level_up_notification",
+      "validation_warning"
+    ],
+    "ai_models": [
+      "get_current_state_for_client",
+      "get_module_details",
+      "OpenAI",
+      "process_ai_turns",
+      "process_ai_response",
+      "process_ai_combat_turns",
+      "validate_ai_response",
+      "discover_available_modules",
+      "ensure_main_system_prompt",
+      "get_ai_response",
+      "ai_fallback_analysis",
+      "model",
+      "get_available_modules",
+      "AI"
+    ],
+    "validation_systems": [
+      "validate_response",
+      "load_validation_prompt"
+    ],
+    "conversation_management": [
+      "save_conversation_history",
+      "handle_chat_message",
+      "handle_clear_combat_history",
+      "messages",
+      "handle_clear_chat_history",
+      "handle_clear_all_history"
+    ],
+    "game_state_management": [
+      "initialize_game_state",
+      "broadcast_full_game_state",
+      "get_current_combat_state",
+      "handle_combat_state_request",
+      "handle_game_state_request",
+      "reload_game_state",
+      "state",
+      "get_game_state"
+    ],
+    "save_load_functions": [
+      "can_player_save",
+      "file",
+      "handle_list_saves",
+      "handle_auto_save",
+      "loads",
+      "get_area_file_path",
+      "get_module_file_path",
+      "safe_json_dump",
+      "list_save_games_with_permissions",
+      "load_system_prompt",
+      "create_save_game_thread_safe",
+      "should_auto_save",
+      "extract_json_from_codeblock",
+      "create_save_game",
+      "get_json",
+      "handle_save_game",
+      "restore_save_game_thread_safe",
+      "get_multiplayer_save_manager",
+      "reload_character_data_for_player",
+      "jsonify",
+      "create_auto_save",
+      "delete_save_game",
+      "list_save_games",
+      "load_save_game",
+      "load",
+      "handle_reload_character_data",
+      "safe_write_json",
+      "safe_json_load",
+      "get_save_info",
+      "get_save_metadata",
+      "loaded",
+      "reload_character_data",
+      "handle_load_game",
+      "safe_read_json"
+    ],
+    "combat_functions": [
+      "CombatService",
+      "handle_combat_action_logic",
+      "start_combat_session",
+      "on_combat_action"
+    ],
+    "character_functions": [
+      "handle_player_action_logic",
+      "is_player_turn",
+      "handle_character_creation_step",
+      "players",
+      "normalize_character_name",
+      "create_character_from_creation_data",
+      "set_host_player",
+      "set_active_players",
+      "get_default_character_template",
+      "get_character_path",
+      "get_multiplayer_transition_manager",
+      "on_player_action_event",
+      "handle_player_data_request",
+      "process_player_turn",
+      "get_character_inventory_snapshot",
+      "Player"
+    ],
+    "location_functions": [
+      "get_location_info",
+      "check_and_process_module_transitions"
+    ],
+    "module_functions": [
+      "ModulePathManager",
+      "get_module_creation_date",
+      "get_current_module_name",
+      "calculate_module_completion",
+      "module",
+      "check_all_modules_plot_completion",
+      "determine_module_type",
+      "switch_module",
+      "get_module_last_played",
+      "get_module_description",
+      "switch_to_module"
+    ],
+    "utility_functions": [
+      "handle_reset_all_quests",
+      "handle_join_game",
+      "Rations",
+      "processed",
+      "handle_plot_data_request",
+      "get_starting_equipment_old",
+      "extract_actual_actions",
+      "int",
+      "strftime",
+      "append",
+      "activate_first_quest_if_needed",
+      "presente",
+      "isdir",
+      "remove",
+      "groups",
+      "search",
+      "tracking",
+      "removed",
+      "now",
+      "keys",
+      "isinstance",
+      "get_starting_equipment",
+      "startswith",
+      "handle_cancel_level_up",
+      "warning",
+      "InventoryManager",
+      "open",
+      "items",
+      "getctime",
+      "emit",
+      "strip",
+      "index",
+      "sanitize_text",
+      "join",
+      "debug",
+      "SocketIO",
+      "active",
+      "exists",
+      "DMResponseValidator",
+      "dirname",
+      "tracker",
+      "get",
+      "insert",
+      "dumps",
+      "name",
+      "set_script_name",
+      "handle_reject_quest",
+      "run",
+      "n",
+      "permissions",
+      "successfully",
+      "sort",
+      "handle_cleanup_rejected_quests",
+      "render_template",
+      "get_class_features",
+      "sum",
+      "dump",
+      "start_background_task",
+      "temperature",
+      "process_inventory_response",
+      "range",
+      "get_spellcasting_data",
+      "set",
+      "handle_disconnect",
+      "getmtime",
+      "predict_actions_required",
+      "update",
+      "makedirs",
+      "host",
+      "sleep",
+      "listdir",
+      "fromtimestamp",
+      "locals",
+      "exit",
+      "add",
+      "findall",
+      "lower",
+      "dictionary",
+      "features",
+      "on",
+      "getcwd",
+      "print",
+      "route",
+      "get_plot_path",
+      "date",
+      "start",
+      "any",
+      "error",
+      "Added",
+      "len",
+      "abspath",
+      "handle_activate_quest",
+      "str",
+      "start_server",
+      "get_class_skills",
+      "handle_close_quest",
+      "read",
+      "log_prediction_accuracy",
+      "import",
+      "handle_remove_quest",
+      "group",
+      "handle_connect",
+      "debug_socket_event",
+      "process_action",
+      "Copyright",
+      "values",
+      "get_class_proficiencies",
+      "handle_input",
+      "Flask",
+      "giocatori",
+      "handle_level_up_input",
+      "required",
+      "process_all_effect_expirations",
+      "info",
+      "set_socketio",
+      "create",
+      "list",
+      "get_class_saving_throws",
+      "isoformat",
+      "replace",
+      "reversed"
+    ]
+  },
+  "summary": {
+    "total_functions": 74,
+    "total_imports": 66,
+    "total_globals": 398,
+    "total_socketio_handlers": 27,
+    "total_systems": 239
+  }
+}

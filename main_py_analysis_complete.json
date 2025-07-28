@@ -1,0 +1,2910 @@
+{
+  "analysis_date": "2025-07-28",
+  "file_analyzed": "main.py",
+  "functions": [
+    {
+      "name": "display_status",
+      "args": [
+        "message"
+      ],
+      "docstring": "Display status message above the command prompt",
+      "line_number": 169
+    },
+    {
+      "name": "status_callback",
+      "args": [
+        "message",
+        "is_processing"
+      ],
+      "docstring": "Callback for status manager to display status updates",
+      "line_number": 181
+    },
+    {
+      "name": "exit_game",
+      "args": [],
+      "docstring": "No docstring",
+      "line_number": 198
+    },
+    {
+      "name": "check_and_inject_return_message",
+      "args": [
+        "conversation_history",
+        "is_combat_active"
+      ],
+      "docstring": "Checks if a 'player has returned' message needs to be injected at startup.\n\nArgs:\n    conversation_history: List of conversation messages\n    is_combat_active: Boolean indicating if combat is currently active (prevents duplicate injection)\n    \nReturns:\n    Tuple of (updated_conversation_history, was_injected)",
+      "line_number": 202
+    },
+    {
+      "name": "generate_arrival_narration",
+      "args": [
+        "departure_narration",
+        "party_tracker_data",
+        "conversation_history"
+      ],
+      "docstring": "Takes the departure narration and generates a seamless arrival narration.",
+      "line_number": 264
+    },
+    {
+      "name": "generate_seamless_transition_narration",
+      "args": [
+        "departure_narration",
+        "arrival_narration"
+      ],
+      "docstring": "Takes two separate narration blocks (departure and arrival) and uses an AI\nto rewrite them into a single, cohesive, and seamless narrative.",
+      "line_number": 326
+    },
+    {
+      "name": "detect_create_encounter",
+      "args": [
+        "parsed_data"
+      ],
+      "docstring": "Check if the parsed response contains a createEncounter action",
+      "line_number": 380
+    },
+    {
+      "name": "combine_messages",
+      "args": [
+        "first_response",
+        "second_response"
+      ],
+      "docstring": "Combine two JSON responses into a single cohesive message",
+      "line_number": 391
+    },
+    {
+      "name": "clear_message_buffer",
+      "args": [],
+      "docstring": "Reset the message buffering state",
+      "line_number": 424
+    },
+    {
+      "name": "get_npc_stat",
+      "args": [
+        "npc_name",
+        "stat_name",
+        "time_estimate"
+      ],
+      "docstring": "No docstring",
+      "line_number": 430
+    },
+    {
+      "name": "parse_json_safely",
+      "args": [
+        "text"
+      ],
+      "docstring": "No docstring",
+      "line_number": 463
+    },
+    {
+      "name": "create_module_validation_context",
+      "args": [
+        "party_tracker_data",
+        "path_manager"
+      ],
+      "docstring": "Create module data context for validation system to check location/NPC references",
+      "line_number": 488
+    },
+    {
+      "name": "validate_ai_response",
+      "args": [
+        "primary_response",
+        "user_input",
+        "validation_prompt_text",
+        "conversation_history",
+        "party_tracker_data"
+      ],
+      "docstring": "No docstring",
+      "line_number": 658
+    },
+    {
+      "name": "load_validation_prompt",
+      "args": [],
+      "docstring": "No docstring",
+      "line_number": 790
+    },
+    {
+      "name": "load_json_file",
+      "args": [
+        "file_path"
+      ],
+      "docstring": "Load a JSON file, with error handling and encoding sanitization",
+      "line_number": 794
+    },
+    {
+      "name": "remove_duplicate_npcs",
+      "args": [
+        "party_tracker_data"
+      ],
+      "docstring": "Remove duplicate NPCs from party tracker, keeping first occurrence.\n\nArgs:\n    party_tracker_data: The party tracker dictionary\n    \nReturns:\n    tuple: (cleaned_data, changes_made) where changes_made is boolean",
+      "line_number": 798
+    },
+    {
+      "name": "process_conversation_history",
+      "args": [
+        "history"
+      ],
+      "docstring": "No docstring",
+      "line_number": 830
+    },
+    {
+      "name": "truncate_dm_notes",
+      "args": [
+        "conversation_history"
+      ],
+      "docstring": "No docstring",
+      "line_number": 842
+    },
+    {
+      "name": "check_and_process_location_transitions",
+      "args": [
+        "conversation_history",
+        "party_tracker_data",
+        "path_manager"
+      ],
+      "docstring": "Check if there are any unprocessed location transitions in the conversation history\nand process them to create summaries and compress the history.",
+      "line_number": 852
+    },
+    {
+      "name": "check_and_process_module_transitions",
+      "args": [
+        "conversation_history",
+        "party_tracker_data"
+      ],
+      "docstring": "Check if there are any unprocessed module transitions in the conversation history\nand process them to create summaries and compress the history.\nMirrors the logic of check_and_process_location_transitions().",
+      "line_number": 968
+    },
+    {
+      "name": "generate_module_summary",
+      "args": [
+        "conversation_history",
+        "party_tracker_data",
+        "module_name",
+        "transition_index"
+      ],
+      "docstring": "Generate a summary for a module transition",
+      "line_number": 1060
+    },
+    {
+      "name": "compress_conversation_history_on_module_transition",
+      "args": [
+        "conversation_history",
+        "module_name",
+        "summary_text",
+        "transition_index"
+      ],
+      "docstring": "Compress conversation history by replacing conversation segment with summary, preserving previous summaries",
+      "line_number": 1181
+    },
+    {
+      "name": "extract_json_from_codeblock",
+      "args": [
+        "text"
+      ],
+      "docstring": "No docstring",
+      "line_number": 1233
+    },
+    {
+      "name": "process_ai_response",
+      "args": [
+        "response",
+        "party_tracker_data",
+        "location_data",
+        "conversation_history"
+      ],
+      "docstring": "No docstring",
+      "line_number": 1239
+    },
+    {
+      "name": "save_conversation_history",
+      "args": [
+        "history"
+      ],
+      "docstring": "No docstring",
+      "line_number": 1421
+    },
+    {
+      "name": "get_ai_response",
+      "args": [
+        "conversation_history",
+        "validation_retry_count"
+      ],
+      "docstring": "No docstring",
+      "line_number": 1427
+    },
+    {
+      "name": "ensure_main_system_prompt",
+      "args": [
+        "conversation_history",
+        "main_system_prompt_text"
+      ],
+      "docstring": "Ensure the main system prompt is first in the conversation history.\nThis removes any existing instances of the main prompt and adds it at the beginning.",
+      "line_number": 1496
+    },
+    {
+      "name": "order_conversation_messages",
+      "args": [
+        "conversation_history",
+        "main_system_prompt_text"
+      ],
+      "docstring": "Order conversation messages with main system prompt first, followed by other system prompts",
+      "line_number": 1516
+    },
+    {
+      "name": "check_all_modules_plot_completion",
+      "args": [],
+      "docstring": "Check plot completion status for ALL available modules, not just the current one.\nReturns a dictionary with completion data for all modules.",
+      "line_number": 1540
+    },
+    {
+      "name": "main_game_loop",
+      "args": [],
+      "docstring": "No docstring",
+      "line_number": 1670
+    },
+    {
+      "name": "main",
+      "args": [],
+      "docstring": "Main entry point with startup wizard integration",
+      "line_number": 2439
+    }
+  ],
+  "imports": {
+    "standard": [
+      "json",
+      "os",
+      "re",
+      "sys",
+      "time",
+      "datetime.datetime",
+      "datetime.timedelta",
+      "os",
+      "os",
+      "re",
+      "re",
+      "os"
+    ],
+    "third_party": [
+      "subprocess",
+      "codecs",
+      "glob",
+      "openai.OpenAI",
+      "termcolor.colored",
+      "config.OPENAI_API_KEY",
+      "config.OPENAI_ORG_ID",
+      "config.DM_MAIN_MODEL",
+      "config.DM_SUMMARIZATION_MODEL",
+      "config.DM_VALIDATION_MODEL",
+      "config.ENABLE_INTELLIGENT_ROUTING",
+      "config.DM_MINI_MODEL",
+      "config.DM_FULL_MODEL",
+      "config.MAX_VALIDATION_RETRIES",
+      "glob",
+      "shutil",
+      "traceback",
+      "traceback",
+      "openai.OpenAI",
+      "config",
+      "traceback",
+      "traceback"
+    ],
+    "local": [
+      "utils.encoding_utils.sanitize_text",
+      "utils.encoding_utils.sanitize_dict",
+      "utils.encoding_utils.safe_json_load",
+      "utils.encoding_utils.safe_json_dump",
+      "utils.encoding_utils.fix_corrupted_location_name",
+      "utils.encoding_utils.setup_utf8_console",
+      "core.managers.combat_manager.run_combat_simulation",
+      "updates.plot_update.update_plot",
+      "utils.player_stats.get_player_stat",
+      "updates.update_world_time.update_world_time",
+      "core.ai.conversation_utils.update_conversation_history",
+      "core.ai.conversation_utils.update_character_data",
+      "updates.update_character_info.update_character_info",
+      "core.managers.level_up_manager.LevelUpSession",
+      "core.managers.location_manager",
+      "utils.location_path_finder.LocationGraph",
+      "core.ai.action_handler",
+      "core.ai.cumulative_summary.generate_enhanced_adventure_summary",
+      "core.ai.cumulative_summary.update_journal_with_summary",
+      "core.ai.cumulative_summary.compress_conversation_history_on_transition",
+      "core.ai.cumulative_summary.check_and_compact_missing_summaries",
+      "core.managers.status_manager.status_manager",
+      "core.managers.status_manager.status_ready",
+      "core.managers.status_manager.status_processing_ai",
+      "core.managers.status_manager.status_validating",
+      "core.managers.status_manager.status_retrying",
+      "core.managers.status_manager.status_transitioning_location",
+      "core.managers.status_manager.status_generating_summary",
+      "core.managers.status_manager.status_updating_journal",
+      "core.managers.status_manager.status_compressing_history",
+      "core.managers.status_manager.status_updating_character",
+      "core.managers.status_manager.status_updating_party",
+      "core.managers.status_manager.status_updating_plot",
+      "core.managers.status_manager.status_advancing_time",
+      "core.managers.status_manager.status_saving",
+      "utils.file_operations.safe_write_json",
+      "utils.file_operations.safe_read_json",
+      "utils.module_path_manager.ModulePathManager",
+      "core.managers.campaign_manager.CampaignManager",
+      "utils.enhanced_logger.debug",
+      "utils.enhanced_logger.info",
+      "utils.enhanced_logger.warning",
+      "utils.enhanced_logger.error",
+      "utils.enhanced_logger.set_script_name",
+      "utils.action_predictor.predict_actions_required",
+      "utils.action_predictor.extract_actual_actions",
+      "utils.action_predictor.log_prediction_accuracy",
+      "utils.startup_wizard.initialize_game_files_from_bu",
+      "utils.startup_wizard.startup_required",
+      "utils.startup_wizard.run_startup_sequence",
+      "core.managers.combat_manager.run_combat_simulation",
+      "updates.update_character_info.normalize_character_name",
+      "utils.startup_wizard.startup_required",
+      "utils.startup_wizard.run_startup_sequence",
+      "updates.process_effect_expirations.process_all_effect_expirations",
+      "core.ai.chunked_compression_integration.check_and_perform_chunked_compression"
+    ]
+  },
+  "global_variables": [
+    {
+      "name": "client_kwargs",
+      "line": 141,
+      "definition": "client_kwargs = {\"api_key\": OPENAI_API_KEY}"
+    },
+    {
+      "name": "client",
+      "line": 144,
+      "definition": "client = OpenAI(**client_kwargs)"
+    },
+    {
+      "name": "location_graph",
+      "line": 147,
+      "definition": "location_graph = LocationGraph()"
+    },
+    {
+      "name": "TEMPERATURE",
+      "line": 151,
+      "definition": "TEMPERATURE = 0.8"
+    },
+    {
+      "name": "SOLID_GREEN",
+      "line": 153,
+      "definition": "SOLID_GREEN = \"\\033[38;2;0;180;0m\"  # Slightly darker solid green for player name"
+    },
+    {
+      "name": "LIGHT_OFF_GREEN",
+      "line": 154,
+      "definition": "LIGHT_OFF_GREEN = \"\\033[38;2;100;180;100m\"  # More muted light green for stats"
+    },
+    {
+      "name": "GOLD",
+      "line": 155,
+      "definition": "GOLD = \"\\033[38;2;255;215;0m\"  # Gold color for status messages"
+    },
+    {
+      "name": "RESET_COLOR",
+      "line": 156,
+      "definition": "RESET_COLOR = \"\\033[0m\""
+    },
+    {
+      "name": "json_file",
+      "line": 158,
+      "definition": "json_file = \"modules/conversation_history/conversation_history.json\""
+    },
+    {
+      "name": "needs_conversation_history_update",
+      "line": 160,
+      "definition": "needs_conversation_history_update = False"
+    },
+    {
+      "name": "held_response",
+      "line": 163,
+      "definition": "held_response = None"
+    },
+    {
+      "name": "awaiting_combat_resolution",
+      "line": 164,
+      "definition": "awaiting_combat_resolution = False"
+    },
+    {
+      "name": "current_status_line",
+      "line": 167,
+      "definition": "current_status_line = None"
+    },
+    {
+      "name": "status_display",
+      "line": 176,
+      "definition": "status_display = f\"{GOLD}[{message}]{RESET_COLOR}\""
+    },
+    {
+      "name": "current_status_line",
+      "line": 178,
+      "definition": "current_status_line = status_display"
+    },
+    {
+      "name": "current_status_line",
+      "line": 190,
+      "definition": "current_status_line = None"
+    },
+    {
+      "name": "user_messages",
+      "line": 219,
+      "definition": "user_messages = [msg for msg in conversation_history if msg.get(\"role\") == \"user\"]"
+    },
+    {
+      "name": "last_message",
+      "line": 225,
+      "definition": "last_message = conversation_history[-1] if conversation_history else None"
+    },
+    {
+      "name": "last_content",
+      "line": 231,
+      "definition": "last_content = last_message.get(\"content\", \"\")"
+    },
+    {
+      "name": "tracking_message",
+      "line": 239,
+      "definition": "tracking_message = {"
+    },
+    {
+      "name": "recovery_marker",
+      "line": 247,
+      "definition": "recovery_marker = {"
+    },
+    {
+      "name": "return_message",
+      "line": 256,
+      "definition": "return_message = {"
+    },
+    {
+      "name": "new_location_name",
+      "line": 271,
+      "definition": "new_location_name = party_tracker_data[\"worldConditions\"][\"currentLocation\"]"
+    },
+    {
+      "name": "new_area_name",
+      "line": 272,
+      "definition": "new_area_name = party_tracker_data[\"worldConditions\"][\"currentArea\"]"
+    },
+    {
+      "name": "arrival_prompt",
+      "line": 275,
+      "definition": "arrival_prompt = f\"\"\""
+    },
+    {
+      "name": "recent_context",
+      "line": 294,
+      "definition": "recent_context = [msg for msg in conversation_history if msg.get(\"role\") != \"system\"][-5:]"
+    },
+    {
+      "name": "narration_request_messages",
+      "line": 296,
+      "definition": "narration_request_messages = ["
+    },
+    {
+      "name": "response",
+      "line": 303,
+      "definition": "response = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 304,
+      "definition": "model=DM_MAIN_MODEL,  # Use the main model for high-quality narration"
+    },
+    {
+      "name": "temperature",
+      "line": 305,
+      "definition": "temperature=TEMPERATURE,"
+    },
+    {
+      "name": "messages",
+      "line": 306,
+      "definition": "messages=narration_request_messages"
+    },
+    {
+      "name": "arrival_text",
+      "line": 308,
+      "definition": "arrival_text = response.choices[0].message.content.strip()"
+    },
+    {
+      "name": "parsed_json",
+      "line": 312,
+      "definition": "parsed_json = json.loads(arrival_text)"
+    },
+    {
+      "name": "arrival_text",
+      "line": 313,
+      "definition": "arrival_text = parsed_json.get(\"narration\", arrival_text)"
+    },
+    {
+      "name": "stitching_prompt",
+      "line": 339,
+      "definition": "stitching_prompt = f\"\"\""
+    },
+    {
+      "name": "response",
+      "line": 362,
+      "definition": "response = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 363,
+      "definition": "model=DM_MAIN_MODEL,  # Use the main model for high-quality writing"
+    },
+    {
+      "name": "temperature",
+      "line": 364,
+      "definition": "temperature=TEMPERATURE,"
+    },
+    {
+      "name": "messages",
+      "line": 365,
+      "definition": "messages=["
+    },
+    {
+      "name": "seamless_narration",
+      "line": 370,
+      "definition": "seamless_narration = response.choices[0].message.content.strip()"
+    },
+    {
+      "name": "actions",
+      "line": 385,
+      "definition": "actions = parsed_data.get(\"actions\", [])"
+    },
+    {
+      "name": "first_data",
+      "line": 395,
+      "definition": "first_data = json.loads(first_response)"
+    },
+    {
+      "name": "second_data",
+      "line": 396,
+      "definition": "second_data = json.loads(second_response)"
+    },
+    {
+      "name": "first_narration",
+      "line": 399,
+      "definition": "first_narration = first_data.get(\"narration\", \"\")"
+    },
+    {
+      "name": "second_narration",
+      "line": 400,
+      "definition": "second_narration = second_data.get(\"narration\", \"\")"
+    },
+    {
+      "name": "combined_narration",
+      "line": 401,
+      "definition": "combined_narration = f\"{first_narration}\\n\\n{second_narration}\""
+    },
+    {
+      "name": "first_actions",
+      "line": 404,
+      "definition": "first_actions = first_data.get(\"actions\", [])"
+    },
+    {
+      "name": "second_actions",
+      "line": 405,
+      "definition": "second_actions = second_data.get(\"actions\", [])"
+    },
+    {
+      "name": "combined_actions",
+      "line": 406,
+      "definition": "combined_actions = first_actions + second_actions"
+    },
+    {
+      "name": "combined_data",
+      "line": 409,
+      "definition": "combined_data = {"
+    },
+    {
+      "name": "held_response",
+      "line": 427,
+      "definition": "held_response = None"
+    },
+    {
+      "name": "awaiting_combat_resolution",
+      "line": 428,
+      "definition": "awaiting_combat_resolution = False"
+    },
+    {
+      "name": "party_data",
+      "line": 433,
+      "definition": "party_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "module_name",
+      "line": 434,
+      "definition": "module_name = party_data.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 435,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "npc_file",
+      "line": 436,
+      "definition": "npc_file = path_manager.get_character_path(npc_name)"
+    },
+    {
+      "name": "npc_stats",
+      "line": 439,
+      "definition": "npc_stats = json.load(file)"
+    },
+    {
+      "name": "stat_value",
+      "line": 447,
+      "definition": "stat_value = None"
+    },
+    {
+      "name": "modifier_value",
+      "line": 448,
+      "definition": "modifier_value = None"
+    },
+    {
+      "name": "stat_value",
+      "line": 452,
+      "definition": "stat_value = npc_stats[\"abilities\"][stat_name.lower()]"
+    },
+    {
+      "name": "modifier_value",
+      "line": 453,
+      "definition": "modifier_value = (stat_value - 10) // 2"
+    },
+    {
+      "name": "json_content",
+      "line": 471,
+      "definition": "json_content = extract_json_from_codeblock(text)"
+    },
+    {
+      "name": "match",
+      "line": 479,
+      "definition": "match = re.search(r'\\{.*\\}', text, re.DOTALL)"
+    },
+    {
+      "name": "current_area_id",
+      "line": 491,
+      "definition": "current_area_id = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "current_location_id",
+      "line": 492,
+      "definition": "current_location_id = party_tracker_data[\"worldConditions\"][\"currentLocationId\"]"
+    },
+    {
+      "name": "current_module",
+      "line": 493,
+      "definition": "current_module = party_tracker_data.get(\"module\", \"Unknown\")"
+    },
+    {
+      "name": "validation_context",
+      "line": 495,
+      "definition": "validation_context = f\"MODULE VALIDATION DATA:\\nCurrent Module: {current_module}\\nCurrent Area: {current_area_id}\\nCurrent Location: {current_location_id}\\n\\n\""
+    },
+    {
+      "name": "area_file",
+      "line": 498,
+      "definition": "area_file = path_manager.get_area_path(current_area_id)"
+    },
+    {
+      "name": "current_location_npcs",
+      "line": 499,
+      "definition": "current_location_npcs = []"
+    },
+    {
+      "name": "area_locations_with_npcs",
+      "line": 500,
+      "definition": "area_locations_with_npcs = {}"
+    },
+    {
+      "name": "area_data",
+      "line": 504,
+      "definition": "area_data = json.load(file)"
+    },
+    {
+      "name": "valid_locations",
+      "line": 506,
+      "definition": "valid_locations = []"
+    },
+    {
+      "name": "loc_id",
+      "line": 508,
+      "definition": "loc_id = location.get(\"locationId\", \"\")"
+    },
+    {
+      "name": "loc_name",
+      "line": 509,
+      "definition": "loc_name = location.get(\"name\", \"\")"
+    },
+    {
+      "name": "location_npcs",
+      "line": 514,
+      "definition": "location_npcs = [npc.get(\"name\") for npc in location.get(\"npcs\", []) if npc.get(\"name\")]"
+    },
+    {
+      "name": "current_location_npcs",
+      "line": 520,
+      "definition": "current_location_npcs = location_npcs.copy()  # Start with location NPCs"
+    },
+    {
+      "name": "party_npcs",
+      "line": 523,
+      "definition": "party_npcs = party_tracker_data.get(\"partyNPCs\", [])"
+    },
+    {
+      "name": "npc_name",
+      "line": 525,
+      "definition": "npc_name = party_npc.get(\"name\", \"\")"
+    },
+    {
+      "name": "valid_npcs",
+      "line": 541,
+      "definition": "valid_npcs = []"
+    },
+    {
+      "name": "modules_dir",
+      "line": 544,
+      "definition": "modules_dir = \"modules\""
+    },
+    {
+      "name": "module_path",
+      "line": 547,
+      "definition": "module_path = os.path.join(modules_dir, item)"
+    },
+    {
+      "name": "codex_file",
+      "line": 553,
+      "definition": "codex_file = os.path.join(module_path, \"npc_codex.json\")"
+    },
+    {
+      "name": "codex",
+      "line": 557,
+      "definition": "codex = json.load(f)"
+    },
+    {
+      "name": "npc_name",
+      "line": 561,
+      "definition": "npc_name = npc_entry[\"name\"]"
+    },
+    {
+      "name": "source",
+      "line": 562,
+      "definition": "source = npc_entry.get(\"source\", \"unknown\")"
+    },
+    {
+      "name": "character_files",
+      "line": 595,
+      "definition": "character_files = glob.glob(f\"{path_manager.module_dir}/characters/*.json\")"
+    },
+    {
+      "name": "valid_npcs",
+      "line": 597,
+      "definition": "valid_npcs = []"
+    },
+    {
+      "name": "char_data",
+      "line": 601,
+      "definition": "char_data = json.load(file)"
+    },
+    {
+      "name": "char_name",
+      "line": 602,
+      "definition": "char_name = char_data.get(\"name\", \"\")"
+    },
+    {
+      "name": "char_type",
+      "line": 603,
+      "definition": "char_type = char_data.get(\"character_type\", \"unknown\")"
+    },
+    {
+      "name": "last_two_messages",
+      "line": 662,
+      "definition": "last_two_messages = conversation_history[-2:]"
+    },
+    {
+      "name": "current_location_id",
+      "line": 669,
+      "definition": "current_location_id = party_tracker_data[\"worldConditions\"][\"currentLocationId\"]"
+    },
+    {
+      "name": "current_area_id",
+      "line": 670,
+      "definition": "current_area_id = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "module_name",
+      "line": 673,
+      "definition": "module_name = party_tracker_data.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 674,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "area_file",
+      "line": 675,
+      "definition": "area_file = path_manager.get_area_path(current_area_id)"
+    },
+    {
+      "name": "area_data",
+      "line": 678,
+      "definition": "area_data = json.load(file)"
+    },
+    {
+      "name": "location_data",
+      "line": 679,
+      "definition": "location_data = next((loc for loc in area_data[\"locations\"] if loc[\"locationId\"] == current_location_id), None)"
+    },
+    {
+      "name": "location_data",
+      "line": 681,
+      "definition": "location_data = None"
+    },
+    {
+      "name": "location_details",
+      "line": 685,
+      "definition": "location_details = f\"Location Details: {location_data['description']} {location_data.get('dmInstructions', '')}\""
+    },
+    {
+      "name": "location_details",
+      "line": 687,
+      "definition": "location_details = \"Location Details: Not available.\""
+    },
+    {
+      "name": "destination_match",
+      "line": 693,
+      "definition": "destination_match = re.search(r'\"newLocation\":\\s*\"([^\"]*)\"', primary_response)"
+    },
+    {
+      "name": "destination",
+      "line": 695,
+      "definition": "destination = destination_match.group(1).strip()"
+    },
+    {
+      "name": "current_origin",
+      "line": 696,
+      "definition": "current_origin = current_location_id"
+    },
+    {
+      "name": "path_info",
+      "line": 700,
+      "definition": "path_info = f\"Path Validation ERROR: Empty destination in transitionLocation action.\""
+    },
+    {
+      "name": "path_info",
+      "line": 702,
+      "definition": "path_info = f\"Path Validation ERROR: Current location ID not available in party tracker.\""
+    },
+    {
+      "name": "path_info",
+      "line": 704,
+      "definition": "path_info = f\"Path Validation ERROR: Location graph not initialized.\""
+    },
+    {
+      "name": "path_info",
+      "line": 710,
+      "definition": "path_info = f\"The party is currently at {current_origin} and desires to travel to {destination}. The path of travel is: {' -> '.join(path)}.\""
+    },
+    {
+      "name": "path_info",
+      "line": 712,
+      "definition": "path_info = f\"The party is currently at {current_origin} and desires to travel to {destination}. WARNING: {message}\""
+    },
+    {
+      "name": "user_input_context",
+      "line": 725,
+      "definition": "user_input_context = f\"VALIDATION CONTEXT: The user input that triggered this assistant response was: '{user_input}'\""
+    },
+    {
+      "name": "module_data_context",
+      "line": 728,
+      "definition": "module_data_context = create_module_validation_context(party_tracker_data, path_manager)"
+    },
+    {
+      "name": "validation_conversation",
+      "line": 730,
+      "definition": "validation_conversation = ["
+    },
+    {
+      "name": "max_validation_retries",
+      "line": 749,
+      "definition": "max_validation_retries = 3"
+    },
+    {
+      "name": "validation_result",
+      "line": 751,
+      "definition": "validation_result = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 752,
+      "definition": "model=DM_VALIDATION_MODEL, # Use imported model name"
+    },
+    {
+      "name": "temperature",
+      "line": 753,
+      "definition": "temperature=TEMPERATURE,"
+    },
+    {
+      "name": "messages",
+      "line": 754,
+      "definition": "messages=validation_conversation"
+    },
+    {
+      "name": "validation_response",
+      "line": 757,
+      "definition": "validation_response = validation_result.choices[0].message.content.strip()"
+    },
+    {
+      "name": "validation_json",
+      "line": 760,
+      "definition": "validation_json = parse_json_safely(validation_response)"
+    },
+    {
+      "name": "is_valid",
+      "line": 761,
+      "definition": "is_valid = validation_json.get(\"valid\", False)"
+    },
+    {
+      "name": "reason",
+      "line": 762,
+      "definition": "reason = validation_json.get(\"reason\", \"No reason provided\")"
+    },
+    {
+      "name": "log_entry",
+      "line": 766,
+      "definition": "log_entry = {"
+    },
+    {
+      "name": "original_npcs",
+      "line": 810,
+      "definition": "original_npcs = party_tracker_data[\"partyNPCs\"]"
+    },
+    {
+      "name": "seen_names",
+      "line": 811,
+      "definition": "seen_names = set()"
+    },
+    {
+      "name": "unique_npcs",
+      "line": 812,
+      "definition": "unique_npcs = []"
+    },
+    {
+      "name": "duplicates_removed",
+      "line": 813,
+      "definition": "duplicates_removed = []"
+    },
+    {
+      "name": "npc_name",
+      "line": 816,
+      "definition": "npc_name = npc.get(\"name\", \"\")"
+    },
+    {
+      "name": "history",
+      "line": 837,
+      "definition": "history = truncate_dm_notes(history)"
+    },
+    {
+      "name": "parts",
+      "line": 845,
+      "definition": "parts = message[\"content\"].split(\"Player:\", 1)"
+    },
+    {
+      "name": "date_time",
+      "line": 847,
+      "definition": "date_time = re.search(r\"Current date and time: ([^.]+)\", parts[0])"
+    },
+    {
+      "name": "last_transition_index",
+      "line": 858,
+      "definition": "last_transition_index = None"
+    },
+    {
+      "name": "last_transition_content",
+      "line": 859,
+      "definition": "last_transition_content = None"
+    },
+    {
+      "name": "msg",
+      "line": 862,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "last_transition_index",
+      "line": 864,
+      "definition": "last_transition_index = i"
+    },
+    {
+      "name": "last_transition_content",
+      "line": 865,
+      "definition": "last_transition_content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "prev_msg",
+      "line": 874,
+      "definition": "prev_msg = conversation_history[last_transition_index - 1]"
+    },
+    {
+      "name": "has_conversation_after",
+      "line": 881,
+      "definition": "has_conversation_after = False"
+    },
+    {
+      "name": "msg",
+      "line": 883,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "has_conversation_after",
+      "line": 886,
+      "definition": "has_conversation_after = True"
+    },
+    {
+      "name": "id_pattern",
+      "line": 899,
+      "definition": "id_pattern = r'Location transition: (.+?) \\(([A-Z]\\d+)\\) to (.+?) \\(([A-Z]\\d+)\\)'"
+    },
+    {
+      "name": "id_match",
+      "line": 900,
+      "definition": "id_match = re.match(id_pattern, last_transition_content)"
+    },
+    {
+      "name": "leaving_location_name",
+      "line": 904,
+      "definition": "leaving_location_name = id_match.group(1)"
+    },
+    {
+      "name": "leaving_location_id",
+      "line": 905,
+      "definition": "leaving_location_id = id_match.group(2)"
+    },
+    {
+      "name": "parts",
+      "line": 909,
+      "definition": "parts = last_transition_content.split(\" to \")"
+    },
+    {
+      "name": "from_part",
+      "line": 911,
+      "definition": "from_part = parts[0].replace(\"Location transition: \", \"\").strip()"
+    },
+    {
+      "name": "leaving_location_name",
+      "line": 912,
+      "definition": "leaving_location_name = from_part"
+    },
+    {
+      "name": "leaving_location_id",
+      "line": 913,
+      "definition": "leaving_location_id = None"
+    },
+    {
+      "name": "adventure_summary",
+      "line": 926,
+      "definition": "adventure_summary = generate_enhanced_adventure_summary("
+    },
+    {
+      "name": "compressed_history",
+      "line": 941,
+      "definition": "compressed_history = compress_conversation_history_on_transition("
+    },
+    {
+      "name": "compressed_history",
+      "line": 952,
+      "definition": "compressed_history = load_json_file(json_file) or compressed_history"
+    },
+    {
+      "name": "last_transition_index",
+      "line": 975,
+      "definition": "last_transition_index = None"
+    },
+    {
+      "name": "last_transition_content",
+      "line": 976,
+      "definition": "last_transition_content = None"
+    },
+    {
+      "name": "msg",
+      "line": 979,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "last_transition_index",
+      "line": 981,
+      "definition": "last_transition_index = i"
+    },
+    {
+      "name": "last_transition_content",
+      "line": 982,
+      "definition": "last_transition_content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "prev_msg",
+      "line": 991,
+      "definition": "prev_msg = conversation_history[last_transition_index - 1]"
+    },
+    {
+      "name": "has_conversation_after",
+      "line": 998,
+      "definition": "has_conversation_after = False"
+    },
+    {
+      "name": "msg",
+      "line": 1000,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "has_conversation_after",
+      "line": 1003,
+      "definition": "has_conversation_after = True"
+    },
+    {
+      "name": "pattern",
+      "line": 1014,
+      "definition": "pattern = r'Module transition: (.+?) to (.+?)$'"
+    },
+    {
+      "name": "match",
+      "line": 1015,
+      "definition": "match = re.match(pattern, last_transition_content)"
+    },
+    {
+      "name": "leaving_module_name",
+      "line": 1018,
+      "definition": "leaving_module_name = match.group(1)"
+    },
+    {
+      "name": "arriving_module_name",
+      "line": 1019,
+      "definition": "arriving_module_name = match.group(2)"
+    },
+    {
+      "name": "module_summary",
+      "line": 1032,
+      "definition": "module_summary = generate_module_summary("
+    },
+    {
+      "name": "compressed_history",
+      "line": 1041,
+      "definition": "compressed_history = compress_conversation_history_on_module_transition("
+    },
+    {
+      "name": "boundary_index",
+      "line": 1064,
+      "definition": "boundary_index = None"
+    },
+    {
+      "name": "msg",
+      "line": 1067,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "content",
+      "line": 1068,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "boundary_index",
+      "line": 1073,
+      "definition": "boundary_index = i + 1  # Start after previous transition/summary"
+    },
+    {
+      "name": "msg",
+      "line": 1080,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "boundary_index",
+      "line": 1082,
+      "definition": "boundary_index = i + 1  # Start after last system message"
+    },
+    {
+      "name": "boundary_index",
+      "line": 1088,
+      "definition": "boundary_index = 0"
+    },
+    {
+      "name": "module_conversation",
+      "line": 1092,
+      "definition": "module_conversation = conversation_history[boundary_index:transition_index]"
+    },
+    {
+      "name": "meaningful_messages",
+      "line": 1098,
+      "definition": "meaningful_messages = []"
+    },
+    {
+      "name": "content",
+      "line": 1100,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "role",
+      "line": 1101,
+      "definition": "role = msg.get(\"role\", \"\")"
+    },
+    {
+      "name": "conversation_text",
+      "line": 1118,
+      "definition": "conversation_text = \"\""
+    },
+    {
+      "name": "role",
+      "line": 1120,
+      "definition": "role = \"Player\" if msg.get(\"role\") == \"user\" else \"DM\""
+    },
+    {
+      "name": "content",
+      "line": 1121,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "client",
+      "line": 1125,
+      "definition": "client = OpenAI(api_key=config.OPENAI_API_KEY)"
+    },
+    {
+      "name": "summary_prompt",
+      "line": 1127,
+      "definition": "summary_prompt = f\"\"\"You are creating an adventure chronicle for a 5th edition session. Summarize this actual gameplay conversation from the {module_name} module into a compelling narrative story."
+    },
+    {
+      "name": "response",
+      "line": 1145,
+      "definition": "response = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 1146,
+      "definition": "model=config.DM_SUMMARIZATION_MODEL,"
+    },
+    {
+      "name": "messages",
+      "line": 1147,
+      "definition": "messages=["
+    },
+    {
+      "name": "temperature",
+      "line": 1151,
+      "definition": "temperature=0.7"
+    },
+    {
+      "name": "ai_summary",
+      "line": 1154,
+      "definition": "ai_summary = response.choices[0].message.content.strip()"
+    },
+    {
+      "name": "formatted_summary",
+      "line": 1155,
+      "definition": "formatted_summary = f\"=== MODULE SUMMARY ===\\n\\n{module_name}:\\n------------------------------\\n{ai_summary}\""
+    },
+    {
+      "name": "meaningful_messages",
+      "line": 1168,
+      "definition": "meaningful_messages = ["
+    },
+    {
+      "name": "boundary_index",
+      "line": 1185,
+      "definition": "boundary_index = None"
+    },
+    {
+      "name": "msg",
+      "line": 1188,
+      "definition": "msg = conversation_history[i]"
+    },
+    {
+      "name": "content",
+      "line": 1189,
+      "definition": "content = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "boundary_index",
+      "line": 1194,
+      "definition": "boundary_index = i + 1  # Start after previous transition/summary"
+    },
+    {
+      "name": "boundary_index",
+      "line": 1202,
+      "definition": "boundary_index = i + 1  # Start after system message"
+    },
+    {
+      "name": "boundary_index",
+      "line": 1207,
+      "definition": "boundary_index = 0"
+    },
+    {
+      "name": "summary_message",
+      "line": 1211,
+      "definition": "summary_message = {"
+    },
+    {
+      "name": "compressed_history",
+      "line": 1217,
+      "definition": "compressed_history = []"
+    },
+    {
+      "name": "match",
+      "line": 1234,
+      "definition": "match = re.search(r'```json\\n(.*?)```', text, re.DOTALL)"
+    },
+    {
+      "name": "json_content",
+      "line": 1243,
+      "definition": "json_content = extract_json_from_codeblock(response)"
+    },
+    {
+      "name": "parsed_response",
+      "line": 1244,
+      "definition": "parsed_response = json.loads(json_content)"
+    },
+    {
+      "name": "actions",
+      "line": 1245,
+      "definition": "actions = parsed_response.get(\"actions\", [])"
+    },
+    {
+      "name": "is_levelup_action",
+      "line": 1248,
+      "definition": "is_levelup_action = any(action.get(\"action\") == \"levelUp\" for action in actions)"
+    },
+    {
+      "name": "is_transition",
+      "line": 1263,
+      "definition": "is_transition = False"
+    },
+    {
+      "name": "departure_narration",
+      "line": 1264,
+      "definition": "departure_narration = \"\""
+    },
+    {
+      "name": "is_transition",
+      "line": 1268,
+      "definition": "is_transition = True"
+    },
+    {
+      "name": "departure_narration",
+      "line": 1269,
+      "definition": "departure_narration = parsed_response.get(\"narration\", \"\")"
+    },
+    {
+      "name": "actions_processed",
+      "line": 1277,
+      "definition": "actions_processed = False"
+    },
+    {
+      "name": "result",
+      "line": 1279,
+      "definition": "result = action_handler.process_action(action, party_tracker_data, location_data, conversation_history)"
+    },
+    {
+      "name": "actions_processed",
+      "line": 1280,
+      "definition": "actions_processed = True"
+    },
+    {
+      "name": "needs_conversation_history_update",
+      "line": 1283,
+      "definition": "needs_conversation_history_update = True"
+    },
+    {
+      "name": "current_response",
+      "line": 1287,
+      "definition": "current_response = {\"role\": \"assistant\", \"content\": response}"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1292,
+      "definition": "conversation_history = load_json_file(\"modules/conversation_history/conversation_history.json\") or []"
+    },
+    {
+      "name": "ai_response",
+      "line": 1293,
+      "definition": "ai_response = get_ai_response(conversation_history)"
+    },
+    {
+      "name": "needs_conversation_history_update",
+      "line": 1296,
+      "definition": "needs_conversation_history_update = True"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1298,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "fresh_party_data",
+      "line": 1301,
+      "definition": "fresh_party_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "fresh_conversation_history",
+      "line": 1302,
+      "definition": "fresh_conversation_history = load_json_file(json_file) or []"
+    },
+    {
+      "name": "arrival_narration",
+      "line": 1305,
+      "definition": "arrival_narration = generate_arrival_narration(departure_narration, fresh_party_data, fresh_conversation_history)"
+    },
+    {
+      "name": "full_narration",
+      "line": 1309,
+      "definition": "full_narration = generate_seamless_transition_narration(departure_narration, arrival_narration)"
+    },
+    {
+      "name": "narration",
+      "line": 1329,
+      "definition": "narration = parsed_response.get(\"narration\", \"\")"
+    },
+    {
+      "name": "sanitized_narration",
+      "line": 1330,
+      "definition": "sanitized_narration = sanitize_text(narration)"
+    },
+    {
+      "name": "actions_processed",
+      "line": 1333,
+      "definition": "actions_processed = False"
+    },
+    {
+      "name": "result",
+      "line": 1335,
+      "definition": "result = action_handler.process_action(action, party_tracker_data, location_data, conversation_history)"
+    },
+    {
+      "name": "actions_processed",
+      "line": 1336,
+      "definition": "actions_processed = True"
+    },
+    {
+      "name": "post_combat_history",
+      "line": 1351,
+      "definition": "post_combat_history = load_json_file(json_file) or conversation_history"
+    },
+    {
+      "name": "ai_response_after_combat",
+      "line": 1352,
+      "definition": "ai_response_after_combat = get_ai_response(post_combat_history)"
+    },
+    {
+      "name": "current_response",
+      "line": 1372,
+      "definition": "current_response = {\"role\": \"assistant\", \"content\": response}"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1377,
+      "definition": "conversation_history = load_json_file(\"modules/conversation_history/conversation_history.json\") or []"
+    },
+    {
+      "name": "ai_response",
+      "line": 1378,
+      "definition": "ai_response = get_ai_response(conversation_history)"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1385,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "combined_summary",
+      "line": 1390,
+      "definition": "combined_summary = \"\\n\\n\".join(action_handler.process_action.level_up_summaries)"
+    },
+    {
+      "name": "ai_response",
+      "line": 1396,
+      "definition": "ai_response = get_ai_response(conversation_history)"
+    },
+    {
+      "name": "assistant_message",
+      "line": 1404,
+      "definition": "assistant_message = {\"role\": \"assistant\", \"content\": response}"
+    },
+    {
+      "name": "sanitized_response",
+      "line": 1412,
+      "definition": "sanitized_response = sanitize_text(response)"
+    },
+    {
+      "name": "assistant_message",
+      "line": 1415,
+      "definition": "assistant_message = {\"role\": \"assistant\", \"content\": response}"
+    },
+    {
+      "name": "user_input",
+      "line": 1435,
+      "definition": "user_input = \"\""
+    },
+    {
+      "name": "user_input",
+      "line": 1438,
+      "definition": "user_input = msg.get(\"content\", \"\")"
+    },
+    {
+      "name": "has_module_creation_prompt",
+      "line": 1442,
+      "definition": "has_module_creation_prompt = \"You are a master storyteller, cartographer of myth\" in user_input"
+    },
+    {
+      "name": "prediction",
+      "line": 1446,
+      "definition": "prediction = predict_actions_required(user_input)"
+    },
+    {
+      "name": "prediction",
+      "line": 1449,
+      "definition": "prediction = {\"requires_actions\": True, \"reason\": \"Module creation prompt detected - using full model\"}"
+    },
+    {
+      "name": "prediction",
+      "line": 1452,
+      "definition": "prediction = {\"requires_actions\": True, \"reason\": \"Validation retry - using full model\"}"
+    },
+    {
+      "name": "selected_model",
+      "line": 1457,
+      "definition": "selected_model = DM_MINI_MODEL if not prediction[\"requires_actions\"] else DM_FULL_MODEL"
+    },
+    {
+      "name": "routing_info",
+      "line": 1460,
+      "definition": "routing_info = \"MINI MODEL\" if not prediction[\"requires_actions\"] else \"FULL MODEL\""
+    },
+    {
+      "name": "selected_model",
+      "line": 1464,
+      "definition": "selected_model = DM_FULL_MODEL"
+    },
+    {
+      "name": "response",
+      "line": 1471,
+      "definition": "response = client.chat.completions.create("
+    },
+    {
+      "name": "model",
+      "line": 1472,
+      "definition": "model=selected_model,"
+    },
+    {
+      "name": "temperature",
+      "line": 1473,
+      "definition": "temperature=TEMPERATURE,"
+    },
+    {
+      "name": "messages",
+      "line": 1474,
+      "definition": "messages=conversation_history"
+    },
+    {
+      "name": "content",
+      "line": 1476,
+      "definition": "content = response.choices[0].message.content.strip()"
+    },
+    {
+      "name": "actual_actions",
+      "line": 1480,
+      "definition": "actual_actions = extract_actual_actions(content)"
+    },
+    {
+      "name": "main_prompt_start",
+      "line": 1504,
+      "definition": "main_prompt_start = main_system_prompt_text[:50]  # First 50 characters as identifier"
+    },
+    {
+      "name": "filtered_history",
+      "line": 1507,
+      "definition": "filtered_history = []"
+    },
+    {
+      "name": "main_prompt",
+      "line": 1518,
+      "definition": "main_prompt = None"
+    },
+    {
+      "name": "other_system_prompts",
+      "line": 1519,
+      "definition": "other_system_prompts = []"
+    },
+    {
+      "name": "non_system_messages",
+      "line": 1520,
+      "definition": "non_system_messages = []"
+    },
+    {
+      "name": "main_prompt",
+      "line": 1525,
+      "definition": "main_prompt = msg"
+    },
+    {
+      "name": "ordered_history",
+      "line": 1532,
+      "definition": "ordered_history = []"
+    },
+    {
+      "name": "modules_dir",
+      "line": 1550,
+      "definition": "modules_dir = \"modules\""
+    },
+    {
+      "name": "all_modules_data",
+      "line": 1551,
+      "definition": "all_modules_data = {"
+    },
+    {
+      "name": "available_modules",
+      "line": 1562,
+      "definition": "available_modules = []"
+    },
+    {
+      "name": "module_path",
+      "line": 1564,
+      "definition": "module_path = os.path.join(modules_dir, item)"
+    },
+    {
+      "name": "area_files",
+      "line": 1567,
+      "definition": "area_files = []"
+    },
+    {
+      "name": "root_area_files",
+      "line": 1571,
+      "definition": "root_area_files = [f for f in os.listdir(module_path)"
+    },
+    {
+      "name": "areas_subdir",
+      "line": 1585,
+      "definition": "areas_subdir = os.path.join(module_path, 'areas')"
+    },
+    {
+      "name": "subdir_area_files",
+      "line": 1588,
+      "definition": "subdir_area_files = [f for f in os.listdir(areas_subdir)"
+    },
+    {
+      "name": "module_path_manager",
+      "line": 1607,
+      "definition": "module_path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "plot_file_path",
+      "line": 1608,
+      "definition": "plot_file_path = module_path_manager.get_plot_path()"
+    },
+    {
+      "name": "plot_data",
+      "line": 1613,
+      "definition": "plot_data = load_json_file(plot_file_path)"
+    },
+    {
+      "name": "main_plots",
+      "line": 1617,
+      "definition": "main_plots = [p for p in plot_data[\"plotPoints\"] if p.get(\"id\", \"\").startswith(\"PP\")]"
+    },
+    {
+      "name": "total_plots",
+      "line": 1618,
+      "definition": "total_plots = len(main_plots)"
+    },
+    {
+      "name": "completed_plots",
+      "line": 1619,
+      "definition": "completed_plots = 0"
+    },
+    {
+      "name": "status",
+      "line": 1622,
+      "definition": "status = plot_point.get(\"status\", \"unknown\")"
+    },
+    {
+      "name": "plot_id",
+      "line": 1623,
+      "definition": "plot_id = plot_point.get(\"id\", \"unknown\")"
+    },
+    {
+      "name": "module_complete",
+      "line": 1629,
+      "definition": "module_complete = completed_plots == total_plots and total_plots > 0"
+    },
+    {
+      "name": "success",
+      "line": 1682,
+      "definition": "success = run_startup_sequence()"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1691,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "combat_was_resumed",
+      "line": 1692,
+      "definition": "combat_was_resumed = False  # Track if we resumed from combat"
+    },
+    {
+      "name": "active_encounter_id",
+      "line": 1695,
+      "definition": "active_encounter_id = party_tracker_data[\"worldConditions\"][\"activeCombatEncounter\"]"
+    },
+    {
+      "name": "combat_was_resumed",
+      "line": 1697,
+      "definition": "combat_was_resumed = True  # Mark that we're resuming from combat"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1700,
+      "definition": "conversation_history = load_json_file(json_file) or []"
+    },
+    {
+      "name": "tracking_message",
+      "line": 1703,
+      "definition": "tracking_message = {"
+    },
+    {
+      "name": "recovery_marker",
+      "line": 1709,
+      "definition": "recovery_marker = {"
+    },
+    {
+      "name": "current_area_id_resume",
+      "line": 1720,
+      "definition": "current_area_id_resume = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "location_data_resume",
+      "line": 1721,
+      "definition": "location_data_resume = location_manager.get_location_info("
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1734,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1735,
+      "definition": "conversation_history = load_json_file(json_file) or []"
+    },
+    {
+      "name": "combat_summary_message",
+      "line": 1741,
+      "definition": "combat_summary_message = f\"[COMBAT CONCLUDED] The encounter has ended. The following is a summary of events:\\n\\n{dialogue_summary}\""
+    },
+    {
+      "name": "ai_response_after_combat",
+      "line": 1748,
+      "definition": "ai_response_after_combat = get_ai_response(conversation_history)"
+    },
+    {
+      "name": "current_area_id_post_combat",
+      "line": 1752,
+      "definition": "current_area_id_post_combat = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "location_data_post_combat",
+      "line": 1753,
+      "definition": "location_data_post_combat = location_manager.get_location_info("
+    },
+    {
+      "name": "validation_prompt_text",
+      "line": 1761,
+      "definition": "validation_prompt_text = load_validation_prompt()"
+    },
+    {
+      "name": "main_system_prompt_text",
+      "line": 1764,
+      "definition": "main_system_prompt_text = file.read()"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1766,
+      "definition": "conversation_history = load_json_file(json_file) or []"
+    },
+    {
+      "name": "ai_response",
+      "line": 1776,
+      "definition": "ai_response = get_ai_response(conversation_history)"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1782,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "module_name",
+      "line": 1790,
+      "definition": "module_name = party_tracker_data.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "path_manager",
+      "line": 1794,
+      "definition": "path_manager = ModulePathManager(module_name)"
+    },
+    {
+      "name": "current_area_id",
+      "line": 1797,
+      "definition": "current_area_id = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "location_data",
+      "line": 1798,
+      "definition": "location_data = location_manager.get_location_info("
+    },
+    {
+      "name": "current_module_name",
+      "line": 1805,
+      "definition": "current_module_name = party_tracker_data.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "current_path_manager",
+      "line": 1806,
+      "definition": "current_path_manager = ModulePathManager(current_module_name)"
+    },
+    {
+      "name": "plot_data",
+      "line": 1807,
+      "definition": "plot_data = load_json_file(current_path_manager.get_plot_path())"
+    },
+    {
+      "name": "module_data",
+      "line": 1810,
+      "definition": "module_data = load_json_file(current_path_manager.get_module_file_path())"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1812,
+      "definition": "conversation_history = ensure_main_system_prompt(conversation_history, main_system_prompt_text)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1814,
+      "definition": "conversation_history = update_conversation_history(conversation_history, party_tracker_data, plot_data, module_data)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1816,
+      "definition": "conversation_history = update_character_data(conversation_history, party_tracker_data)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1819,
+      "definition": "conversation_history = order_conversation_messages(conversation_history, main_system_prompt_text)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1823,
+      "definition": "conversation_history = check_and_compact_missing_summaries("
+    },
+    {
+      "name": "initial_ai_response",
+      "line": 1830,
+      "definition": "initial_ai_response = get_ai_response(conversation_history)"
+    },
+    {
+      "name": "empty_input_count",
+      "line": 1835,
+      "definition": "empty_input_count = 0"
+    },
+    {
+      "name": "max_empty_inputs",
+      "line": 1836,
+      "definition": "max_empty_inputs = 5"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1839,
+      "definition": "conversation_history = truncate_dm_notes(conversation_history)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1844,
+      "definition": "conversation_history = load_json_file(\"modules/conversation_history/conversation_history.json\") or []"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1845,
+      "definition": "conversation_history = process_conversation_history(conversation_history)"
+    },
+    {
+      "name": "needs_conversation_history_update",
+      "line": 1847,
+      "definition": "needs_conversation_history_update = False"
+    },
+    {
+      "name": "original_length",
+      "line": 1852,
+      "definition": "original_length = len(conversation_history)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 1853,
+      "definition": "conversation_history = check_and_process_location_transitions(conversation_history, party_tracker_data, path_manager)"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1888,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "player_name_actual",
+      "line": 1894,
+      "definition": "player_name_actual = party_tracker_data[\"partyMembers\"][0]"
+    },
+    {
+      "name": "player_name_normalized",
+      "line": 1896,
+      "definition": "player_name_normalized = normalize_character_name(player_name_actual)"
+    },
+    {
+      "name": "player_data_file",
+      "line": 1897,
+      "definition": "player_data_file = path_manager.get_character_path(player_name_normalized)"
+    },
+    {
+      "name": "player_data_current",
+      "line": 1898,
+      "definition": "player_data_current = load_json_file(player_data_file)"
+    },
+    {
+      "name": "current_hp",
+      "line": 1902,
+      "definition": "current_hp = player_data_current.get(\"hitPoints\", \"N/A\")"
+    },
+    {
+      "name": "max_hp",
+      "line": 1903,
+      "definition": "max_hp = player_data_current.get(\"maxHitPoints\", \"N/A\")"
+    },
+    {
+      "name": "current_xp",
+      "line": 1904,
+      "definition": "current_xp = player_data_current.get(\"experience_points\", \"N/A\")"
+    },
+    {
+      "name": "next_level_xp",
+      "line": 1905,
+      "definition": "next_level_xp = player_data_current.get(\"exp_required_for_next_level\", \"N/A\")"
+    },
+    {
+      "name": "current_time_str",
+      "line": 1906,
+      "definition": "current_time_str = party_tracker_data[\"worldConditions\"][\"time\"]"
+    },
+    {
+      "name": "stats_display",
+      "line": 1907,
+      "definition": "stats_display = f\"{LIGHT_OFF_GREEN}[{current_time_str}][HP:{current_hp}/{max_hp}][XP:{current_xp}/{next_level_xp}]{RESET_COLOR}\""
+    },
+    {
+      "name": "player_name_display",
+      "line": 1908,
+      "definition": "player_name_display = f\"{SOLID_GREEN}{player_name_actual}{RESET_COLOR}\""
+    },
+    {
+      "name": "user_input_text",
+      "line": 1909,
+      "definition": "user_input_text = input(f\"{stats_display} {player_name_display}: \")"
+    },
+    {
+      "name": "user_input_text",
+      "line": 1911,
+      "definition": "user_input_text = input(\"User: \")"
+    },
+    {
+      "name": "empty_input_count",
+      "line": 1918,
+      "definition": "empty_input_count = 0"
+    },
+    {
+      "name": "party_tracker_data",
+      "line": 1920,
+      "definition": "party_tracker_data = load_json_file(\"party_tracker.json\")"
+    },
+    {
+      "name": "party_members_stats",
+      "line": 1929,
+      "definition": "party_members_stats = []"
+    },
+    {
+      "name": "member_file_path",
+      "line": 1931,
+      "definition": "member_file_path = path_manager.get_character_path(member_name_iter)"
+    },
+    {
+      "name": "member_data_iter",
+      "line": 1932,
+      "definition": "member_data_iter = load_json_file(member_file_path)"
+    },
+    {
+      "name": "stats",
+      "line": 1934,
+      "definition": "stats = {"
+    },
+    {
+      "name": "npc_name_iter",
+      "line": 1947,
+      "definition": "npc_name_iter = npc_info_iter[\"name\"]"
+    },
+    {
+      "name": "npc_data_file",
+      "line": 1948,
+      "definition": "npc_data_file = path_manager.get_character_path(npc_name_iter)"
+    },
+    {
+      "name": "npc_data_iter",
+      "line": 1950,
+      "definition": "npc_data_iter = load_json_file(npc_data_file)"
+    },
+    {
+      "name": "stats",
+      "line": 1953,
+      "definition": "stats = {"
+    },
+    {
+      "name": "current_area_id",
+      "line": 1970,
+      "definition": "current_area_id = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "location_data",
+      "line": 1971,
+      "definition": "location_data = location_manager.get_location_info("
+    },
+    {
+      "name": "world_conditions",
+      "line": 1978,
+      "definition": "world_conditions = party_tracker_data[\"worldConditions\"]"
+    },
+    {
+      "name": "date_time_str",
+      "line": 1979,
+      "definition": "date_time_str = f\"{world_conditions['year']} {world_conditions['month']} {world_conditions['day']} {world_conditions['time']}\""
+    },
+    {
+      "name": "party_stats_formatted",
+      "line": 1980,
+      "definition": "party_stats_formatted = []"
+    },
+    {
+      "name": "member_data_for_note",
+      "line": 1984,
+      "definition": "member_data_for_note = load_json_file(path_manager.get_character_path(stats_item['name']))"
+    },
+    {
+      "name": "member_data_for_note",
+      "line": 1986,
+      "definition": "member_data_for_note = load_json_file(path_manager.get_character_path(stats_item['name']))"
+    },
+    {
+      "name": "abilities",
+      "line": 1988,
+      "definition": "abilities = member_data_for_note.get(\"abilities\", {})"
+    },
+    {
+      "name": "ability_str",
+      "line": 1989,
+      "definition": "ability_str = f\"STR:{abilities.get('strength', 'N/A')} DEX:{abilities.get('dexterity', 'N/A')} CON:{abilities.get('constitution', 'N/A')} INT:{abilities.get('intelligence', 'N/A')} WIS:{abilities.get('wisdom', 'N/A')} CHA:{abilities.get('charisma', 'N/A')}\""
+    },
+    {
+      "name": "next_level_xp_note",
+      "line": 1990,
+      "definition": "next_level_xp_note = member_data_for_note.get(\"exp_required_for_next_level\", \"N/A\")"
+    },
+    {
+      "name": "display_name",
+      "line": 1991,
+      "definition": "display_name = stats_item.get('display_name', stats_item['name'].capitalize())"
+    },
+    {
+      "name": "spell_slots_str",
+      "line": 1994,
+      "definition": "spell_slots_str = \"\""
+    },
+    {
+      "name": "spellcasting",
+      "line": 1995,
+      "definition": "spellcasting = member_data_for_note.get(\"spellcasting\", {})"
+    },
+    {
+      "name": "spell_slots",
+      "line": 1997,
+      "definition": "spell_slots = spellcasting[\"spellSlots\"]"
+    },
+    {
+      "name": "slot_parts",
+      "line": 1998,
+      "definition": "slot_parts = []"
+    },
+    {
+      "name": "level_key",
+      "line": 2000,
+      "definition": "level_key = f\"level{level}\""
+    },
+    {
+      "name": "slot_data",
+      "line": 2002,
+      "definition": "slot_data = spell_slots[level_key]"
+    },
+    {
+      "name": "current",
+      "line": 2003,
+      "definition": "current = slot_data.get(\"current\", 0)"
+    },
+    {
+      "name": "maximum",
+      "line": 2004,
+      "definition": "maximum = slot_data.get(\"max\", 0)"
+    },
+    {
+      "name": "spell_slots_str",
+      "line": 2008,
+      "definition": "spell_slots_str = f\", Spell Slots: {' '.join(slot_parts)}\""
+    },
+    {
+      "name": "party_stats_str",
+      "line": 2012,
+      "definition": "party_stats_str = \"; \".join(party_stats_formatted)"
+    },
+    {
+      "name": "current_location_name_note",
+      "line": 2013,
+      "definition": "current_location_name_note = world_conditions[\"currentLocation\"]"
+    },
+    {
+      "name": "current_location_id_note",
+      "line": 2014,
+      "definition": "current_location_id_note = world_conditions[\"currentLocationId\"]"
+    },
+    {
+      "name": "connected_locations_display_str",
+      "line": 2017,
+      "definition": "connected_locations_display_str = \"None listed\""
+    },
+    {
+      "name": "connected_areas_display_str",
+      "line": 2018,
+      "definition": "connected_areas_display_str = \"\" # Initialize as empty"
+    },
+    {
+      "name": "connected_ids_current_area",
+      "line": 2023,
+      "definition": "connected_ids_current_area = location_data[\"connectivity\"]"
+    },
+    {
+      "name": "connected_names_current_area",
+      "line": 2024,
+      "definition": "connected_names_current_area = []"
+    },
+    {
+      "name": "current_area_full_data",
+      "line": 2026,
+      "definition": "current_area_full_data = load_json_file(path_manager.get_area_path(current_area_id))"
+    },
+    {
+      "name": "found_loc",
+      "line": 2029,
+      "definition": "found_loc = next((l[\"name\"] for l in current_area_full_data[\"locations\"] if l[\"locationId\"] == loc_id), loc_id)"
+    },
+    {
+      "name": "connected_locations_display_str",
+      "line": 2032,
+      "definition": "connected_locations_display_str = \", \".join(connected_names_current_area)"
+    },
+    {
+      "name": "connected_area_details",
+      "line": 2037,
+      "definition": "connected_area_details = []"
+    },
+    {
+      "name": "conn_loc_info",
+      "line": 2040,
+      "definition": "conn_loc_info = location_graph.get_location_info(connected_loc_id)"
+    },
+    {
+      "name": "conn_loc_name",
+      "line": 2042,
+      "definition": "conn_loc_name = conn_loc_info['location_name']"
+    },
+    {
+      "name": "conn_area_name",
+      "line": 2043,
+      "definition": "conn_area_name = location_graph.get_area_name_from_location_id(connected_loc_id)"
+    },
+    {
+      "name": "connected_areas_display_str",
+      "line": 2047,
+      "definition": "connected_areas_display_str = \". Connects to other areas via: \" + \", \".join(connected_area_details)"
+    },
+    {
+      "name": "available_modules_str",
+      "line": 2050,
+      "definition": "available_modules_str = \"\""
+    },
+    {
+      "name": "world_registry_path",
+      "line": 2053,
+      "definition": "world_registry_path = \"modules/world_registry.json\""
+    },
+    {
+      "name": "world_registry",
+      "line": 2054,
+      "definition": "world_registry = safe_read_json(world_registry_path)"
+    },
+    {
+      "name": "current_module",
+      "line": 2057,
+      "definition": "current_module = party_tracker_data.get('module', '').replace(' ', '_')"
+    },
+    {
+      "name": "all_modules",
+      "line": 2058,
+      "definition": "all_modules = list(world_registry['modules'].keys())"
+    },
+    {
+      "name": "other_modules",
+      "line": 2059,
+      "definition": "other_modules = [m for m in all_modules if m != current_module]"
+    },
+    {
+      "name": "other_module_areas",
+      "line": 2063,
+      "definition": "other_module_areas = []"
+    },
+    {
+      "name": "module_info",
+      "line": 2065,
+      "definition": "module_info = world_registry['modules'][module_name]"
+    },
+    {
+      "name": "module_areas",
+      "line": 2067,
+      "definition": "module_areas = []"
+    },
+    {
+      "name": "area_name",
+      "line": 2070,
+      "definition": "area_name = area_info.get('areaName', area_id)"
+    },
+    {
+      "name": "level_range",
+      "line": 2074,
+      "definition": "level_range = module_info.get('levelRange', {})"
+    },
+    {
+      "name": "level_str",
+      "line": 2075,
+      "definition": "level_str = f\"Level {level_range.get('min', '?')}-{level_range.get('max', '?')}\""
+    },
+    {
+      "name": "starting_info",
+      "line": 2080,
+      "definition": "starting_info = f\" (Starting location: {start_location_name} [{start_location_id}] in {start_area_name} [{start_area_id}])\""
+    },
+    {
+      "name": "starting_info",
+      "line": 2083,
+      "definition": "starting_info = \"\""
+    },
+    {
+      "name": "module_description",
+      "line": 2085,
+      "definition": "module_description = f\"{module_name} [{level_str}]: {', '.join(module_areas[:3])}{starting_info}\""
+    },
+    {
+      "name": "available_modules_str",
+      "line": 2089,
+      "definition": "available_modules_str = \". Available modules for travel: \" + \"; \".join(other_module_areas)"
+    },
+    {
+      "name": "current_module_for_plot",
+      "line": 2096,
+      "definition": "current_module_for_plot = party_tracker_data.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "current_plot_manager",
+      "line": 2097,
+      "definition": "current_plot_manager = ModulePathManager(current_module_for_plot)"
+    },
+    {
+      "name": "plot_data_for_note",
+      "line": 2098,
+      "definition": "plot_data_for_note = load_json_file(current_plot_manager.get_plot_path())"
+    },
+    {
+      "name": "current_plot_points",
+      "line": 2105,
+      "definition": "current_plot_points = []"
+    },
+    {
+      "name": "all_active_plot_points",
+      "line": 2106,
+      "definition": "all_active_plot_points = []"
+    },
+    {
+      "name": "current_plot_points",
+      "line": 2109,
+      "definition": "current_plot_points = ["
+    },
+    {
+      "name": "all_active_plot_points",
+      "line": 2114,
+      "definition": "all_active_plot_points = ["
+    },
+    {
+      "name": "plot_points_parts",
+      "line": 2120,
+      "definition": "plot_points_parts = []"
+    },
+    {
+      "name": "other_plots",
+      "line": 2126,
+      "definition": "other_plots = [p for p in all_active_plot_points if p not in current_plot_points]"
+    },
+    {
+      "name": "plot_points_str",
+      "line": 2132,
+      "definition": "plot_points_str = \"\\n\".join(plot_points_parts) if plot_points_parts else \"None active\""
+    },
+    {
+      "name": "side_quests",
+      "line": 2134,
+      "definition": "side_quests = []"
+    },
+    {
+      "name": "location_info",
+      "line": 2139,
+      "definition": "location_info = f\" [Location: {point.get('location', 'Unknown')}]\" if point.get('location') != current_area_id else \"\""
+    },
+    {
+      "name": "side_quests_str",
+      "line": 2141,
+      "definition": "side_quests_str = \"\\n\".join(side_quests) if side_quests else \"None active\""
+    },
+    {
+      "name": "traps_str",
+      "line": 2143,
+      "definition": "traps_str = \"None listed\""
+    },
+    {
+      "name": "traps",
+      "line": 2145,
+      "definition": "traps = location_data.get(\"traps\", [])"
+    },
+    {
+      "name": "traps_str",
+      "line": 2147,
+      "definition": "traps_str = \"\\n\".join(["
+    },
+    {
+      "name": "monsters_str",
+      "line": 2152,
+      "definition": "monsters_str = \"None listed\""
+    },
+    {
+      "name": "monsters",
+      "line": 2154,
+      "definition": "monsters = location_data.get(\"monsters\", [])"
+    },
+    {
+      "name": "monsters_str",
+      "line": 2158,
+      "definition": "monsters_str = f\"Invalid monster data format: {type(monsters)}\""
+    },
+    {
+      "name": "monster_list",
+      "line": 2160,
+      "definition": "monster_list = []"
+    },
+    {
+      "name": "name",
+      "line": 2168,
+      "definition": "name = monster.get('name', 'Unknown')"
+    },
+    {
+      "name": "qty",
+      "line": 2171,
+      "definition": "qty = None"
+    },
+    {
+      "name": "qty_str",
+      "line": 2172,
+      "definition": "qty_str = \"1\""
+    },
+    {
+      "name": "qty",
+      "line": 2176,
+      "definition": "qty = monster.get('quantity', {})"
+    },
+    {
+      "name": "qty_str",
+      "line": 2178,
+      "definition": "qty_str = f\"{qty.get('min', 1)}-{qty.get('max', 1)}\""
+    },
+    {
+      "name": "qty_str",
+      "line": 2180,
+      "definition": "qty_str = str(qty)"
+    },
+    {
+      "name": "qty_str",
+      "line": 2183,
+      "definition": "qty_str = str(monster.get('number', 1))"
+    },
+    {
+      "name": "qty_str",
+      "line": 2186,
+      "definition": "qty_str = str(monster.get('count', 1))"
+    },
+    {
+      "name": "monsters_str",
+      "line": 2192,
+      "definition": "monsters_str = \"\\n\".join(monster_list)"
+    },
+    {
+      "name": "module_creation_prompt",
+      "line": 2195,
+      "definition": "module_creation_prompt = \"\""
+    },
+    {
+      "name": "should_inject_creation_prompt",
+      "line": 2196,
+      "definition": "should_inject_creation_prompt = False  # Initialize for later use"
+    },
+    {
+      "name": "current_module",
+      "line": 2199,
+      "definition": "current_module = party_tracker_data.get('module', '').replace(' ', '_')"
+    },
+    {
+      "name": "all_modules_completion",
+      "line": 2203,
+      "definition": "all_modules_completion = check_all_modules_plot_completion()"
+    },
+    {
+      "name": "all_modules_complete",
+      "line": 2206,
+      "definition": "all_modules_complete = all_modules_completion[\"all_complete\"]"
+    },
+    {
+      "name": "modules_checked",
+      "line": 2207,
+      "definition": "modules_checked = all_modules_completion[\"modules_checked\"]"
+    },
+    {
+      "name": "completion_summary",
+      "line": 2208,
+      "definition": "completion_summary = all_modules_completion[\"completion_summary\"]"
+    },
+    {
+      "name": "status",
+      "line": 2214,
+      "definition": "status = \"COMPLETE\" if summary[\"is_complete\"] else \"INCOMPLETE\""
+    },
+    {
+      "name": "should_inject_creation_prompt",
+      "line": 2221,
+      "definition": "should_inject_creation_prompt = all_modules_complete and len(modules_checked) > 0"
+    },
+    {
+      "name": "module_creation_prompt",
+      "line": 2236,
+      "definition": "module_creation_prompt = \"\\n\\n\" + f.read()"
+    },
+    {
+      "name": "incomplete_modules",
+      "line": 2241,
+      "definition": "incomplete_modules = [name for name, summary in completion_summary.items() if not summary[\"is_complete\"]]"
+    },
+    {
+      "name": "current_location_name_note",
+      "line": 2253,
+      "definition": "current_location_name_note = sanitize_text(current_location_name_note)"
+    },
+    {
+      "name": "dm_note",
+      "line": 2258,
+      "definition": "dm_note = (f\"Dungeon Master Note: Current date and time: {date_time_str}. \""
+    },
+    {
+      "name": "dm_note",
+      "line": 2264,
+      "definition": "dm_note = (f\"Dungeon Master Note: Current date and time: {date_time_str}. \""
+    },
+    {
+      "name": "dm_note",
+      "line": 2296,
+      "definition": "dm_note = \"Dungeon Master Note: Remember to take actions if necessary such as updating the plot, time, character sheets, and location if changes occur.\""
+    },
+    {
+      "name": "user_input_with_note",
+      "line": 2298,
+      "definition": "user_input_with_note = f\"{dm_note} Player: {user_input_text}\""
+    },
+    {
+      "name": "retry_count",
+      "line": 2302,
+      "definition": "retry_count = 0"
+    },
+    {
+      "name": "valid_response_received",
+      "line": 2303,
+      "definition": "valid_response_received = False"
+    },
+    {
+      "name": "ai_response_content",
+      "line": 2304,
+      "definition": "ai_response_content = None"
+    },
+    {
+      "name": "ai_response_content",
+      "line": 2308,
+      "definition": "ai_response_content = get_ai_response(conversation_history, validation_retry_count=retry_count)"
+    },
+    {
+      "name": "validation_result",
+      "line": 2309,
+      "definition": "validation_result = validate_ai_response(ai_response_content, user_input_text, validation_prompt_text, conversation_history, party_tracker_data)"
+    },
+    {
+      "name": "valid_response_received",
+      "line": 2312,
+      "definition": "valid_response_received = True"
+    },
+    {
+      "name": "final_result",
+      "line": 2323,
+      "definition": "final_result = process_ai_response(ai_response_content, party_tracker_data, location_data, conversation_history)"
+    },
+    {
+      "name": "level_up_session",
+      "line": 2335,
+      "definition": "level_up_session = final_result[\"session\"]"
+    },
+    {
+      "name": "final_narration",
+      "line": 2336,
+      "definition": "final_narration = \"\""
+    },
+    {
+      "name": "dm_response",
+      "line": 2339,
+      "definition": "dm_response = level_up_session.start()"
+    },
+    {
+      "name": "player_name_display",
+      "line": 2349,
+      "definition": "player_name_display = f\"{SOLID_GREEN}{player_name_actual}{RESET_COLOR}\""
+    },
+    {
+      "name": "level_up_input",
+      "line": 2350,
+      "definition": "level_up_input = input(f\"{player_name_display} (Leveling Up): \")"
+    },
+    {
+      "name": "dm_response",
+      "line": 2356,
+      "definition": "dm_response = level_up_session.handle_input(level_up_input)"
+    },
+    {
+      "name": "parsed_data",
+      "line": 2361,
+      "definition": "parsed_data = json.loads(dm_response)"
+    },
+    {
+      "name": "final_narration",
+      "line": 2362,
+      "definition": "final_narration = parsed_data.get(\"narration\", \"Level up complete!\")"
+    },
+    {
+      "name": "conversation_history",
+      "line": 2390,
+      "definition": "conversation_history = load_json_file(json_file) or []"
+    },
+    {
+      "name": "result",
+      "line": 2406,
+      "definition": "result = process_ai_response(ai_response_content, party_tracker_data, location_data, conversation_history)"
+    },
+    {
+      "name": "current_area_id",
+      "line": 2420,
+      "definition": "current_area_id = party_tracker_data[\"worldConditions\"][\"currentAreaId\"]"
+    },
+    {
+      "name": "module_name_updated",
+      "line": 2422,
+      "definition": "module_name_updated = party_tracker_data.get(\"module\", \"\").replace(\" \", \"_\")"
+    },
+    {
+      "name": "updated_path_manager",
+      "line": 2423,
+      "definition": "updated_path_manager = ModulePathManager(module_name_updated)"
+    },
+    {
+      "name": "plot_data",
+      "line": 2424,
+      "definition": "plot_data = load_json_file(updated_path_manager.get_plot_path())"
+    },
+    {
+      "name": "module_data",
+      "line": 2425,
+      "definition": "module_data = load_json_file(updated_path_manager.get_module_file_path())"
+    },
+    {
+      "name": "conversation_history",
+      "line": 2429,
+      "definition": "conversation_history = update_conversation_history(conversation_history, party_tracker_data, plot_data, module_data)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 2431,
+      "definition": "conversation_history = update_character_data(conversation_history, party_tracker_data)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 2432,
+      "definition": "conversation_history = ensure_main_system_prompt(conversation_history, main_system_prompt_text)"
+    },
+    {
+      "name": "conversation_history",
+      "line": 2435,
+      "definition": "conversation_history = order_conversation_messages(conversation_history, main_system_prompt_text)"
+    },
+    {
+      "name": "required_dirs",
+      "line": 2472,
+      "definition": "required_dirs = ["
+    },
+    {
+      "name": "success",
+      "line": 2500,
+      "definition": "success = run_startup_sequence()"
+    }
+  ],
+  "systems": {
+    "ai_models": [
+      "process_ai_response",
+      "main_game_loop",
+      "main",
+      "validate_ai_response",
+      "available",
+      "again",
+      "OpenAI",
+      "model",
+      "ensure_main_system_prompt",
+      "details",
+      "get_ai_response",
+      "status_processing_ai"
+    ],
+    "validation_systems": [
+      "create_module_validation_context",
+      "load_validation_prompt"
+    ],
+    "conversation_management": [
+      "compress_conversation_history_on_transition",
+      "combine_messages",
+      "messages",
+      "update_conversation_history",
+      "history",
+      "save_conversation_history",
+      "process_conversation_history",
+      "check_and_inject_return_message",
+      "order_conversation_messages",
+      "clear_message_buffer",
+      "compress_conversation_history_on_module_transition"
+    ],
+    "game_loop_functions": [
+      "game",
+      "exit_game",
+      "initialize_game_files_from_bu"
+    ],
+    "save_load_functions": [
+      "get_module_file_path",
+      "isfile",
+      "files",
+      "loads",
+      "load_module_data",
+      "load",
+      "JSONDecodeError",
+      "loaded",
+      "parse_json_safely",
+      "safe_json_dump",
+      "extract_json_from_codeblock",
+      "safe_write_json",
+      "safe_read_json",
+      "safe_json_load",
+      "load_json_file"
+    ],
+    "combat_functions": [
+      "run_combat_simulation",
+      "combat"
+    ],
+    "character_functions": [
+      "normalize_character_name",
+      "get_character_path",
+      "CHARACTERS",
+      "update_character_data"
+    ],
+    "location_functions": [
+      "generate_seamless_transition_narration",
+      "transition",
+      "LocationGraph",
+      "check_and_process_module_transitions",
+      "get_area_name_from_location_id",
+      "location",
+      "get_module_starting_location",
+      "get_location_info",
+      "check_and_process_location_transitions",
+      "transitions",
+      "get_area_path"
+    ],
+    "module_functions": [
+      "check_all_modules_plot_completion",
+      "generate_module_summary",
+      "ModulePathManager"
+    ],
+    "utility_functions": [
+      "str",
+      "process_action",
+      "len",
+      "read",
+      "tracking",
+      "update_journal_with_summary",
+      "dumps",
+      "run_startup_sequence",
+      "subdirectory",
+      "format_exc",
+      "strip",
+      "detect_create_encounter",
+      "get",
+      "makedirs",
+      "required",
+      "processed",
+      "type",
+      "update_world_time",
+      "generate_enhanced_adventure_summary",
+      "except",
+      "or",
+      "isinstance",
+      "included",
+      "print",
+      "isatty",
+      "write",
+      "status",
+      "NARRATION",
+      "listdir",
+      "get_plot_path",
+      "group",
+      "reversed",
+      "set_callback",
+      "error",
+      "warning",
+      "boundary",
+      "list",
+      "exists",
+      "insert",
+      "enumerate",
+      "turn",
+      "status_callback",
+      "glob",
+      "start",
+      "input",
+      "active",
+      "estimate",
+      "log_prediction_accuracy",
+      "exit",
+      "states",
+      "the",
+      "process_all_effect_expirations",
+      "first",
+      "replace",
+      "get_npc_stat",
+      "capitalize",
+      "split",
+      "log_complete_interaction",
+      "hasattr",
+      "truncate_dm_notes",
+      "append",
+      "sessions",
+      "status_validating",
+      "check_and_compact_missing_summaries",
+      "points",
+      "open",
+      "extract_actual_actions",
+      "else",
+      "blocks",
+      "startup_required",
+      "create",
+      "summary",
+      "name",
+      "Configuration",
+      "generate_arrival_narration",
+      "check_and_perform_chunked_compression",
+      "and",
+      "import",
+      "to",
+      "set_script_name",
+      "internally",
+      "encounters",
+      "find_path",
+      "keys",
+      "items",
+      "add",
+      "display_status",
+      "directory",
+      "n",
+      "dump",
+      "isdir",
+      "state",
+      "setup_utf8_console",
+      "debug",
+      "remove_duplicate_npcs",
+      "Copyright",
+      "Normal",
+      "status_ready",
+      "operations",
+      "of",
+      "colored",
+      "info",
+      "sanitize_text",
+      "extend",
+      "plots",
+      "copy",
+      "any",
+      "status_retrying",
+      "match",
+      "predict_actions_required",
+      "changes",
+      "endswith",
+      "startswith",
+      "range",
+      "next",
+      "lower",
+      "join",
+      "print_exc",
+      "handle_input",
+      "establishHub",
+      "check",
+      "reference",
+      "search",
+      "if",
+      "response",
+      "set",
+      "quests",
+      "found",
+      "format"
+    ]
+  },
+  "summary": {
+    "total_functions": 31,
+    "total_imports": 90,
+    "total_globals": 464,
+    "total_systems": 192
+  }
+}

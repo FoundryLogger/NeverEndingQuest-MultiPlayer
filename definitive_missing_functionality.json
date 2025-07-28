@@ -1,0 +1,24 @@
+{
+  "high_priority": [
+    "check_and_process_location_transitions",
+    "main_game_loop"
+  ],
+  "medium_priority": [
+    "check_and_inject_return_message",
+    "generate_module_summary"
+  ],
+  "confirmed_working": [
+    "location_path_validation",
+    "effect_expiration",
+    "ai_validation"
+  ],
+  "architectural_differences": {
+    "architecture": "EVENT_DRIVEN_VS_LOOP",
+    "session_management": "SOCKETIO_VS_FILE",
+    "realtime": "SOCKETIO_EVENTS"
+  },
+  "analysis_date": "2025-07-28",
+  "total_missing_high": 2,
+  "total_missing_medium": 2,
+  "total_working": 3
+}

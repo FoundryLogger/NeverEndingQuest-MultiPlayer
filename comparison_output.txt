@@ -1,0 +1,335 @@
+Loading analysis data...
+====================================================================================================
+COMPREHENSIVE SINGLE-PLAYER vs MULTIPLAYER COMPARISON
+====================================================================================================
+Analysis Date: 2025-07-28 11:01:38
+Single-Player Functions: 31
+Multiplayer Functions: 74
+Single-Player Imports: 90
+Multiplayer Imports: 66
+\n============================================================
+FUNCTION COMPARISON
+============================================================
+\nFunctions ONLY in Single-Player (main.py): 24
+  - check_and_inject_return_message(conversation_history, is_combat_active) [line 202]
+  - check_and_process_location_transitions(conversation_history, party_tracker_data, path_manager) [line 852]
+  - check_and_process_module_transitions(conversation_history, party_tracker_data) [line 968]
+  - clear_message_buffer(no args) [line 424]
+  - combine_messages(first_response, second_response) [line 391]
+  - compress_conversation_history_on_module_transition(conversation_history, module_name, summary_text, transition_index) [line 1181]
+  - create_module_validation_context(party_tracker_data, path_manager) [line 488]
+  - detect_create_encounter(parsed_data) [line 380]
+  - display_status(message) [line 169]
+  - exit_game(no args) [line 198]
+  - generate_arrival_narration(departure_narration, party_tracker_data, conversation_history) [line 264]
+  - generate_module_summary(conversation_history, party_tracker_data, module_name, transition_index) [line 1060]
+  - generate_seamless_transition_narration(departure_narration, arrival_narration) [line 326]
+  - get_npc_stat(npc_name, stat_name, time_estimate) [line 430]
+  - load_json_file(file_path) [line 794]
+  - main(no args) [line 2439]
+  - main_game_loop(no args) [line 1670]
+  - order_conversation_messages(conversation_history, main_system_prompt_text) [line 1516]
+  - parse_json_safely(text) [line 463]
+  - process_conversation_history(history) [line 830]
+  - remove_duplicate_npcs(party_tracker_data) [line 798]
+  - save_conversation_history(history) [line 1421]
+  - status_callback(message, is_processing) [line 181]
+  - truncate_dm_notes(conversation_history) [line 842]
+\nFunctions ONLY in Multiplayer (server.py): 67
+  - activate_first_quest_if_needed(plot_data, current_module) [line 2414]
+  - broadcast_full_game_state(message_type, message_content, message_player) [line 733]
+  - calculate_module_completion(plot_data) [line 577]
+  - create_character_from_creation_data(player_name, creation_data) [line 2453]
+  - create_save_game(no args) [line 1024]
+  - debug_socket_event(event_name, data) [line 113]
+  - delete_save_game(save_id) [line 1137]
+  - determine_module_type(context_data) [line 513]
+  - discover_available_modules(no args) [line 424]
+  - get_available_modules(no args) [line 888]
+  - get_class_features(character_class) [line 2744]
+  - get_class_proficiencies(character_class) [line 2719]
+  - get_class_saving_throws(character_class) [line 2695]
+  - get_class_skills(character_class, background) [line 2711]
+  - get_current_module_name(no args) [line 566]
+  - get_current_state_for_client(no args) [line 789]
+  - get_game_state(no args) [line 883]
+  - get_module_creation_date(module_path) [line 537]
+  - get_module_description(plot_data) [line 498]
+  - get_module_details(module_name) [line 978]
+  - get_module_last_played(module_path) [line 548]
+  - get_save_metadata(save_id) [line 1177]
+  - get_spellcasting_data(character_class, abilities) [line 2492]
+  - get_starting_equipment_old(character_class, background) [line 2765]
+  - handle_activate_quest(data) [line 2228]
+  - handle_auto_save(data) [line 3591]
+  - handle_cancel_level_up(data) [line 3420]
+  - handle_character_creation_step(data) [line 1350]
+  - handle_chat_message(data) [line 2174]
+  - handle_cleanup_rejected_quests(data) [line 3115]
+  - handle_clear_all_history(data) [line 3260]
+  - handle_clear_chat_history(data) [line 3178]
+  - handle_clear_combat_history(data) [line 3215]
+  - handle_close_quest(data) [line 2292]
+  - handle_combat_action_logic(player_name, action_text) [line 2819]
+  - handle_combat_state_request(no args) [line 2219]
+  - handle_connect(no args) [line 1196]
+  - handle_disconnect(no args) [line 1212]
+  - handle_game_state_request(no args) [line 2000]
+  - handle_join_game(data) [line 1243]
+  - handle_level_up_input(data) [line 3341]
+  - handle_list_saves(data) [line 3564]
+  - handle_load_game(data) [line 3514]
+  - handle_player_action_logic(player_name, action_text, sid) [line 1423]
+  - handle_player_data_request(data) [line 2006]
+  - handle_plot_data_request(no args) [line 2119]
+  - handle_reject_quest(data) [line 2985]
+  - handle_reload_character_data(data) [line 2101]
+  - handle_remove_quest(data) [line 3050]
+  - handle_reset_all_quests(data) [line 2356]
+  - handle_save_game(data) [line 3464]
+  - index(no args) [line 878]
+  - initialize_game_state(no args) [line 178]
+  - is_player_turn(character_name) [line 2956]
+  - list_save_games(no args) [line 1073]
+  - load_save_game(save_id) [line 1093]
+  - load_system_prompt(no args) [line 170]
+  - on_combat_action(data) [line 2195]
+  - on_player_action_event(data) [line 1325]
+  - process_ai_combat_turns(no args) [line 2868]
+  - reload_character_data(player_name) [line 2075]
+  - reload_character_data_for_player(player_name) [line 3612]
+  - reload_game_state(no args) [line 216]
+  - start_combat_session(encounter_id) [line 2908]
+  - start_server(no args) [line 2964]
+  - switch_module(no args) [line 911]
+  - switch_to_module(new_module_name) [line 589]
+\nCommon Functions: 7
+\n============================================================
+IMPORT COMPARISON
+============================================================
+\nImports ONLY in Single-Player: 42
+  - codecs
+  - config
+  - core.ai.action_handler
+  - core.ai.chunked_compression_integration.check_and_perform_chunked_compression
+  - core.ai.cumulative_summary.check_and_compact_missing_summaries
+  - core.ai.cumulative_summary.compress_conversation_history_on_transition
+  - core.ai.cumulative_summary.generate_enhanced_adventure_summary
+  - core.ai.cumulative_summary.update_journal_with_summary
+  - core.managers.campaign_manager.CampaignManager
+  - core.managers.combat_manager.run_combat_simulation
+  - core.managers.level_up_manager.LevelUpSession
+  - core.managers.status_manager.status_advancing_time
+  - core.managers.status_manager.status_compressing_history
+  - core.managers.status_manager.status_generating_summary
+  - core.managers.status_manager.status_manager
+  - core.managers.status_manager.status_processing_ai
+  - core.managers.status_manager.status_ready
+  - core.managers.status_manager.status_retrying
+  - core.managers.status_manager.status_saving
+  - core.managers.status_manager.status_transitioning_location
+  - core.managers.status_manager.status_updating_character
+  - core.managers.status_manager.status_updating_journal
+  - core.managers.status_manager.status_updating_party
+  - core.managers.status_manager.status_updating_plot
+  - core.managers.status_manager.status_validating
+  - datetime.timedelta
+  - glob
+  - shutil
+  - subprocess
+  - termcolor.colored
+  - traceback
+  - updates.plot_update.update_plot
+  - updates.update_character_info.update_character_info
+  - updates.update_world_time.update_world_time
+  - utils.encoding_utils.fix_corrupted_location_name
+  - utils.encoding_utils.sanitize_dict
+  - utils.encoding_utils.setup_utf8_console
+  - utils.location_path_finder.LocationGraph
+  - utils.player_stats.get_player_stat
+  - utils.startup_wizard.initialize_game_files_from_bu
+  - utils.startup_wizard.run_startup_sequence
+  - utils.startup_wizard.startup_required
+\nImports ONLY in Multiplayer: 20
+  - core.ai.action_handler.process_action
+  - core.managers.combat_service.CombatService
+  - core.managers.inventory_manager.InventoryManager
+  - core.managers.inventory_manager.process_inventory_response
+  - core.managers.multiplayer_save_manager.get_multiplayer_save_manager
+  - core.managers.multiplayer_transition_manager.get_multiplayer_transition_manager
+  - core.validation.dm_response_validator.DMResponseValidator
+  - flask.Flask
+  - flask.jsonify
+  - flask.render_template
+  - flask.request
+  - flask_socketio.SocketIO
+  - flask_socketio.disconnect
+  - flask_socketio.emit
+  - flask_socketio.join_room
+  - flask_socketio.leave_room
+  - main.save_conversation_history
+  - threading
+  - utils.character_creation_template.get_default_character_template
+  - utils.character_creation_template.get_starting_equipment
+\n============================================================
+SYSTEM COMPARISON
+============================================================
+\nGAME_LOOP_FUNCTIONS:
+  Single-Player Only (3):
+    - exit_game
+    - game
+    - initialize_game_files_from_bu
+\nCHARACTER_FUNCTIONS:
+  Single-Player Only (2):
+    - CHARACTERS
+    - update_character_data
+  Multiplayer Only (14):
+    - Player
+    - create_character_from_creation_data
+    - get_character_inventory_snapshot
+    - get_default_character_template
+    - get_multiplayer_transition_manager
+    ... and 9 more
+\nMODULE_FUNCTIONS:
+  Single-Player Only (1):
+    - generate_module_summary
+  Multiplayer Only (9):
+    - calculate_module_completion
+    - determine_module_type
+    - get_current_module_name
+    - get_module_creation_date
+    - get_module_description
+    ... and 4 more
+\nSOCKETIO_EVENTS:
+  Multiplayer Only (16):
+    - auto_save_completed
+    - character_data_updated
+    - chat_message
+    - combat_ended
+    - combat_started
+    ... and 11 more
+\nGAME_STATE_MANAGEMENT:
+  Multiplayer Only (8):
+    - broadcast_full_game_state
+    - get_current_combat_state
+    - get_game_state
+    - handle_combat_state_request
+    - handle_game_state_request
+    ... and 3 more
+\nLOCATION_FUNCTIONS:
+  Single-Player Only (9):
+    - LocationGraph
+    - check_and_process_location_transitions
+    - generate_seamless_transition_narration
+    - get_area_name_from_location_id
+    - get_area_path
+    ... and 4 more
+\nCONVERSATION_MANAGEMENT:
+  Single-Player Only (9):
+    - check_and_inject_return_message
+    - clear_message_buffer
+    - combine_messages
+    - compress_conversation_history_on_module_transition
+    - compress_conversation_history_on_transition
+    ... and 4 more
+  Multiplayer Only (4):
+    - handle_chat_message
+    - handle_clear_all_history
+    - handle_clear_chat_history
+    - handle_clear_combat_history
+\nVALIDATION_SYSTEMS:
+  Single-Player Only (1):
+    - create_module_validation_context
+  Multiplayer Only (1):
+    - validate_response
+\nAI_MODELS:
+  Single-Player Only (6):
+    - again
+    - available
+    - details
+    - main
+    - main_game_loop
+    ... and 1 more
+  Multiplayer Only (8):
+    - AI
+    - ai_fallback_analysis
+    - discover_available_modules
+    - get_available_modules
+    - get_current_state_for_client
+    ... and 3 more
+\nCOMBAT_FUNCTIONS:
+  Single-Player Only (2):
+    - combat
+    - run_combat_simulation
+  Multiplayer Only (4):
+    - CombatService
+    - handle_combat_action_logic
+    - on_combat_action
+    - start_combat_session
+\nMULTIPLAYER_FEATURES:
+  Multiplayer Only (5):
+    - GAME_STATE
+    - connected_players
+    - multiplayer
+    - player_name
+    - sid
+\nSAVE_LOAD_FUNCTIONS:
+  Single-Player Only (6):
+    - JSONDecodeError
+    - files
+    - isfile
+    - load_json_file
+    - load_module_data
+    ... and 1 more
+  Multiplayer Only (25):
+    - can_player_save
+    - create_auto_save
+    - create_save_game
+    - create_save_game_thread_safe
+    - delete_save_game
+    ... and 20 more
+\nUTILITY_FUNCTIONS:
+  Single-Player Only (75):
+    - Configuration
+    - NARRATION
+    - Normal
+    - and
+    - blocks
+    ... and 70 more
+  Multiplayer Only (67):
+    - Added
+    - DMResponseValidator
+    - Flask
+    - InventoryManager
+    - Rations
+    ... and 62 more
+\n============================================================
+CRITICAL MISSING FUNCTIONALITY ANALYSIS
+============================================================
+\n[HIGH PRIORITY - MISSING FROM MULTIPLAYER]
+  - check_and_process_location_transitions (function): Core game loop or location processing functionality
+  - main_game_loop (function): Core game loop or location processing functionality
+\n[MEDIUM PRIORITY - MISSING FROM MULTIPLAYER]
+  - check_and_inject_return_message (function): Session management or narrative enhancement
+  - generate_module_summary (function): Session management or narrative enhancement
+\n[LOW PRIORITY - MISSING FROM MULTIPLAYER]
+  - compress_conversation_history_on_module_transition (function): Utility or enhancement function
+  - get_npc_stat (function): Utility or enhancement function
+  - create_module_validation_context (function): Utility or enhancement function
+  - generate_arrival_narration (function): Utility or enhancement function
+  - generate_seamless_transition_narration (function): Utility or enhancement function
+\n[MULTIPLAYER-SPECIFIC FUNCTIONALITY]
+  - handle_join_game (function): Multiplayer-specific functionality
+  - broadcast_full_game_state (function): Multiplayer-specific functionality
+  - handle_player_action_logic (function): Multiplayer-specific functionality
+  - handle_combat_action_logic (function): Multiplayer-specific functionality
+\n============================================================
+FINAL SUMMARY
+============================================================
+Functions missing from multiplayer: 24
+High priority missing: 2
+Medium priority missing: 2
+Low priority missing: 5
+Multiplayer-specific additions: 4
+\nDetailed report saved to: single_vs_multiplayer_comparison.json
+====================================================================================================
