@@ -1311,6 +1311,59 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Module Transition Indicator Styles */
+        .transition-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(30, 30, 30, 0.95);
+            border: 2px solid #4A90E2;
+            border-radius: 12px;
+            padding: 25px 35px;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+        }
+
+        .transition-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #e0e0e0;
+        }
+
+        .transition-icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .transition-text {
+            flex: 1;
+        }
+
+        .transition-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4A90E2;
+            margin-bottom: 5px;
+        }
+
+        .transition-subtitle {
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .transition-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #444;
+            border-radius: 50%;
+            border-top-color: #4A90E2;
+            animation: spin 1s linear infinite;
+        }
+
         .module-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -4137,6 +4190,41 @@
             document.getElementById('module-creation-progress').style.display = 'none';
         }
 
+        function showTransitionIndicator(fromModule, toModule) {
+            // Create or show transition indicator in the UI
+            let indicator = document.getElementById('module-transition-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'module-transition-indicator';
+                indicator.className = 'transition-indicator';
+                indicator.innerHTML = `
+                    <div class="transition-content">
+                        <div class="transition-icon">📚</div>
+                        <div class="transition-text">
+                            <div class="transition-title">Module Transition in Progress</div>
+                            <div class="transition-subtitle">Generating adventure summary...</div>
+                        </div>
+                        <div class="transition-spinner"></div>
+                    </div>
+                `;
+                document.body.appendChild(indicator);
+            }
+            
+            const titleElement = indicator.querySelector('.transition-title');
+            const subtitleElement = indicator.querySelector('.transition-subtitle');
+            titleElement.textContent = `Leaving "${fromModule}" → "${toModule}"`;
+            subtitleElement.textContent = 'Generating adventure summary and preserving timeline...';
+            
+            indicator.style.display = 'block';
+        }
+
+        function hideTransitionIndicator() {
+            const indicator = document.getElementById('module-transition-indicator');
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
+        }
+
         // Socket event handlers for module creation
         socket.on('module_creation_started', (data) => {
             console.log('Module creation started:', data);
@@ -4157,6 +4245,45 @@
             } else {
                 addMessage('system', `Error: ${data.message}`, 'Module Creation');
             }
+        });
+
+        // Socket event handlers for module transitions
+        socket.on('module_transition_start', (data) => {
+            console.log('Module transition started:', data);
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            addMessage('system', 
+                `[📚 Module Transition] Leaving "${data.from_module}" and entering "${data.to_module}"... Generating adventure summary...`, 
+                'Module Transition', 
+                timestamp
+            );
+            
+            // Show a transition indicator
+            showTransitionIndicator(data.from_module, data.to_module);
+        });
+
+        socket.on('module_transition_complete', (data) => {
+            console.log('Module transition completed:', data);
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            
+            if (data.summary_generated && data.history_compressed) {
+                addMessage('system', 
+                    `[✅ Module Transition Complete] Adventure summary for "${data.from_module}" has been generated and timeline preserved. Welcome to "${data.to_module}"!`, 
+                    'Module Transition', 
+                    timestamp
+                );
+            } else {
+                addMessage('system', 
+                    `[⚠️ Module Transition] Transitioned to "${data.to_module}" but summary generation failed.`, 
+                    'Module Transition', 
+                    timestamp
+                );
+            }
+            
+            // Hide transition indicator
+            hideTransitionIndicator();
+            
+            // Update module info in UI
+            updateModuleInfo(data.to_module);
         });
 
         // Add module creation button to existing UI

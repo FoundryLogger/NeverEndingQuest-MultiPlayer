@@ -78,6 +78,9 @@ from core.managers.inventory_manager import process_inventory_response
 # Import save game manager for multiplayer
 from core.managers.multiplayer_save_manager import get_multiplayer_save_manager
 
+# Import module transition manager for timeline preservation
+from core.managers.multiplayer_transition_manager import get_multiplayer_transition_manager
+
 # Import configuration
 try:
     from config import (
@@ -143,6 +146,10 @@ LEVEL_UP_SESSIONS = {}
 
 # Initialize multiplayer save manager
 save_manager = get_multiplayer_save_manager()
+
+# Initialize multiplayer transition manager
+transition_manager = get_multiplayer_transition_manager()
+transition_manager.set_socketio(socketio)
 
 # Game configuration
 TEMPERATURE = 0.8
@@ -1897,6 +1904,22 @@ def handle_player_action_logic(player_name, action_text, sid=None):
         # Aggiungi la risposta completa dell'AI alla cronologia
         GAME_STATE["conversation_history"].append({"role": "assistant", "content": ai_response_content})
         safe_write_json("modules/conversation_history/conversation_history.json", GAME_STATE["conversation_history"])
+
+        # 6.1 MODULE TRANSITION PROCESSING - Check for module transitions and compress history
+        try:
+            # Check and process any module transitions with timeline preservation
+            processed_history = transition_manager.check_and_process_module_transitions(
+                GAME_STATE["conversation_history"], 
+                GAME_STATE["party_tracker"]
+            )
+            
+            # Update conversation history if it was processed (compressed)
+            if len(processed_history) != len(GAME_STATE["conversation_history"]):
+                GAME_STATE["conversation_history"] = processed_history
+                debug(f"Module transition processed: history compressed from {len(GAME_STATE['conversation_history'])} to {len(processed_history)} messages", 
+                     category="module_transitions")
+        except Exception as e:
+            error(f"Failed to process module transitions", exception=e, category="module_transitions")
 
         # Ricarica lo stato finale dopo tutte le azioni
         GAME_STATE["party_tracker"] = safe_json_load("party_tracker.json")

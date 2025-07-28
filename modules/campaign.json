@@ -4,8 +4,10 @@
   "hubModule": null,
   "completedModules": [],
   "availableModules": [
+    "Veil_of_Aether",
     "The_Thornwood_Watch",
-    "Keep_of_Doom"
+    "Keep_of_Doom",
+    "The_Crimson_Eclipse"
   ],
   "hubs": {},
   "relationships": {},
@@ -17,6 +19,6 @@
     "unlockedAreas": [],
     "hubEstablished": false
   },
-  "lastUpdated": "2025-07-24T19:33:34.982352",
+  "lastUpdated": "2025-07-27T20:43:56.670564",
   "version": "1.0.0"
 }
