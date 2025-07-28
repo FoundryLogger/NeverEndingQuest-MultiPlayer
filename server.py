@@ -81,6 +81,9 @@ from core.managers.multiplayer_save_manager import get_multiplayer_save_manager
 # Import module transition manager for timeline preservation
 from core.managers.multiplayer_transition_manager import get_multiplayer_transition_manager
 
+# Import validation systems
+from core.validation.dm_response_validator import DMResponseValidator
+
 # Import configuration
 try:
     from config import (
@@ -1627,6 +1630,31 @@ def handle_player_action_logic(player_name, action_text, sid=None):
         GAME_STATE["party_tracker"]
     )
     
+    # Enhanced validation with DMResponseValidator (non-breaking addition)
+    if validation_result is True:
+        try:
+            dm_validator = DMResponseValidator()
+            dm_valid, dm_errors, dm_details = dm_validator.validate_response(ai_response_content)
+            
+            if not dm_valid:
+                debug(f"DM_VALIDATION: Advanced validation failed - {', '.join(dm_errors)}", category="validation")
+                # Log but don't block - this is additional validation
+                for error in dm_errors:
+                    warning(f"DM_VALIDATION: {error}", category="validation")
+                
+                # Notify all players of validation warnings
+                socketio.emit('validation_warning', {
+                    'player': player_name,
+                    'errors': dm_errors,
+                    'timestamp': datetime.now().isoformat(),
+                    'severity': 'warning'
+                })
+            else:
+                debug("DM_VALIDATION: Advanced validation passed", category="validation")
+        except Exception as e:
+            # Non-breaking - log and continue
+            debug(f"DM_VALIDATION: Exception in advanced validation - {str(e)}", category="validation")
+    
     if validation_result is not True:
         # Retry con il modello di validazione
         ai_response_content = get_ai_response(GAME_STATE["conversation_history"], validation_retry_count=1, action_text=action_text)
@@ -1920,6 +1948,15 @@ def handle_player_action_logic(player_name, action_text, sid=None):
                      category="module_transitions")
         except Exception as e:
             error(f"Failed to process module transitions", exception=e, category="module_transitions")
+
+        # 6.2 EFFECT EXPIRATION PROCESSING - Check for expired character effects
+        try:
+            from updates.process_effect_expirations import process_all_effect_expirations
+            debug("EFFECTS: Checking for expired effects", category="effects_tracking")
+            process_all_effect_expirations()
+        except Exception as e:
+            debug(f"EFFECTS: Failed to process effect expirations: {str(e)}", category="effects_tracking")
+            # Don't break the game if effects processing fails
 
         # Ricarica lo stato finale dopo tutte le azioni
         GAME_STATE["party_tracker"] = safe_json_load("party_tracker.json")

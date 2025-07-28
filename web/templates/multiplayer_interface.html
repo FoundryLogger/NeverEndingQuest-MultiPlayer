@@ -4247,6 +4247,30 @@
             }
         });
 
+        // Socket event handler for validation warnings
+        socket.on('validation_warning', (data) => {
+            console.log('Validation warning:', data);
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            
+            // Show validation warnings in chat
+            data.errors.forEach(error => {
+                addMessage('system', 
+                    `[⚠️ Validation Warning] ${error}`, 
+                    'AI Validator', 
+                    timestamp
+                );
+            });
+            
+            // Optionally show a brief visual indicator
+            const header = document.querySelector('.header h1');
+            if (header) {
+                header.style.color = '#ffa500';
+                setTimeout(() => {
+                    header.style.color = '';
+                }, 2000);
+            }
+        });
+
         // Socket event handlers for module transitions
         socket.on('module_transition_start', (data) => {
             console.log('Module transition started:', data);
