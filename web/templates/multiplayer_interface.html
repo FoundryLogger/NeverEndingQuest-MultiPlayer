@@ -1421,6 +1421,7 @@
                     <div class="header-buttons">
                         <button class="toggle-button save-button" onclick="showSaveModal()">💾 Save Game</button>
                         <button class="toggle-button load-button" onclick="showLoadModal()">📁 Load Game</button>
+                        <button class="toggle-button" onclick="showModuleModal()">🏰 Create Module</button>
                         <button class="toggle-button secondary" id="toggle-character-btn" onclick="toggleCharacterPanel()">Show Character Sheet</button>
                         <span id="game-status">Waiting for players...</span>
                         <span id="auto-save-status" class="auto-save-indicator" style="display: none;">Auto-saved</span>
@@ -3409,22 +3410,7 @@
             color: #e1bee7;
         }
 
-        /* Module Management Styles */
-        .module-management-section {
-            background-color: #2a2a2a;
-            border: 2px solid #444;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-
-        .module-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
+        /* Module Button Styles (used in header and modals) */
         .module-button {
             background-color: #4CAF50;
             color: white;
@@ -3447,12 +3433,6 @@
 
         .module-button.secondary:hover {
             background-color: #1976D2;
-        }
-
-        .module-status {
-            color: #b0b0b0;
-            font-size: 12px;
-            margin-top: 5px;
         }
 
         .module-creation-progress {
@@ -4310,23 +4290,7 @@
             updateModuleInfo(data.to_module);
         });
 
-        // Add module creation button to existing UI
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add module management section to the first panel (game panel)
-            const gamePanel = document.querySelector('.panel .panel-content');
-            if (gamePanel) {
-                const moduleSection = document.createElement('div');
-                moduleSection.className = 'module-management-section';
-                moduleSection.innerHTML = `
-                    <div class="module-header">
-                        <h4>🏰 Adventure Modules</h4>
-                        <button class="module-button" onclick="showModuleModal()">Create New Module</button>
-                    </div>
-                    <div class="module-status">Create custom adventures or explore existing modules</div>
-                `;
-                gamePanel.appendChild(moduleSection);
-            }
-        });
+        // Module creation button is now in the header - no need for additional UI injection
 
         // Close modal when clicking outside of it
         window.onclick = function(event) {
